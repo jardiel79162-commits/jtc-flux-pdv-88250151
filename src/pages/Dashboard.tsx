@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Package, ShoppingCart, AlertTriangle, Calendar } from "lucide-react";
+import { TrendingUp, Package, ShoppingCart, AlertTriangle, Calendar, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { PixFeeCalculator } from "@/components/PixFeeCalculator";
 import { DashboardSkeleton } from "@/components/skeletons";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -49,6 +50,19 @@ const quickActions = [
   { label: "Bônus", path: "/resgate-semanal", image: quickActionBonus },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 300, damping: 24 } },
+};
+
 const Dashboard = () => {
   const { hasPermission, isAdmin, getEffectiveUserId } = usePermissions();
   const [data, setData] = useState<DashboardData>({
@@ -68,7 +82,7 @@ const Dashboard = () => {
 
   // Filter quick actions by permissions
   const filteredQuickActions = quickActions.filter((action) => {
-    if (action.isModal) return true; // Calculadora always visible
+    if (action.isModal) return true;
     const permKey = QUICK_ACTION_PERMISSIONS[action.path];
     if (permKey) return hasPermission(permKey);
     return true;
@@ -83,19 +97,15 @@ const Dashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // For employees, use admin's user_id to query data
       const effectiveUserId = getEffectiveUserId() || user.id;
-
       const isMissingTableError = (err: any) => err?.code === "PGRST205";
 
-      // Buscar perfil
       const { data: profile } = await supabase
         .from("profiles")
         .select("created_at")
         .eq("user_id", effectiveUserId)
         .maybeSingle();
 
-      // Store settings é opcional
       let quickActionsEnabled = true;
       let hideTrialMessage = false;
       const { data: storeSettings, error: storeSettingsError } = await supabase
@@ -109,7 +119,6 @@ const Dashboard = () => {
         hideTrialMessage = storeSettings.hide_trial_message ?? false;
       }
 
-      // Calcular período de teste (3 dias)
       const createdAt = profile?.created_at ? new Date(profile.created_at) : new Date();
       const trialEnd = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
       const now = new Date();
@@ -128,7 +137,6 @@ const Dashboard = () => {
         subscriptionDaysLeft = trialDaysLeft;
       }
 
-      // Vendas de hoje
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -142,7 +150,6 @@ const Dashboard = () => {
         ? 0
         : (salesToday?.reduce((sum, sale) => sum + Number(sale.total_amount), 0) || 0);
 
-      // Vendas do mês
       const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
       const { data: salesMonth, error: salesMonthError } = await supabase
@@ -155,7 +162,6 @@ const Dashboard = () => {
         ? 0
         : (salesMonth?.reduce((sum, sale) => sum + Number(sale.total_amount), 0) || 0);
 
-      // Produtos com estoque baixo
       const { data: productsForStock, error: productsError } = await supabase
         .from("products")
         .select("id, stock_quantity, min_stock_quantity")
@@ -167,7 +173,6 @@ const Dashboard = () => {
             (product) => product.stock_quantity <= (product.min_stock_quantity ?? 0)
           ).length || 0);
 
-      // Vendas recentes
       const { data: recentSales, error: recentSalesError } = await supabase
         .from("sales")
         .select("id")
@@ -202,219 +207,247 @@ const Dashboard = () => {
     );
   }
 
+  const metricCards = [
+    {
+      title: "Vendas Hoje",
+      value: `R$ ${data.salesToday.toFixed(2)}`,
+      subtitle: "Faturamento do dia",
+      icon: TrendingUp,
+      gradient: "from-primary to-primary/70",
+      iconClass: "icon-gradient-primary",
+    },
+    {
+      title: "Vendas do Mês",
+      value: `R$ ${data.salesMonth.toFixed(2)}`,
+      subtitle: "Faturamento mensal",
+      icon: ShoppingCart,
+      gradient: "from-accent to-accent/70",
+      iconClass: "icon-gradient-accent",
+    },
+    {
+      title: "Estoque Baixo",
+      value: data.lowStockProducts.toString(),
+      subtitle: "Produtos precisam reposição",
+      icon: AlertTriangle,
+      gradient: data.lowStockProducts > 0 ? "from-warning to-warning/70" : "from-muted-foreground to-muted-foreground/70",
+      iconClass: "icon-gradient-warning",
+    },
+    {
+      title: "Últimas Vendas",
+      value: data.recentSales.toString(),
+      subtitle: "Transações recentes",
+      icon: Package,
+      gradient: "from-info to-info/70",
+      iconClass: "icon-gradient-info",
+    },
+  ];
+
   return (
     <PageLoader pageName="Dashboard">
-    <div className="space-y-8 animate-fade-in">
-      {/* Header */}
-      <div className="page-header">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground text-lg">Visão geral do seu negócio</p>
-      </div>
-
-      {/* Status da Assinatura */}
-      {!data.hideTrialMessage && data.subscriptionStatus === "trial" && (
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-yellow-500/10 shadow-lg animate-scale-in">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-orange-500/5" />
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-400/20 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="relative pb-2">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
-                  <Calendar className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                    Período de Teste Ativo
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground/80">
-                    Explore todos os recursos do sistema
-                  </CardDescription>
-                </div>
-              </div>
-              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md px-4 py-1.5 text-sm font-semibold animate-pulse">
-                {data.trialDaysLeft} {data.trialDaysLeft === 1 ? 'dia' : 'dias'}
-              </Badge>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8"
+      >
+        {/* Header com saudação */}
+        <motion.div variants={itemVariants} className="page-header">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+              <Sparkles className="w-6 h-6 text-primary" />
             </div>
-          </CardHeader>
-          <CardContent className="relative pt-2">
-            <Link to="/assinatura">
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25 transition-all hover:shadow-xl hover:scale-[1.02]">
-                Assinar Agora
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
-
-      {!data.hideTrialMessage && data.subscriptionStatus === "expired" && (
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-red-500/10 via-rose-500/10 to-pink-500/10 shadow-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-rose-500/5" />
-          <CardHeader className="relative pb-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 shadow-lg">
-                <AlertTriangle className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-lg font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-                  Assinatura Expirada
-                </CardTitle>
-                <CardDescription className="text-muted-foreground/80">
-                  Renove para continuar usando o sistema
-                </CardDescription>
-              </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
+                Dashboard
+              </h1>
+              <p className="text-muted-foreground">Visão geral do seu negócio</p>
             </div>
-          </CardHeader>
-          <CardContent className="relative pt-2">
-            <Link to="/assinatura">
-              <Button className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]">
-                Renovar Assinatura
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </motion.div>
 
-      {!data.hideTrialMessage && data.subscriptionStatus === "active" && (
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 shadow-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5" />
-          <CardHeader className="relative pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 shadow-lg">
-                  <TrendingUp className="w-5 h-5 text-white" />
+        {/* Status da Assinatura */}
+        {!data.hideTrialMessage && data.subscriptionStatus === "trial" && (
+          <motion.div variants={itemVariants}>
+            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-yellow-500/10 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-orange-500/5" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-amber-400/20 to-transparent rounded-full blur-3xl" />
+              <CardHeader className="relative pb-2">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
+                      <Calendar className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                        Período de Teste Ativo
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground/80">
+                        Explore todos os recursos do sistema
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md px-4 py-1.5 text-sm font-semibold animate-pulse">
+                    {data.trialDaysLeft} {data.trialDaysLeft === 1 ? 'dia' : 'dias'}
+                  </Badge>
                 </div>
-                <div>
-                  <CardTitle className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                    Assinatura Ativa
-                  </CardTitle>
-                  {data.subscriptionEndDate && (
+              </CardHeader>
+              <CardContent className="relative pt-2">
+                <Link to="/assinatura">
+                  <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25 transition-all hover:shadow-xl hover:scale-[1.02]">
+                    Assinar Agora
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {!data.hideTrialMessage && data.subscriptionStatus === "expired" && (
+          <motion.div variants={itemVariants}>
+            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-red-500/10 via-rose-500/10 to-pink-500/10 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-rose-500/5" />
+              <CardHeader className="relative pb-2">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 shadow-lg">
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                      Assinatura Expirada
+                    </CardTitle>
                     <CardDescription className="text-muted-foreground/80">
-                      Válido até {data.subscriptionEndDate.toLocaleDateString('pt-BR')}
+                      Renove para continuar usando o sistema
                     </CardDescription>
-                  )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0 shadow-md px-4 py-1.5 text-sm font-semibold">
-                  {data.subscriptionDaysLeft} {data.subscriptionDaysLeft === 1 ? 'dia' : 'dias'}
-                </Badge>
-                <span className="text-xs text-muted-foreground">restantes</span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="relative pt-2">
-            <Link to="/assinatura">
-              <Button variant="outline" size="sm" className="border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10">
-                Renovar Plano
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+              </CardHeader>
+              <CardContent className="relative pt-2">
+                <Link to="/assinatura">
+                  <Button className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]">
+                    Renovar Assinatura
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
-      {/* Ações Rápidas com Logos */}
-      {data.quickActionsEnabled && (
-        <div className="grid grid-cols-4 md:grid-cols-10 gap-4">
-          {filteredQuickActions.map((action) => (
-            action.isModal ? (
-              <button 
-                key={action.path} 
-                onClick={() => setShowCalculator(true)}
-                className="flex flex-col items-center gap-2 group"
+        {!data.hideTrialMessage && data.subscriptionStatus === "active" && (
+          <motion.div variants={itemVariants}>
+            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-teal-500/10 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5" />
+              <CardHeader className="relative pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 shadow-lg">
+                      <TrendingUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        Assinatura Ativa
+                      </CardTitle>
+                      {data.subscriptionEndDate && (
+                        <CardDescription className="text-muted-foreground/80">
+                          Válido até {data.subscriptionEndDate.toLocaleDateString('pt-BR')}
+                        </CardDescription>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0 shadow-md px-4 py-1.5 text-sm font-semibold">
+                      {data.subscriptionDaysLeft} {data.subscriptionDaysLeft === 1 ? 'dia' : 'dias'}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">restantes</span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="relative pt-2">
+                <Link to="/assinatura">
+                  <Button variant="outline" size="sm" className="border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10">
+                    Renovar Plano
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Ações Rápidas */}
+        {data.quickActionsEnabled && (
+          <motion.div variants={itemVariants}>
+            <div className="grid grid-cols-5 md:grid-cols-10 gap-3 md:gap-4">
+              {filteredQuickActions.map((action, index) => {
+                const content = (
+                  <motion.div
+                    key={action.path}
+                    whileHover={{ scale: 1.08, y: -4 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    className="flex flex-col items-center gap-2 group cursor-pointer"
+                  >
+                    <div className="w-14 h-14 md:w-[4.5rem] md:h-[4.5rem] rounded-2xl bg-card border border-border/60 p-2.5 shadow-sm group-hover:shadow-xl group-hover:border-primary/30 transition-all duration-300">
+                      <img 
+                        src={action.image} 
+                        alt={action.label} 
+                        className="w-full h-full object-contain pointer-events-auto"
+                      />
+                    </div>
+                    <span className="text-[11px] md:text-xs font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
+                      {action.label}
+                    </span>
+                  </motion.div>
+                );
+
+                if (action.isModal) {
+                  return (
+                    <div key={action.path} onClick={() => setShowCalculator(true)}>
+                      {content}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link key={action.path} to={action.path}>
+                    {content}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Modal da Calculadora PIX */}
+        <PixFeeCalculator open={showCalculator} onOpenChange={setShowCalculator} />
+
+        {/* Cards de Métricas */}
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {metricCards.map((metric, index) => {
+            const Icon = metric.icon;
+            return (
+              <motion.div
+                key={metric.title}
+                whileHover={{ y: -4, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-card border border-border p-2 transition-all group-hover:scale-105 group-hover:shadow-lg">
-                  <img 
-                    src={action.image} 
-                    alt={action.label} 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <span className="text-xs md:text-sm font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors">
-                  {action.label}
-                </span>
-              </button>
-            ) : (
-              <Link key={action.path} to={action.path} className="flex flex-col items-center gap-2 group">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-card border border-border p-2 transition-all group-hover:scale-105 group-hover:shadow-lg">
-                  <img 
-                    src={action.image} 
-                    alt={action.label} 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <span className="text-xs md:text-sm font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors">
-                  {action.label}
-                </span>
-              </Link>
-            )
-          ))}
-        </div>
-      )}
-
-      {/* Modal da Calculadora PIX */}
-      <PixFeeCalculator open={showCalculator} onOpenChange={setShowCalculator} />
-
-      {/* Cards de Métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="metric-card animate-fade-in">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Vendas Hoje</CardTitle>
-            <div className="icon-gradient-primary">
-              <TrendingUp className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              R$ {data.salesToday.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Faturamento do dia</p>
-          </CardContent>
-        </Card>
-
-        <Card className="metric-card animate-fade-in delay-100">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Vendas do Mês</CardTitle>
-            <div className="icon-gradient-accent">
-              <ShoppingCart className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent">
-              R$ {data.salesMonth.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Faturamento mensal</p>
-          </CardContent>
-        </Card>
-
-        <Card className="metric-card animate-fade-in delay-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Estoque Baixo</CardTitle>
-            <div className="icon-gradient-warning">
-              <AlertTriangle className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{data.lowStockProducts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Produtos precisam reposição</p>
-          </CardContent>
-        </Card>
-
-        <Card className="metric-card animate-fade-in delay-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Últimas Vendas</CardTitle>
-            <div className="icon-gradient-info">
-              <Package className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{data.recentSales}</div>
-            <p className="text-xs text-muted-foreground mt-1">Transações recentes</p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                <Card className="metric-card h-full">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">{metric.title}</CardTitle>
+                    <div className={metric.iconClass}>
+                      <Icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${metric.gradient} bg-clip-text text-transparent`}>
+                      {metric.value}
+                    </div>
+                    <p className="text-[10px] md:text-xs text-muted-foreground mt-1">{metric.subtitle}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </motion.div>
     </PageLoader>
   );
 };

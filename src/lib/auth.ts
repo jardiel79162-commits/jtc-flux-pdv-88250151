@@ -46,12 +46,18 @@ export const signUp = async (data: SignUpData) => {
 
   // Supabase returns a "fake" user with no session and no identities when
   // the email is already registered (security measure to not reveal existing accounts).
-  // Detect this and show a clear error instead of going to the confirmation screen.
+  // Detect this scenario.
   if (
     signUpData?.user &&
     (!signUpData.user.identities || signUpData.user.identities.length === 0)
   ) {
-    throw new Error("Este e-mail já está cadastrado. Se você esqueceu sua senha, tente recuperá-la na tela de login.");
+    // Try to resend confirmation email in case the previous signup wasn't confirmed
+    try {
+      await supabase.auth.resend({ type: "signup", email: data.email });
+    } catch {
+      // ignore resend errors
+    }
+    throw new Error("Este e-mail já possui um cadastro. Verifique sua caixa de entrada (e spam) para confirmar. Se já confirmou, faça login.");
   }
 };
 

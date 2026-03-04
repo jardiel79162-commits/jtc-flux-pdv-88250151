@@ -28,7 +28,6 @@ import { useThemeContext } from "@/components/ThemeProvider";
 import { PermissionsProvider, usePermissions } from "@/hooks/usePermissions";
 import { MENU_PERMISSIONS, ROUTE_PERMISSIONS } from "@/lib/permissions";
 
-// Rotas permitidas mesmo com assinatura expirada
 const ALLOWED_WHEN_EXPIRED = ["/dashboard", "/configuracoes", "/assinatura"];
 
 const DashboardLayoutInner = () => {
@@ -90,27 +89,20 @@ const DashboardLayoutInner = () => {
     { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
   ];
 
-  // Filter menu items based on permissions
   const menuItems = allMenuItems.filter((item) => {
-    // Dashboard always visible
     if (item.path === "/dashboard") return true;
-    // Check permission
     const permKey = MENU_PERMISSIONS[item.path];
     if (permKey) return hasPermission(permKey);
     return true;
   });
 
-  // Check if current route is allowed for this employee
   useEffect(() => {
     if (permLoading || isAdmin) return;
-
     const path = location.pathname;
     if (path === "/dashboard") return;
 
-    // Find matching route permission
     let requiredPerm = ROUTE_PERMISSIONS[path];
     if (!requiredPerm) {
-      // Check prefix matches (e.g., /produtos/editar/123)
       for (const [route, perm] of Object.entries(ROUTE_PERMISSIONS)) {
         if (path.startsWith(route)) {
           requiredPerm = perm;
@@ -137,33 +129,38 @@ const DashboardLayoutInner = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-40 flex items-center justify-between px-4">
-        <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-          <img src={logo} alt="JTC FluxPDV Logo" className="w-10 h-10 rounded-full object-cover" />
-          <h1 className="text-xl font-bold text-primary">JTC FluxPDV</h1>
+      {/* Header com glassmorphism */}
+      <header className="fixed top-0 left-0 right-0 h-16 z-40 flex items-center justify-between px-4 border-b border-border/50 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
+        <Link to="/dashboard" className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
+          <div className="relative">
+            <img src={logo} alt="JTC FluxPDV Logo" className="w-10 h-10 rounded-xl object-cover shadow-sm pointer-events-auto" />
+            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 -z-10 blur-sm" />
+          </div>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            JTC FluxPDV
+          </h1>
         </Link>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground rounded-xl hover:bg-muted/80">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="rounded-xl hover:bg-muted/80">
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </Button>
         </div>
       </header>
 
-      {/* Menu Overlay */}
+      {/* Menu Overlay melhorado */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-30 bg-background pt-16"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed inset-0 z-30 bg-background/95 backdrop-blur-sm pt-16"
           >
-            <nav className="p-4 space-y-1">
+            <nav className="p-4 space-y-1 max-w-md mx-auto">
               {menuItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -172,14 +169,16 @@ const DashboardLayoutInner = () => {
                     key={item.path}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.04, duration: 0.2 }}
+                    transition={{ delay: index * 0.03, duration: 0.2 }}
                   >
                     <Link to={item.path} onClick={() => setIsMobileMenuOpen(false)}>
                       <Button
                         variant={isActive ? "secondary" : "ghost"}
-                        className="w-full justify-start gap-3 transition-all duration-150 active:scale-[0.97]"
+                        className={`w-full justify-start gap-3 h-12 rounded-xl transition-all duration-150 active:scale-[0.97] ${
+                          isActive ? "bg-primary/10 text-primary font-semibold border border-primary/20" : ""
+                        }`}
                       >
-                        <Icon className="w-5 h-5" />
+                        <Icon className={`w-5 h-5 ${isActive ? "text-primary" : ""}`} />
                         {item.label}
                       </Button>
                     </Link>
@@ -187,20 +186,23 @@ const DashboardLayoutInner = () => {
                 );
               })}
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: menuItems.length * 0.04, duration: 0.2 }}
-              >
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3 text-destructive hover:text-destructive transition-all duration-150 active:scale-[0.97]"
-                  onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+              <div className="pt-4">
+                <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-4" />
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: menuItems.length * 0.03, duration: 0.2 }}
                 >
-                  <LogOut className="w-5 h-5" />
-                  Sair
-                </Button>
-              </motion.div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150 active:scale-[0.97]"
+                    onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Sair
+                  </Button>
+                </motion.div>
+              </div>
             </nav>
           </motion.div>
         )}
@@ -210,9 +212,9 @@ const DashboardLayoutInner = () => {
       <main className="pt-16 min-h-screen overflow-hidden">
         <motion.div
           key={location.pathname}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           className="p-4 md:p-8 w-full max-w-full overflow-hidden"
         >
           {isExpired && !ALLOWED_WHEN_EXPIRED.includes(location.pathname) ? (
@@ -226,7 +228,6 @@ const DashboardLayoutInner = () => {
   );
 };
 
-// Wrapper that provides PermissionsProvider
 const DashboardLayout = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
