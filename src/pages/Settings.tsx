@@ -61,39 +61,67 @@ const Settings = () => {
   const [inviteCodeLoading, setInviteCodeLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
-    fetchSettings();
-    fetchInviteCode();
+    loadAllSettings();
   }, []);
 
-  const fetchInviteCode = async () => {
-    setInviteCodeLoading(true);
+  const loadAllSettings = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log("Usuário não encontrado para buscar código de convite");
         setInviteCodeLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("invite_code")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // Fetch settings and invite code in parallel
+      const [settingsRes, profileRes] = await Promise.all([
+        supabase.from("store_settings").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("invite_code").eq("user_id", user.id).maybeSingle(),
+      ]);
 
-      if (error) {
-        console.error("Erro ao buscar código de convite:", error);
+      // Process invite code
+      if (profileRes.data?.invite_code) {
+        setInviteCode(profileRes.data.invite_code);
       }
+      setInviteCodeLoading(false);
 
-      if (data?.invite_code) {
-        setInviteCode(data.invite_code);
-      } else {
-        console.log("Código de convite não encontrado para o usuário:", user.id);
+      // Process settings
+      if (!settingsRes.error && settingsRes.data) {
+        const data = settingsRes.data;
+        setSettings({
+          store_name: data.store_name || "",
+          commercial_phone: data.commercial_phone || "",
+          store_address: data.store_address || "",
+          operation_type: data.operation_type || "",
+          primary_color: data.primary_color || "#4C6FFF",
+          logo_url: data.logo_url || "",
+          category: data.category || "",
+          quick_actions_enabled: data.quick_actions_enabled || false,
+          hide_trial_message: data.hide_trial_message || false,
+          pix_key_type: data.pix_key_type || "",
+          pix_key: data.pix_key || "",
+          pix_receiver_name: data.pix_receiver_name || "",
+          pix_mode: (data.pix_mode === "automatic" ? "automatic" : "manual") as "manual" | "automatic",
+          mercado_pago_cpf: data.mercado_pago_cpf || "",
+          mercado_pago_name: data.mercado_pago_name || "",
+        });
+
+        // Fetch MP token (non-blocking)
+        supabase.from("store_integrations").select("encrypted_token")
+          .eq("user_id", user.id).eq("integration_type", "mercado_pago").maybeSingle()
+          .then(({ data: integrationData }) => {
+            if (integrationData?.encrypted_token) setMercadoPagoToken("••••••••••••••••••••");
+          });
+
+        const predefinedCategories = ["mercado", "padaria", "mercearia", "bazar", "papelaria", "restaurante", "lanchonete", "farmacia", "pet_shop"];
+        if (data.category && !predefinedCategories.includes(data.category)) {
+          setCustomCategory(data.category);
+          setSettings(prev => ({ ...prev, category: "outros" }));
+        }
+      } else if (settingsRes.error && !isMissingTableError(settingsRes.error)) {
+        toast({ title: "Erro ao carregar configurações", variant: "destructive" });
       }
     } catch (err) {
-      console.error("Erro inesperado ao buscar código de convite:", err);
-    } finally {
-      setInviteCodeLoading(false);
+      console.error("Erro ao carregar configurações:", err);
     }
   };
 
@@ -147,62 +175,6 @@ const Settings = () => {
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
 
-  const fetchSettings = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("store_settings")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (error) {
-      if (!isMissingTableError(error)) {
-        toast({ title: "Erro ao carregar configurações", variant: "destructive" });
-      }
-      return;
-    }
-
-    if (data) {
-      setSettings({
-        store_name: data.store_name || "",
-        commercial_phone: data.commercial_phone || "",
-        store_address: data.store_address || "",
-        operation_type: data.operation_type || "",
-        primary_color: data.primary_color || "#4C6FFF",
-        logo_url: data.logo_url || "",
-        category: data.category || "",
-        quick_actions_enabled: data.quick_actions_enabled || false,
-        hide_trial_message: data.hide_trial_message || false,
-        pix_key_type: data.pix_key_type || "",
-        pix_key: data.pix_key || "",
-        pix_receiver_name: data.pix_receiver_name || "",
-        pix_mode: (data.pix_mode === "automatic" ? "automatic" : "manual") as "manual" | "automatic",
-        mercado_pago_cpf: data.mercado_pago_cpf || "",
-        mercado_pago_name: data.mercado_pago_name || "",
-      });
-
-      // Buscar token do Mercado Pago se houver
-      const { data: integrationData } = await supabase
-        .from("store_integrations")
-        .select("encrypted_token")
-        .eq("user_id", user.id)
-        .eq("integration_type", "mercado_pago")
-        .maybeSingle();
-      
-      if (integrationData?.encrypted_token) {
-        setMercadoPagoToken("••••••••••••••••••••");
-      }
-      
-      // Se a categoria não está na lista padrão, é uma categoria personalizada
-      const predefinedCategories = ["mercado", "padaria", "mercearia", "bazar", "papelaria", "restaurante", "lanchonete", "farmacia", "pet_shop"];
-      if (data.category && !predefinedCategories.includes(data.category)) {
-        setCustomCategory(data.category);
-        setSettings(prev => ({ ...prev, category: "outros" }));
-      }
-    }
-  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -274,7 +246,7 @@ const Settings = () => {
       setOpenSection(null);
       window.dispatchEvent(new CustomEvent('store-settings-updated'));
       // Recarregar dados
-      fetchSettings();
+      loadAllSettings();
     }
   };
 

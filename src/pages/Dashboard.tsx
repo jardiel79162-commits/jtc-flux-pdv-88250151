@@ -99,26 +99,28 @@ const Dashboard = () => {
       const effectiveUserId = getEffectiveUserId() || user.id;
       const isMissingTableError = (err: any) => err?.code === "PGRST205";
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("created_at")
-        .eq("user_id", effectiveUserId)
-        .maybeSingle();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      // Run ALL queries in parallel
+      const [profileRes, storeSettingsRes, salesTodayRes, salesMonthRes, productsRes, recentSalesRes] = await Promise.all([
+        supabase.from("profiles").select("created_at").eq("user_id", effectiveUserId).maybeSingle(),
+        supabase.from("store_settings").select("quick_actions_enabled, hide_trial_message").eq("user_id", effectiveUserId).maybeSingle(),
+        supabase.from("sales").select("total_amount").eq("user_id", effectiveUserId).gte("created_at", today.toISOString()),
+        supabase.from("sales").select("total_amount").eq("user_id", effectiveUserId).gte("created_at", firstDayOfMonth.toISOString()),
+        supabase.from("products").select("id, stock_quantity, min_stock_quantity").eq("user_id", effectiveUserId),
+        supabase.from("sales").select("id").eq("user_id", effectiveUserId).order("created_at", { ascending: false }).limit(5),
+      ]);
 
       let quickActionsEnabled = true;
       let hideTrialMessage = false;
-      const { data: storeSettings, error: storeSettingsError } = await supabase
-        .from("store_settings")
-        .select("quick_actions_enabled, hide_trial_message")
-        .eq("user_id", effectiveUserId)
-        .maybeSingle();
-
-      if (!storeSettingsError && storeSettings) {
-        quickActionsEnabled = storeSettings.quick_actions_enabled ?? true;
-        hideTrialMessage = storeSettings.hide_trial_message ?? false;
+      if (!storeSettingsRes.error && storeSettingsRes.data) {
+        quickActionsEnabled = storeSettingsRes.data.quick_actions_enabled ?? true;
+        hideTrialMessage = storeSettingsRes.data.hide_trial_message ?? false;
       }
 
-      const createdAt = profile?.created_at ? new Date(profile.created_at) : new Date();
+      const createdAt = profileRes.data?.created_at ? new Date(profileRes.data.created_at) : new Date();
       const trialEnd = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
       const now = new Date();
       const isTrialActive = now <= trialEnd;
@@ -136,54 +138,25 @@ const Dashboard = () => {
         subscriptionDaysLeft = trialDaysLeft;
       }
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const { data: salesToday, error: salesTodayError } = await supabase
-        .from("sales")
-        .select("total_amount")
-        .eq("user_id", effectiveUserId)
-        .gte("created_at", today.toISOString());
-
-      const totalToday = isMissingTableError(salesTodayError)
+      const totalToday = isMissingTableError(salesTodayRes.error)
         ? 0
-        : (salesToday?.reduce((sum, sale) => sum + Number(sale.total_amount), 0) || 0);
+        : (salesTodayRes.data?.reduce((sum, sale) => sum + Number(sale.total_amount), 0) || 0);
 
-      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-      const { data: salesMonth, error: salesMonthError } = await supabase
-        .from("sales")
-        .select("total_amount")
-        .eq("user_id", effectiveUserId)
-        .gte("created_at", firstDayOfMonth.toISOString());
-
-      const totalMonth = isMissingTableError(salesMonthError)
+      const totalMonth = isMissingTableError(salesMonthRes.error)
         ? 0
-        : (salesMonth?.reduce((sum, sale) => sum + Number(sale.total_amount), 0) || 0);
+        : (salesMonthRes.data?.reduce((sum, sale) => sum + Number(sale.total_amount), 0) || 0);
 
-      const { data: productsForStock, error: productsError } = await supabase
-        .from("products")
-        .select("id, stock_quantity, min_stock_quantity")
-        .eq("user_id", effectiveUserId);
-
-      const lowStockCount = isMissingTableError(productsError)
+      const lowStockCount = isMissingTableError(productsRes.error)
         ? 0
-        : (productsForStock?.filter(
+        : (productsRes.data?.filter(
             (product) => product.stock_quantity <= (product.min_stock_quantity ?? 0)
           ).length || 0);
 
-      const { data: recentSales, error: recentSalesError } = await supabase
-        .from("sales")
-        .select("id")
-        .eq("user_id", effectiveUserId)
-        .order("created_at", { ascending: false })
-        .limit(5);
-
       setData({
-        salesToday: isMissingTableError(salesTodayError) ? 0 : totalToday,
-        salesMonth: isMissingTableError(salesMonthError) ? 0 : totalMonth,
+        salesToday: isMissingTableError(salesTodayRes.error) ? 0 : totalToday,
+        salesMonth: isMissingTableError(salesMonthRes.error) ? 0 : totalMonth,
         lowStockProducts: lowStockCount,
-        recentSales: isMissingTableError(recentSalesError) ? 0 : (recentSales?.length || 0),
+        recentSales: isMissingTableError(recentSalesRes.error) ? 0 : (recentSalesRes.data?.length || 0),
         subscriptionStatus,
         trialDaysLeft,
         subscriptionDaysLeft,
