@@ -34,9 +34,9 @@ serve(async (req) => {
     }
 
     // Buscar detalhes do pagamento no Mercado Pago
-    const accessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
+    const accessToken = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN');
     if (!accessToken) {
-      console.error('MERCADO_PAGO_ACCESS_TOKEN not configured');
+      console.error('MERCADOPAGO_ACCESS_TOKEN not configured');
       return new Response(JSON.stringify({ error: 'Configuration error' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
