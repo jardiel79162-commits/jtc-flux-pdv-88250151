@@ -150,7 +150,7 @@ const DashboardLayoutInner = () => {
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground rounded-xl hover:bg-muted/80">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => window.location.reload()} className="text-muted-foreground rounded-xl hover:bg-muted/80">
+          <Button variant="ghost" size="icon" onClick={() => navigate(0)} className="text-muted-foreground rounded-xl hover:bg-muted/80">
             <RefreshCw className="w-5 h-5" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="rounded-xl hover:bg-muted/80">
