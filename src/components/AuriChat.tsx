@@ -13,11 +13,25 @@ export const AuriChat = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const positionRef = useRef({ x: 0, y: 0 });
 
-  // Initialize position
+  // Direct DOM manipulation for zero-lag dragging
+  const updateButtonPosition = useCallback((x: number, y: number) => {
+    if (buttonRef.current) {
+      buttonRef.current.style.left = `${x}px`;
+      buttonRef.current.style.top = `${y}px`;
+    }
+  }, []);
+
+  // Initialize position and clamp to viewport
   useEffect(() => {
+    const buttonSize = 56;
+    const clamp = (pos: { x: number; y: number }) => ({
+      x: Math.max(0, Math.min(window.innerWidth - buttonSize, pos.x)),
+      y: Math.max(0, Math.min(window.innerHeight - buttonSize, pos.y)),
+    });
+
     const savedPosition = localStorage.getItem("auriChatPosition");
     if (savedPosition) {
-      const parsed = JSON.parse(savedPosition);
+      const parsed = clamp(JSON.parse(savedPosition));
       positionRef.current = parsed;
       setPosition(parsed);
     } else {
@@ -29,15 +43,18 @@ export const AuriChat = () => {
       setPosition(defaultPos);
     }
     setIsInitialized(true);
-  }, []);
 
-  // Direct DOM manipulation for zero-lag dragging
-  const updateButtonPosition = useCallback((x: number, y: number) => {
-    if (buttonRef.current) {
-      buttonRef.current.style.left = `${x}px`;
-      buttonRef.current.style.top = `${y}px`;
-    }
-  }, []);
+    // Re-clamp on resize
+    const handleResize = () => {
+      const clamped = clamp(positionRef.current);
+      positionRef.current = clamped;
+      setPosition(clamped);
+      updateButtonPosition(clamped.x, clamped.y);
+      localStorage.setItem("auriChatPosition", JSON.stringify(clamped));
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [updateButtonPosition]);
 
   const handleStart = useCallback((clientX: number, clientY: number) => {
     isDraggingRef.current = true;
