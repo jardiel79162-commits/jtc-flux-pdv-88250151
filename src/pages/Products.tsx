@@ -86,99 +86,44 @@ const Products = () => {
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
 
-  const fetchProducts = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      if (isMissingTableError(error)) {
-        setProducts([]);
-        return;
-      }
-      toast({ title: "Erro ao carregar produtos", variant: "destructive" });
-    } else {
-      const mappedProducts: Product[] = (data || []).map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        price: p.price,
-        cost_price: p.cost_price,
-        promotional_price: p.promotional_price,
-        stock_quantity: p.stock_quantity,
-        barcode: p.barcode,
-        is_active: p.is_active,
-        category_id: p.category_id,
-        supplier_id: p.supplier_id,
-      }));
-      setProducts(mappedProducts);
-    }
-  };
-
-  const fetchCategories = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("name");
-
-    if (error) {
-      if (isMissingTableError(error)) {
-        setCategories([]);
-        return;
-      }
-      toast({ title: "Erro ao carregar categorias", variant: "destructive" });
-    } else {
-      setCategories(data || []);
-    }
-  };
-
-  const fetchSuppliers = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("suppliers")
-      .select("id, name")
-      .eq("user_id", user.id)
-      .order("name");
-
-    if (error) {
-      if (isMissingTableError(error)) {
-        setSuppliers([]);
-        return;
-      }
-      toast({ title: "Erro ao carregar fornecedores", variant: "destructive" });
-    } else {
-      setSuppliers(data || []);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-
-    const channel = supabase
-      .channel('products-list-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
-        loadData();
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, []);
-
   const loadData = async () => {
     setIsLoading(true);
-    await Promise.all([fetchProducts(), fetchCategories(), fetchSuppliers()]);
-    setIsLoading(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const [productsRes, categoriesRes, suppliersRes] = await Promise.all([
+        supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("categories").select("*").eq("user_id", user.id).order("name"),
+        supabase.from("suppliers").select("id, name").eq("user_id", user.id).order("name"),
+      ]);
+
+      if (productsRes.error && !isMissingTableError(productsRes.error)) {
+        toast({ title: "Erro ao carregar produtos", variant: "destructive" });
+      } else {
+        const mappedProducts: Product[] = (productsRes.data || []).map((p: any) => ({
+          id: p.id, name: p.name, description: p.description, price: p.price,
+          cost_price: p.cost_price, promotional_price: p.promotional_price,
+          stock_quantity: p.stock_quantity, barcode: p.barcode, is_active: p.is_active,
+          category_id: p.category_id, supplier_id: p.supplier_id,
+        }));
+        setProducts(mappedProducts);
+      }
+
+      if (categoriesRes.error && !isMissingTableError(categoriesRes.error)) {
+        toast({ title: "Erro ao carregar categorias", variant: "destructive" });
+      } else {
+        setCategories(categoriesRes.data || []);
+      }
+
+      if (suppliersRes.error && !isMissingTableError(suppliersRes.error)) {
+        toast({ title: "Erro ao carregar fornecedores", variant: "destructive" });
+      } else {
+        setSuppliers(suppliersRes.data || []);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Bloquear se assinatura expirada
@@ -228,7 +173,7 @@ const Products = () => {
           toast({ title: "Erro ao atualizar produto", variant: "destructive" });
         } else {
           toast({ title: "Produto atualizado com sucesso" });
-          fetchProducts();
+          loadData();
           resetProductForm();
         }
       } else {
@@ -238,7 +183,7 @@ const Products = () => {
           toast({ title: "Erro ao criar produto", variant: "destructive" });
         } else {
           toast({ title: "Produto criado com sucesso" });
-          fetchProducts();
+          loadData();
           resetProductForm();
         }
       }
@@ -277,7 +222,7 @@ const Products = () => {
       });
     } else {
       toast({ title: "Produto deletado com sucesso" });
-      fetchProducts();
+      loadData();
     }
   };
 
@@ -306,7 +251,7 @@ const Products = () => {
           toast({ title: "Erro ao atualizar categoria", variant: "destructive" });
         } else {
           toast({ title: "Categoria atualizada com sucesso" });
-          fetchCategories();
+          loadData();
           resetCategoryForm();
         }
       } else {
@@ -316,7 +261,7 @@ const Products = () => {
           toast({ title: "Erro ao criar categoria", variant: "destructive" });
         } else {
           toast({ title: "Categoria criada com sucesso" });
-          fetchCategories();
+          loadData();
           resetCategoryForm();
         }
       }
@@ -332,7 +277,7 @@ const Products = () => {
       toast({ title: "Erro ao deletar categoria", variant: "destructive" });
     } else {
       toast({ title: "Categoria deletada com sucesso" });
-      fetchCategories();
+      loadData();
     }
   };
 
@@ -529,7 +474,7 @@ const Products = () => {
         }
       }
 
-      fetchProducts();
+      loadData();
       toast({ 
         title: `Importação concluída`, 
         description: `${imported} produtos importados${errors > 0 ? `, ${errors} erros` : ""}` 
