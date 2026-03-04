@@ -24,6 +24,7 @@ import Suppliers from "./pages/Suppliers";
 import SupplierForm from "./pages/SupplierForm";
 import WeeklyRedemption from "./pages/WeeklyRedemption";
 import Calculator from "./pages/Calculator";
+import Manuals from "./pages/Manuals";
 
 import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
@@ -65,6 +66,7 @@ const App = () => (
             <Route path="/resgate-semanal" element={<WeeklyRedemption />} />
             <Route path="/calculadora" element={<Calculator />} />
             <Route path="/auri" element={<Auri />} />
+            <Route path="/manuais" element={<Manuals />} />
             
           </Route>
 
