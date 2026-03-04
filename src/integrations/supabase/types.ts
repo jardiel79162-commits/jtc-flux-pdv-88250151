@@ -516,6 +516,7 @@ export type Database = {
           id: string
           notes: string | null
           product_id: string | null
+          product_name: string | null
           purchase_date: string | null
           quantity: number
           supplier_id: string | null
@@ -528,6 +529,7 @@ export type Database = {
           id?: string
           notes?: string | null
           product_id?: string | null
+          product_name?: string | null
           purchase_date?: string | null
           quantity?: number
           supplier_id?: string | null
@@ -540,6 +542,7 @@ export type Database = {
           id?: string
           notes?: string | null
           product_id?: string | null
+          product_name?: string | null
           purchase_date?: string | null
           quantity?: number
           supplier_id?: string | null
