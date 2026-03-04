@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CreditCard, LogOut, Gift, Copy, Check, Share2 } from "lucide-react";
+import { AlertCircle, CreditCard, LogOut, Gift, Copy, Check, Share2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { generateInviteCode } from "@/lib/inviteCode";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +18,7 @@ export const SubscriptionBlocker = ({ isTrial = false, isEmployee = false }: Sub
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showInviteCode, setShowInviteCode] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     fetchInviteCode();
@@ -127,28 +129,56 @@ export const SubscriptionBlocker = ({ isTrial = false, isEmployee = false }: Sub
               </p>
               
               <div className="bg-muted rounded-xl p-6 space-y-4">
-                <div className="text-4xl font-mono font-bold tracking-widest text-primary">
-                  {inviteCode || "..."}
-                </div>
-                
-                <div className="flex gap-2 justify-center">
-                  <Button
-                    onClick={handleCopyCode}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    {copied ? "Copiado!" : "Copiar Código"}
-                  </Button>
-                  
-                  <Button
-                    onClick={handleShare}
-                    className="gap-2 bg-accent hover:bg-accent/90"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Compartilhar
-                  </Button>
-                </div>
+                {inviteCode ? (
+                  <>
+                    <div className="text-4xl font-mono font-bold tracking-widest text-primary">
+                      {inviteCode}
+                    </div>
+                    
+                    <div className="flex gap-2 justify-center">
+                      <Button
+                        onClick={handleCopyCode}
+                        variant="outline"
+                        className="gap-2"
+                      >
+                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copied ? "Copiado!" : "Copiar Código"}
+                      </Button>
+                      
+                      <Button
+                        onClick={handleShare}
+                        className="gap-2 bg-accent hover:bg-accent/90"
+                      >
+                        <Share2 className="h-4 w-4" />
+                        Compartilhar
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-muted-foreground text-sm">
+                      Você ainda não possui um código de convite. Clique abaixo para gerar o seu!
+                    </p>
+                    <Button
+                      onClick={async () => {
+                        setGenerating(true);
+                        try {
+                          const code = await generateInviteCode();
+                          if (code) setInviteCode(code);
+                        } catch {
+                          toast({ title: "Erro ao gerar código", variant: "destructive" });
+                        } finally {
+                          setGenerating(false);
+                        }
+                      }}
+                      disabled={generating}
+                      className="gap-2"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+                      {generating ? "Gerando..." : "Gerar Meu Código"}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="bg-primary/5 rounded-lg p-4 text-sm text-left space-y-2">
