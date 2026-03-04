@@ -127,6 +127,10 @@ const Products = () => {
     }
   };
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
   // Bloquear se assinatura expirada
   if (!loading && isExpired) {
     return <SubscriptionBlocker isTrial={isTrial} />;
