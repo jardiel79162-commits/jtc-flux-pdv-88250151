@@ -255,7 +255,7 @@
 
   /* Page header with gradient */
   .page-header {
-    @apply relative pb-6 mb-6;
+    @apply relative pb-5 mb-2;
   }
 
   .page-header::after {
@@ -267,15 +267,55 @@
     @apply text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text;
   }
 
+  /* Page container */
+  .page-container {
+    @apply space-y-5 md:space-y-6 animate-fade-in;
+  }
+
+  /* Page header row */
+  .page-header-row {
+    @apply page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3;
+  }
+
+  /* Page title block */
+  .page-title-block {
+    @apply flex items-center gap-3;
+  }
+
+  .page-title-icon {
+    @apply p-2.5 rounded-xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary;
+  }
+
+  .page-title-text {
+    @apply text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-muted-foreground mt-0.5;
+  }
+
+  /* Search bar */
+  .search-container {
+    @apply relative;
+  }
+
+  .search-container .search-icon {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none;
+  }
+
+  .search-container input {
+    @apply pl-10 h-11 rounded-xl border-border/60 bg-card shadow-sm;
+  }
+
   /* Metric card with gradient border */
   .metric-card {
-    @apply relative overflow-hidden rounded-xl border-0 bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    @apply relative overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
   }
 
   .metric-card::before {
     content: '';
-    @apply absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--accent) / 0.1));
+    @apply absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.06));
   }
 
   .metric-card:hover::before {
@@ -305,29 +345,39 @@
 
   /* Table improvements */
   .table-modern {
-    @apply rounded-xl border overflow-hidden shadow-sm;
+    @apply rounded-2xl border border-border/50 overflow-hidden shadow-sm bg-card;
   }
 
   .table-modern th {
-    @apply bg-muted/50 font-semibold text-muted-foreground uppercase text-xs tracking-wider;
+    @apply bg-muted/40 font-semibold text-muted-foreground uppercase text-[11px] tracking-wider;
   }
 
   .table-modern tr {
-    @apply transition-colors hover:bg-muted/30;
+    @apply transition-colors hover:bg-muted/20;
   }
 
   /* Empty state styling */
   .empty-state {
-    @apply flex flex-col items-center justify-center py-16 text-center;
+    @apply flex flex-col items-center justify-center py-20 text-center;
   }
 
   .empty-state-icon {
-    @apply w-16 h-16 mx-auto text-muted-foreground/40 mb-4;
+    @apply w-16 h-16 mx-auto text-muted-foreground/30 mb-4;
   }
 
   /* Section divider */
   .section-divider {
     @apply my-8 h-px bg-gradient-to-r from-transparent via-border to-transparent;
+  }
+
+  /* Action button */
+  .btn-action {
+    @apply gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:scale-[1.02] text-primary-foreground;
+  }
+
+  /* Stats number */
+  .stat-value {
+    @apply text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent;
   }
 
   /* Auth page premium styles - always loaded via CSS for consistency */

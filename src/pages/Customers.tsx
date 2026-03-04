@@ -287,15 +287,18 @@ const Customers = () => {
 
   return (
     <PageLoader pageName="Clientes">
-    <div className="space-y-6 animate-fade-in">
-      <div className="page-header flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Clientes
-          </h1>
-          <p className="text-muted-foreground">Gerencie seus clientes e saldos</p>
+    <div className="page-container">
+      <div className="page-header-row">
+        <div className="page-title-block">
+          <div className="page-title-icon">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="page-title-text">Clientes</h1>
+            <p className="page-subtitle">Gerencie seus clientes e saldos</p>
+          </div>
         </div>
-        <Button onClick={() => navigate("/clientes/novo")} className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:scale-[1.02]">
+        <Button onClick={() => navigate("/clientes/novo")} className="btn-action">
           <UserPlus className="w-4 h-4" />
           Cadastrar Cliente
         </Button>
@@ -485,9 +488,9 @@ const Customers = () => {
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {customers.map((customer) => (
-            <Card key={customer.id} className="hover:shadow-lg transition-shadow">
+            <Card key={customer.id} className="metric-card hover:shadow-lg transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

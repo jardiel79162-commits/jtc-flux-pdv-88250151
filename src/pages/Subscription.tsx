@@ -233,10 +233,17 @@ const Subscription = () => {
 
   return (
     <PageLoader pageName="Assinatura">
-    <div className="space-y-8 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">Assinatura</h1>
-        <p className="text-muted-foreground">Escolha o plano ideal para o seu negócio</p>
+    <div className="page-container max-w-6xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-block">
+          <div className="page-title-icon">
+            <CreditCard className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="page-title-text">Assinatura</h1>
+            <p className="page-subtitle">Escolha o plano ideal para o seu negócio</p>
+          </div>
+        </div>
       </div>
 
       {/* Card de status do plano */}

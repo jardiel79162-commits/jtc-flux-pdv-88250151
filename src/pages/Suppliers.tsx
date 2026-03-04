@@ -218,30 +218,30 @@ const Suppliers = () => {
 
   return (
     <PageLoader pageName="Fornecedores">
-    <div className="p-6 space-y-6 overflow-hidden animate-fade-in">
-      <div className="page-header flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Fornecedores
-          </h1>
-          <p className="text-muted-foreground">Gerencie seus fornecedores</p>
+    <div className="page-container overflow-hidden">
+      <div className="page-header-row">
+        <div className="page-title-block">
+          <div className="page-title-icon">
+            <Truck className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="page-title-text">Fornecedores</h1>
+            <p className="page-subtitle">Gerencie seus fornecedores</p>
+          </div>
         </div>
-        <Button onClick={() => navigate("/fornecedores/novo")} className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:scale-[1.02]">
+        <Button onClick={() => navigate("/fornecedores/novo")} className="btn-action">
           <Plus className="mr-2 h-4 w-4" />
           Novo Fornecedor
         </Button>
       </div>
 
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar fornecedor..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+      <div className="search-container">
+        <Search className="search-icon" />
+        <Input
+          placeholder="Buscar fornecedor..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {filteredSuppliers.length === 0 ? (
