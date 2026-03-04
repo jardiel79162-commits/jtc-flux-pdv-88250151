@@ -18,18 +18,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          title?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -190,6 +193,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      email_logs: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_email: string
+          sale_id: string | null
+          status: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_email: string
+          sale_id?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_email?: string
+          sale_id?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_verifications: {
         Row: {
@@ -469,6 +510,60 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_items: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string | null
+          purchase_date: string | null
+          quantity: number
+          supplier_id: string | null
+          total_cost: number
+          unit_cost: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          supplier_id?: string | null
+          total_cost?: number
+          unit_cost?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          supplier_id?: string | null
+          total_cost?: number
+          unit_cost?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_items: {
         Row: {
           cost_price: number | null
@@ -575,6 +670,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      store_integrations: {
+        Row: {
+          created_at: string
+          encrypted_token: string | null
+          id: string
+          integration_type: string
+          is_active: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_token?: string | null
+          id?: string
+          integration_type: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_token?: string | null
+          id?: string
+          integration_type?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       store_settings: {
         Row: {
@@ -737,6 +862,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_weekly_code_for_user: {
+        Args: { p_code: string; p_user_id: string; p_week_start: string }
+        Returns: string
+      }
       get_profile_created_at_by_email: {
         Args: { p_email: string }
         Returns: {
@@ -757,6 +886,10 @@ export type Database = {
         Returns: boolean
       }
       is_cpf_blocked: { Args: { check_cpf: string }; Returns: boolean }
+      redeem_weekly_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
+      }
       validate_invite_code: {
         Args: { code: string }
         Returns: {
