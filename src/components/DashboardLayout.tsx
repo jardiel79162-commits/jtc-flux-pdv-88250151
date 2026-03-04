@@ -20,6 +20,7 @@ import {
   Gift,
   Sun,
   Moon,
+  RefreshCw,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -148,6 +149,9 @@ const DashboardLayoutInner = () => {
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground rounded-xl hover:bg-muted/80">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => window.location.reload()} className="text-muted-foreground rounded-xl hover:bg-muted/80">
+            <RefreshCw className="w-5 h-5" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="rounded-xl hover:bg-muted/80">
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
