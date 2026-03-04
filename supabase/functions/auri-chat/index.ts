@@ -22,6 +22,7 @@ const tools = [
           barcode: { type: "string", description: "Código de barras (opcional)" },
           description: { type: "string", description: "Descrição do produto (opcional)" },
           min_stock_quantity: { type: "integer", description: "Estoque mínimo (opcional, padrão 5)" },
+          photo_url: { type: "string", description: "URL da foto do produto (se o usuário enviou uma imagem)" },
         },
         required: ["name", "price", "stock_quantity"],
       },
@@ -185,6 +186,7 @@ async function executeToolCall(
   try {
     switch (toolName) {
       case "add_product": {
+        const photos = args.photo_url ? [args.photo_url] : null;
         const { data, error } = await supabaseAdmin
           .from("products")
           .insert({
@@ -196,11 +198,12 @@ async function executeToolCall(
             barcode: args.barcode || null,
             description: args.description || null,
             min_stock_quantity: args.min_stock_quantity || 5,
+            photos,
           })
           .select()
           .single();
         if (error) return JSON.stringify({ success: false, error: error.message });
-        return JSON.stringify({ success: true, message: `Produto "${data.name}" cadastrado com sucesso! Preço: R$ ${Number(data.price).toFixed(2)}, Estoque: ${data.stock_quantity}` });
+        return JSON.stringify({ success: true, message: `Produto "${data.name}" cadastrado com sucesso! Preço: R$ ${Number(data.price).toFixed(2)}, Estoque: ${data.stock_quantity}${photos ? ', com foto' : ''}` });
       }
 
       case "edit_product": {
@@ -466,7 +469,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { messages, context } = await req.json();
+    const { messages, context, imageUrl } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -564,9 +567,10 @@ SUAS CAPACIDADES:
 
 AÇÕES QUE VOCÊ PODE EXECUTAR:
 Você pode realizar ações diretamente no sistema do usuário usando as ferramentas disponíveis:
-- **Produtos**: Cadastrar, editar e excluir produtos (nome, preço, estoque, código de barras, etc.)
+- **Produtos**: Cadastrar (com foto se enviada), editar e excluir produtos (nome, preço, estoque, código de barras, etc.)
 - **Clientes**: Cadastrar, editar e excluir clientes (nome, telefone, CPF, endereço, etc.)
 - **Fornecedores**: Cadastrar, editar e excluir fornecedores (nome, CNPJ, telefone, e-mail, etc.)
+- **VENDAS NÃO PODEM SER REALIZADAS** pela Auri. Se pedirem para fazer uma venda, oriente o usuário a usar o PDV.
 
 REGRAS PARA AÇÕES:
 1. Quando o usuário pedir para criar/cadastrar algo, use a ferramenta correspondente IMEDIATAMENTE
@@ -574,6 +578,8 @@ REGRAS PARA AÇÕES:
 3. Quando pedir para excluir, confirme o nome antes de excluir (pergunte ao usuário se tem certeza)
 4. Sempre confirme a ação realizada com detalhes (nome, preço, etc.)
 5. Se houver erro, explique o que aconteceu de forma amigável
+6. Se o usuário enviar uma imagem junto com o pedido de criar produto, use a URL da imagem como photo_url
+7. NUNCA realize vendas. Se pedirem, diga que vendas só podem ser feitas pelo PDV.
 
 FUNCIONALIDADES DO SISTEMA:
 1. **Dashboard** - Visão geral com métricas de vendas
@@ -602,9 +608,18 @@ ${contextInfo}
 IMPORTANTE: Use os dados acima para responder às perguntas do usuário com precisão.
 Quando perguntarem quem te criou ou desenvolveu, SEMPRE diga que foi **Jardiel De Sousa Lopes, criador da JTC**.`;
 
+    // If user sent an image, append context about it to the last user message
+    const processedMessages = [...messages];
+    if (imageUrl && processedMessages.length > 0) {
+      const lastMsg = processedMessages[processedMessages.length - 1];
+      if (lastMsg.role === "user") {
+        lastMsg.content = `${lastMsg.content}\n\n[O usuário enviou uma imagem. URL da imagem: ${imageUrl}]`;
+      }
+    }
+
     const aiMessages = [
       { role: "system", content: systemPrompt },
-      ...messages,
+      ...processedMessages,
     ];
 
     // First call: non-streaming to check for tool calls
