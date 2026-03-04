@@ -405,9 +405,11 @@ const Auth = () => {
 
       clearFormPersist();
       clearAddressPersist();
-      setAccountCreated(true);
-      setRegisterStep(4);
-      toast({ title: "Conta criada!", description: "Enviamos um link de confirmação para seu e-mail." });
+
+      // Auto-confirm está ativado, então fazemos login automático
+      await signIn(data.email, data.password);
+      toast({ title: "Conta criada!", description: "Bem-vindo ao JTC FluxPDV!" });
+      navigate("/dashboard");
 
     } catch (error: any) {
       const errorMsg = (error.message || "").toLowerCase();
