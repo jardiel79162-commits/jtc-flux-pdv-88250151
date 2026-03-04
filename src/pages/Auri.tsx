@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Send, Loader2, Sparkles, Plus, Trash2, MessageSquare, Home, History, X, ChevronDown,
-  Package, Users, Truck
+  Package, Users, Truck, Camera
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ interface Message {
   id?: string;
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
 }
 
 interface Conversation {
@@ -68,8 +69,11 @@ const Auri = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [context, setContext] = useState<AuriContext | null>(null);
   const [contextLoading, setContextLoading] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ file: File; previewUrl: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -335,7 +339,64 @@ const Auri = () => {
     }
   }, [messages]);
 
-  const streamChat = async (userMessages: Message[]) => {
+  const uploadImage = async (file: File): Promise<string | null> => {
+    setIsUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `${user.id}/auri-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-photos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast({ title: "Erro ao enviar imagem", variant: "destructive" });
+        return null;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('product-photos')
+        .getPublicUrl(fileName);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Apenas imagens são aceitas", variant: "destructive" });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "Imagem muito grande (máx 10MB)", variant: "destructive" });
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setPendingImage({ file, previewUrl });
+  };
+
+  const removePendingImage = () => {
+    if (pendingImage) {
+      URL.revokeObjectURL(pendingImage.previewUrl);
+      setPendingImage(null);
+    }
+  };
+
+  const streamChat = async (userMessages: Message[], imageUrl?: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     
@@ -345,7 +406,11 @@ const Auri = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ messages: userMessages.map(m => ({ role: m.role, content: m.content })), context }),
+      body: JSON.stringify({
+        messages: userMessages.map(m => ({ role: m.role, content: m.content })),
+        context,
+        imageUrl,
+      }),
     });
 
     if (!response.ok || !response.body) {
@@ -357,9 +422,20 @@ const Auri = () => {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !pendingImage) || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    // Upload image if pending
+    let imageUrl: string | undefined;
+    if (pendingImage) {
+      imageUrl = (await uploadImage(pendingImage.file)) || undefined;
+      removePendingImage();
+    }
+
+    const userMessage: Message = { 
+      role: "user", 
+      content: input.trim() || (imageUrl ? "Enviei uma imagem" : ""),
+      imageUrl,
+    };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
@@ -381,7 +457,7 @@ const Auri = () => {
     let assistantContent = "";
 
     try {
-      const reader = await streamChat(newMessages);
+      const reader = await streamChat(newMessages, imageUrl);
       const decoder = new TextDecoder();
       let buffer = "";
 
@@ -611,12 +687,19 @@ const Auri = () => {
                       : "bg-muted rounded-bl-md"
                   }`}
                 >
+                  {message.imageUrl && (
+                    <img 
+                      src={message.imageUrl} 
+                      alt="Imagem enviada" 
+                      className="rounded-lg mb-2 max-w-full max-h-48 object-cover"
+                    />
+                  )}
                   {message.role === "assistant" ? (
                     <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>p:last-child]:mb-0">
                       <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    message.content && <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   )}
                 </div>
               </div>
@@ -637,24 +720,63 @@ const Auri = () => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t bg-background shrink-0">
-        <div className="max-w-2xl mx-auto flex gap-3">
+      <div className="border-t bg-background shrink-0">
+        {/* Pending image preview */}
+        {pendingImage && (
+          <div className="px-4 pt-3 max-w-2xl mx-auto">
+            <div className="relative inline-block">
+              <img 
+                src={pendingImage.previewUrl} 
+                alt="Preview" 
+                className="h-20 w-20 rounded-lg object-cover border-2 border-primary"
+              />
+              <button
+                onClick={removePendingImage}
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+        
+        <div className="p-4 max-w-2xl mx-auto flex gap-2">
+          {/* Image upload button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-12 w-12 rounded-full shrink-0"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading || contextLoading || isUploading}
+            title="Enviar imagem"
+          >
+            <Camera className="h-5 w-5" />
+          </Button>
+          
           <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="Digite sua mensagem..."
+            placeholder={pendingImage ? "Descreva o que fazer com a imagem..." : "Digite sua mensagem..."}
             disabled={isLoading || contextLoading}
             className="flex-1 h-12 rounded-full px-5 border-2 focus-visible:ring-violet-500"
           />
           <Button
             onClick={sendMessage}
-            disabled={!input.trim() || isLoading || contextLoading}
+            disabled={(!input.trim() && !pendingImage) || isLoading || contextLoading}
             className="h-12 w-12 rounded-full bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 shrink-0"
             size="icon"
           >
-            <Send className="h-5 w-5" />
+            {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </Button>
         </div>
       </div>
