@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import PageLoader from "@/components/PageLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -50,10 +51,8 @@ const Settings = () => {
     setOpenSection(prev => prev === section ? null : section);
   };
 
-  // PWA Install states
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  // PWA Install
+  const { isInstallable, isInstalled, install } = useInstallPrompt();
   const [isInstalling, setIsInstalling] = useState(false);
 
   // Estado do código de convite
@@ -63,37 +62,6 @@ const Settings = () => {
   useEffect(() => {
     fetchSettings();
     fetchInviteCode();
-
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-    }
-
-    // Listen for beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-
-    // Listen for app installed event
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setIsInstallable(false);
-      setDeferredPrompt(null);
-      toast({
-        title: "App instalado com sucesso!",
-        description: "O JTC FluxPDV foi adicionado à sua tela inicial",
-      });
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
   }, []);
 
   const fetchInviteCode = async () => {
@@ -159,17 +127,15 @@ const Settings = () => {
   };
 
   const handleInstallApp = async () => {
-    if (deferredPrompt) {
-      setIsInstalling(true);
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      setIsInstalling(false);
-      
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-        setIsInstallable(false);
-      }
-    } else {
+    setIsInstalling(true);
+    const accepted = await install();
+    setIsInstalling(false);
+    if (accepted) {
+      toast({
+        title: "App instalado com sucesso!",
+        description: "O JTC FluxPDV foi adicionado à sua tela inicial",
+      });
+    } else if (!isInstallable) {
       toast({
         title: "Instalação manual necessária",
         description: "Use o menu do navegador → 'Adicionar à tela inicial'",
