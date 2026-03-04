@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  Send, Loader2, Sparkles, Plus, Trash2, MessageSquare, Home, History, X, ChevronDown,
-  Package, Users, Truck, Camera
+  Send, Loader2, Sparkles, Plus, Trash2, MessageSquare, Home, History, X,
+  Package, Users, Truck, Camera, ImageIcon, Paperclip
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -74,6 +74,7 @@ const Auri = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -741,25 +742,47 @@ const Auri = () => {
         )}
         
         <div className="p-4 max-w-2xl mx-auto flex gap-2">
-          {/* Image upload button */}
+          {/* Hidden file inputs */}
           <input
             ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <input
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
             onChange={handleImageSelect}
             className="hidden"
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-12 w-12 rounded-full shrink-0"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading || contextLoading || isUploading}
-            title="Enviar imagem"
-          >
-            <Camera className="h-5 w-5" />
-          </Button>
+          
+          {/* Attachment dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-12 w-12 rounded-full shrink-0"
+                disabled={isLoading || contextLoading || isUploading}
+                title="Anexar imagem"
+              >
+                <Paperclip className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="mb-1">
+              <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Enviar foto
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => cameraInputRef.current?.click()}>
+                <Camera className="h-4 w-4 mr-2" />
+                Tirar foto
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           <Input
             ref={inputRef}
