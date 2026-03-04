@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, Package, ShoppingCart, AlertTriangle, Calendar, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { PixFeeCalculator } from "@/components/PixFeeCalculator";
+
 import { DashboardSkeleton } from "@/components/skeletons";
 import { usePermissions } from "@/hooks/usePermissions";
 import { QUICK_ACTION_PERMISSIONS } from "@/lib/permissions";
@@ -46,7 +46,7 @@ const quickActions = [
   { label: "Relatórios", path: "/relatorios", image: quickActionRelatorios },
   { label: "Configurações", path: "/configuracoes", image: quickActionConfiguracoes },
   { label: "Assinatura", path: "/assinatura", image: quickActionAssinatura },
-  { label: "Calculadora", path: "#calculadora", image: quickActionCalculadora, isModal: true },
+  { label: "Calculadora", path: "/calculadora", image: quickActionCalculadora },
   { label: "Bônus", path: "/resgate-semanal", image: quickActionBonus },
 ];
 
@@ -78,11 +78,10 @@ const Dashboard = () => {
     hideTrialMessage: false,
   });
   const [loading, setLoading] = useState(true);
-  const [showCalculator, setShowCalculator] = useState(false);
+  
 
   // Filter quick actions by permissions
   const filteredQuickActions = quickActions.filter((action) => {
-    if (action.isModal) return true;
     const permKey = QUICK_ACTION_PERMISSIONS[action.path];
     if (permKey) return hasPermission(permKey);
     return true;
@@ -398,12 +397,8 @@ const Dashboard = () => {
                   </motion.div>
                 );
 
-                if (action.isModal) {
-                  return (
-                    <div key={action.path} onClick={() => setShowCalculator(true)}>
-                      {content}
-                    </div>
-                  );
+                if (false) {
+                  return null;
                 }
 
                 return (
@@ -416,8 +411,6 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* Modal da Calculadora PIX */}
-        <PixFeeCalculator open={showCalculator} onOpenChange={setShowCalculator} />
 
         {/* Cards de Métricas */}
         <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
