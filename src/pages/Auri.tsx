@@ -344,7 +344,10 @@ const Auri = () => {
     setIsUploading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        toast({ title: "Usuário não autenticado", variant: "destructive" });
+        return null;
+      }
 
       const ext = file.name.split('.').pop() || 'jpg';
       const fileName = `${user.id}/auri-${Date.now()}.${ext}`;
@@ -355,7 +358,7 @@ const Auri = () => {
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
-        toast({ title: "Erro ao enviar imagem", variant: "destructive" });
+        toast({ title: "Erro ao enviar imagem", description: uploadError.message, variant: "destructive" });
         return null;
       }
 
@@ -366,6 +369,7 @@ const Auri = () => {
       return urlData.publicUrl;
     } catch (error) {
       console.error("Upload error:", error);
+      toast({ title: "Erro ao enviar imagem", variant: "destructive" });
       return null;
     } finally {
       setIsUploading(false);
