@@ -152,61 +152,95 @@ const DashboardLayoutInner = () => {
         </div>
       </header>
 
-      {/* Menu Overlay melhorado */}
+      {/* Drawer Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-0 z-30 bg-background/95 backdrop-blur-sm pt-16"
-          >
-            <nav className="p-4 space-y-1 max-w-md mx-auto">
-              {menuItems.map((item, index) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <motion.div
-                    key={item.path}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03, duration: 0.2 }}
-                  >
-                    <Link to={item.path} onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button
-                        variant={isActive ? "secondary" : "ghost"}
-                        className={`w-full justify-start gap-3 h-12 rounded-xl transition-all duration-150 active:scale-[0.97] ${
-                          isActive ? "bg-primary/10 text-primary font-semibold border border-primary/20" : ""
-                        }`}
-                      >
-                        <Icon className={`w-5 h-5 ${isActive ? "text-primary" : ""}`} />
-                        {item.label}
-                      </Button>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              <div className="pt-4">
-                <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-4" />
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: menuItems.length * 0.03, duration: 0.2 }}
-                >
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-3 h-12 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150 active:scale-[0.97]"
-                    onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
-                  >
-                    <LogOut className="w-5 h-5" />
-                    Sair
-                  </Button>
-                </motion.div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: DRAWER_WIDTH }}
+              animate={{ x: 0 }}
+              exit={{ x: DRAWER_WIDTH }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+                if (info.offset.x > 80 || info.velocity.x > 300) {
+                  setIsMobileMenuOpen(false);
+                }
+              }}
+              className="fixed top-0 right-0 bottom-0 z-50 bg-card border-l border-border/50 shadow-2xl overflow-y-auto touch-pan-y"
+              style={{ width: DRAWER_WIDTH }}
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between p-4 border-b border-border/50">
+                <h2 className="text-base font-semibold text-foreground">Menu</h2>
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl hover:bg-muted/80">
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
-            </nav>
-          </motion.div>
+
+              {/* Drag indicator */}
+              <div className="flex justify-center py-2">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+              </div>
+
+              <nav className="px-3 pb-4 space-y-1">
+                {menuItems.map((item, index) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <motion.div
+                      key={item.path}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03, duration: 0.2 }}
+                    >
+                      <Link to={item.path} onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button
+                          variant={isActive ? "secondary" : "ghost"}
+                          className={`w-full justify-start gap-3 h-12 rounded-xl transition-all duration-150 active:scale-[0.97] ${
+                            isActive ? "bg-primary/10 text-primary font-semibold border border-primary/20" : ""
+                          }`}
+                        >
+                          <Icon className={`w-5 h-5 ${isActive ? "text-primary" : ""}`} />
+                          {item.label}
+                        </Button>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+
+                <div className="pt-4">
+                  <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-4" />
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: menuItems.length * 0.03, duration: 0.2 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 h-12 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150 active:scale-[0.97]"
+                      onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                    >
+                      <LogOut className="w-5 h-5" />
+                      Sair
+                    </Button>
+                  </motion.div>
+                </div>
+              </nav>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
