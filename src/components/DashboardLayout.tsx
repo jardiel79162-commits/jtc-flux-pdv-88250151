@@ -167,19 +167,19 @@ const DashboardLayoutInner = () => {
             />
             {/* Drawer */}
             <motion.div
-              initial={{ x: DRAWER_WIDTH }}
+              initial={{ x: -DRAWER_WIDTH }}
               animate={{ x: 0 }}
-              exit={{ x: DRAWER_WIDTH }}
+              exit={{ x: -DRAWER_WIDTH }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.1}
               onDragEnd={(_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-                if (info.offset.x > 80 || info.velocity.x > 300) {
+                if (info.offset.x < -80 || info.velocity.x < -300) {
                   setIsMobileMenuOpen(false);
                 }
               }}
-              className="fixed top-0 right-0 bottom-0 z-50 bg-card border-l border-border/50 shadow-2xl overflow-y-auto touch-pan-y"
+              className="fixed top-0 left-0 bottom-0 z-50 bg-card border-r border-border/50 shadow-2xl overflow-y-auto touch-pan-y"
               style={{ width: DRAWER_WIDTH }}
             >
               {/* Drawer Header */}
