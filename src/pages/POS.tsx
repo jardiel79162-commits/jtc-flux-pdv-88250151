@@ -1565,11 +1565,18 @@ ${paymentInfo}
       {productsLoading ? (
         <POSSkeleton />
       ) : (
-        <div className="p-6 overflow-hidden">
-          <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">PDV - Ponto de Venda</h1>
-        <p className="text-muted-foreground">Sistema de vendas</p>
-      </div>
+        <div className="page-container">
+          <div className="page-header-row">
+            <div className="page-title-block">
+              <div className="page-title-icon">
+                <ShoppingCart className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="page-title-text">PDV - Ponto de Venda</h1>
+                <p className="page-subtitle">Sistema de vendas</p>
+              </div>
+            </div>
+          </div>
 
 
       {/* Etapa 1: Carrinho */}
@@ -1577,13 +1584,12 @@ ${paymentInfo}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <div className="search-container flex-1">
+                <Search className="search-icon" />
                 <Input
                   placeholder="Buscar produto por nome, código interno ou código de barras..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
                 />
               </div>
               <Button

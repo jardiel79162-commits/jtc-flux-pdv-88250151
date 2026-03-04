@@ -410,20 +410,30 @@ const Settings = () => {
                   label="Logo da Loja"
                 />
 
-                <div className="space-y-2">
-                  <Label>Cor Primária do Sistema</Label>
-                  <div className="flex gap-2 items-center">
-                    <Input
-                      type="color"
-                      value={settings.primary_color}
-                      onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                      className="w-20 h-10"
-                    />
-                    <Input
-                      value={settings.primary_color}
-                      onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                      placeholder="#4C6FFF"
-                    />
+                <div className="space-y-3">
+                  <Label>Cor do Sistema</Label>
+                  <p className="text-xs text-muted-foreground">Escolha a cor principal do sistema</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { value: "#4C6FFF", label: "Azul", bg: "bg-[#4C6FFF]" },
+                      { value: "#E53E3E", label: "Vermelho", bg: "bg-[#E53E3E]" },
+                      { value: "#38A169", label: "Verde", bg: "bg-[#38A169]" },
+                      { value: "#D69E2E", label: "Amarelo", bg: "bg-[#D69E2E]" },
+                    ].map((color) => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        onClick={() => setSettings({ ...settings, primary_color: color.value })}
+                        className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                          settings.primary_color === color.value
+                            ? "border-foreground shadow-lg scale-105"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                      >
+                        <div className={`w-10 h-10 rounded-full ${color.bg} shadow-md`} />
+                        <span className="text-xs font-medium">{color.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </CardContent>
