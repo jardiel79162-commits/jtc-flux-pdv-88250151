@@ -548,31 +548,33 @@ const Products = () => {
 
   return (
     <PageLoader pageName="Produtos">
-    <div className="p-6 space-y-6 overflow-hidden animate-fade-in">
-      <div className="page-header flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Produtos
-          </h1>
-          <p className="text-muted-foreground">Gerencie seus produtos e categorias</p>
+    <div className="page-container overflow-hidden">
+      <div className="page-header-row">
+        <div className="page-title-block">
+          <div className="page-title-icon">
+            <Package className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="page-title-text">Produtos</h1>
+            <p className="page-subtitle">Gerencie seus produtos e categorias</p>
+          </div>
         </div>
       </div>
 
       <Tabs defaultValue="products" className="w-full">
-        <TabsList className="bg-muted/50 p-1">
-          <TabsTrigger value="products" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Produtos</TabsTrigger>
-          <TabsTrigger value="categories" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Categorias</TabsTrigger>
+        <TabsList className="bg-muted/40 p-1 rounded-xl">
+          <TabsTrigger value="products" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+          <TabsTrigger value="categories" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Categorias</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products" className="space-y-4">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <div className="flex gap-3">
+            <div className="search-container flex-1">
+              <Search className="search-icon" />
               <Input
-                placeholder="Buscar por nome, código interno ou código de barras..."
+                placeholder="Buscar por nome ou código de barras..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
               />
             </div>
             
@@ -603,13 +605,13 @@ const Products = () => {
               className="hidden"
             />
             
-            <Button onClick={() => navigate("/produtos/novo")} className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:scale-[1.02]">
+            <Button onClick={() => navigate("/produtos/novo")} className="btn-action">
               <Plus className="mr-2 h-4 w-4" />
               Novo Produto
             </Button>
           </div>
 
-          <div className="border rounded-lg overflow-hidden">
+          <div className="table-modern">
             <Table className="table-fixed w-full">
               <TableHeader>
                 <TableRow>

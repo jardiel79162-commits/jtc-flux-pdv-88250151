@@ -252,15 +252,18 @@ const Reports = () => {
 
   return (
     <PageLoader pageName="Relatórios">
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-hidden animate-fade-in">
-      <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Relatórios
-          </h1>
-          <p className="text-muted-foreground text-sm">Análise de vendas e desempenho</p>
+    <div className="page-container overflow-hidden">
+      <div className="page-header-row">
+        <div className="page-title-block">
+          <div className="page-title-icon">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="page-title-text">Relatórios</h1>
+            <p className="page-subtitle">Análise de vendas e desempenho</p>
+          </div>
         </div>
-        <Button onClick={exportToCSV} size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:scale-[1.02]">
+        <Button onClick={exportToCSV} size="sm" className="btn-action">
           <Download className="mr-2 h-4 w-4" />
           Exportar CSV
         </Button>
@@ -307,7 +310,7 @@ const Reports = () => {
         )}
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="metric-card animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6 md:pb-2">
             <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Faturamento</CardTitle>
@@ -360,10 +363,10 @@ const Reports = () => {
       </div>
 
       <Tabs defaultValue="sales" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 bg-muted/50 p-1">
-          <TabsTrigger value="sales" className="text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">Vendas</TabsTrigger>
-          <TabsTrigger value="products" className="text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">Produtos</TabsTrigger>
-          <TabsTrigger value="payment" className="text-xs md:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">Pagamento</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-3 bg-muted/40 p-1 rounded-xl">
+          <TabsTrigger value="sales" className="text-xs md:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Vendas</TabsTrigger>
+          <TabsTrigger value="products" className="text-xs md:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+          <TabsTrigger value="payment" className="text-xs md:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Pagamento</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sales" className="space-y-4 mt-4">

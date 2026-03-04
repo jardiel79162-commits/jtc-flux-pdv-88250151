@@ -487,21 +487,25 @@ const SalesHistory = () => {
 
   return (
     <PageLoader pageName="Histórico">
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-hidden animate-fade-in">
+    <div className="page-container overflow-hidden">
       <div className="page-header">
-        <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-          Histórico de Vendas
-        </h1>
-        <p className="text-muted-foreground text-sm">Visualize e gerencie suas vendas</p>
+        <div className="page-title-block">
+          <div className="page-title-icon">
+            <Eye className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="page-title-text">Histórico de Vendas</h1>
+            <p className="page-subtitle">Visualize e gerencie suas vendas</p>
+          </div>
+        </div>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <div className="search-container">
+        <Search className="search-icon" />
         <Input
           placeholder="Buscar por cliente, pagamento ou data..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 transition-all focus:shadow-md"
         />
       </div>
 

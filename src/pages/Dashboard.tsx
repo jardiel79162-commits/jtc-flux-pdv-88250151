@@ -247,19 +247,17 @@ const Dashboard = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-8"
+        className="page-container"
       >
-        {/* Header com saudação */}
+        {/* Header */}
         <motion.div variants={itemVariants} className="page-header">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-              <Sparkles className="w-6 h-6 text-primary" />
+          <div className="page-title-block">
+            <div className="page-title-icon">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
-                Dashboard
-              </h1>
-              <p className="text-muted-foreground">Visão geral do seu negócio</p>
+              <h1 className="page-title-text">Dashboard</h1>
+              <p className="page-subtitle">Visão geral do seu negócio</p>
             </div>
           </div>
         </motion.div>
@@ -374,66 +372,55 @@ const Dashboard = () => {
         {/* Ações Rápidas */}
         {data.quickActionsEnabled && (
           <motion.div variants={itemVariants}>
-            <div className="grid grid-cols-5 md:grid-cols-10 gap-3 md:gap-4">
-              {filteredQuickActions.map((action, index) => {
-                const content = (
+            <div className="grid grid-cols-5 md:grid-cols-10 gap-2.5 md:gap-3">
+              {filteredQuickActions.map((action) => (
+                <Link key={action.path} to={action.path}>
                   <motion.div
-                    key={action.path}
-                    whileHover={{ scale: 1.08, y: -4 }}
+                    whileHover={{ scale: 1.08, y: -3 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                    className="flex flex-col items-center gap-2 group cursor-pointer"
+                    className="flex flex-col items-center gap-1.5 group cursor-pointer"
                   >
-                    <div className="w-14 h-14 md:w-[4.5rem] md:h-[4.5rem] rounded-2xl bg-card border border-border/60 p-2.5 shadow-sm group-hover:shadow-xl group-hover:border-primary/30 transition-all duration-300">
+                    <div className="w-13 h-13 md:w-16 md:h-16 rounded-2xl bg-card border border-border/50 p-2 shadow-sm group-hover:shadow-lg group-hover:border-primary/30 transition-all duration-300">
                       <img 
                         src={action.image} 
                         alt={action.label} 
                         className="w-full h-full object-contain pointer-events-auto"
                       />
                     </div>
-                    <span className="text-[11px] md:text-xs font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
+                    <span className="text-[10px] md:text-xs font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
                       {action.label}
                     </span>
                   </motion.div>
-                );
-
-                if (false) {
-                  return null;
-                }
-
-                return (
-                  <Link key={action.path} to={action.path}>
-                    {content}
-                  </Link>
-                );
-              })}
+                </Link>
+              ))}
             </div>
           </motion.div>
         )}
 
 
         {/* Cards de Métricas */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {metricCards.map((metric, index) => {
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {metricCards.map((metric) => {
             const Icon = metric.icon;
             return (
               <motion.div
                 key={metric.title}
-                whileHover={{ y: -4, scale: 1.02 }}
+                whileHover={{ y: -3, scale: 1.01 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <Card className="metric-card h-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">{metric.title}</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-4 md:p-5 md:pb-1">
+                    <CardTitle className="text-[11px] md:text-xs font-medium text-muted-foreground uppercase tracking-wide">{metric.title}</CardTitle>
                     <div className={metric.iconClass}>
-                      <Icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
+                      <Icon className="h-3.5 w-3.5 text-white" />
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${metric.gradient} bg-clip-text text-transparent`}>
+                  <CardContent className="p-4 pt-0 md:p-5 md:pt-0">
+                    <div className={`stat-value from-foreground to-muted-foreground`}>
                       {metric.value}
                     </div>
-                    <p className="text-[10px] md:text-xs text-muted-foreground mt-1">{metric.subtitle}</p>
+                    <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">{metric.subtitle}</p>
                   </CardContent>
                 </Card>
               </motion.div>
