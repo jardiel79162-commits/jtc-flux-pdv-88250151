@@ -27,6 +27,7 @@ import { SubscriptionBlocker } from "@/components/SubscriptionBlocker";
 import { useThemeContext } from "@/components/ThemeProvider";
 import { PermissionsProvider, usePermissions } from "@/hooks/usePermissions";
 import { MENU_PERMISSIONS, ROUTE_PERMISSIONS } from "@/lib/permissions";
+import { useSystemColor } from "@/hooks/useSystemColor";
 
 const DRAWER_WIDTH = 300;
 
@@ -42,6 +43,7 @@ const DashboardLayoutInner = () => {
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
   const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
+  useSystemColor();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
