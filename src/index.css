@@ -197,6 +197,7 @@
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
   }
 
   /* Hide scrollbar but keep functionality */
