@@ -58,7 +58,13 @@ const DashboardLayoutInner = () => {
         return;
       }
 
-      supabase.functions.invoke("ensure-admin-role").catch(() => {});
+      // Only call ensure-admin-role once per session
+      const adminRoleCacheKey = `admin-role-ensured-${session.user.id}`;
+      if (!sessionStorage.getItem(adminRoleCacheKey)) {
+        supabase.functions.invoke("ensure-admin-role").then(() => {
+          sessionStorage.setItem(adminRoleCacheKey, "1");
+        }).catch(() => {});
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -66,11 +72,17 @@ const DashboardLayoutInner = () => {
       setUser(session?.user ?? null);
       
       if (event === "SIGNED_OUT") {
+        sessionStorage.clear();
         navigate("/auth");
       }
       
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        supabase.functions.invoke("ensure-admin-role").catch(() => {});
+      if (event === "SIGNED_IN") {
+        const adminRoleCacheKey = `admin-role-ensured-${session?.user?.id}`;
+        if (session && !sessionStorage.getItem(adminRoleCacheKey)) {
+          supabase.functions.invoke("ensure-admin-role").then(() => {
+            sessionStorage.setItem(adminRoleCacheKey, "1");
+          }).catch(() => {});
+        }
       }
     });
 

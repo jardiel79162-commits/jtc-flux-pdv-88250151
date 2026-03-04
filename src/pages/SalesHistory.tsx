@@ -55,53 +55,37 @@ const SalesHistory = () => {
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
 
-  const fetchStoreInfo = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+  useEffect(() => {
+    loadSalesData();
+  }, []);
+
+  const loadSalesData = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return;
 
     setUserEmail(user.email || "");
 
-    const { data, error } = await supabase
-      .from("store_settings")
-      .select("store_name")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // Fetch store info and sales in parallel
+    const [storeRes, salesRes] = await Promise.all([
+      supabase.from("store_settings").select("store_name").eq("user_id", user.id).maybeSingle(),
+      supabase.from("sales").select(`*, customers (name)`).eq("user_id", user.id).order("created_at", { ascending: false }),
+    ]);
 
-    if (!error && data?.store_name) {
-      setStoreName(data.store_name);
+    if (!storeRes.error && storeRes.data?.store_name) {
+      setStoreName(storeRes.data.store_name);
     }
-  };
 
-  useEffect(() => {
-    fetchSales();
-    fetchStoreInfo();
-  }, []);
-
-  const fetchSales = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: salesData, error } = await supabase
-      .from("sales")
-      .select(`
-        *,
-        customers (name)
-      `)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      if (isMissingTableError(error)) {
-        setSales([]);
-        return;
+    if (salesRes.error) {
+      if (!isMissingTableError(salesRes.error)) {
+        toast({ title: "Erro ao carregar vendas", variant: "destructive" });
       }
-      toast({ title: "Erro ao carregar vendas", variant: "destructive" });
       return;
     }
 
-    if (salesData) {
+    if (salesRes.data) {
       const salesWithItems = await Promise.all(
-        salesData.map(async (sale) => {
+        salesRes.data.map(async (sale) => {
           const { data: items } = await supabase
             .from("sale_items")
             .select(`
@@ -197,7 +181,7 @@ const SalesHistory = () => {
 
       toast({ title: "Venda cancelada com sucesso!" });
       setSaleToCancel(null);
-      fetchSales();
+      loadSalesData();
     } catch (error) {
       console.error("Erro ao cancelar venda:", error);
       toast({ 
