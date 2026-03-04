@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  Send, Loader2, Sparkles, Plus, Trash2, MessageSquare, Home, History, X, ChevronDown
+  Send, Loader2, Sparkles, Plus, Trash2, MessageSquare, Home, History, X, ChevronDown,
+  Package, Users, Truck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -334,11 +336,14 @@ const Auri = () => {
   }, [messages]);
 
   const streamChat = async (userMessages: Message[]) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
     const response = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ messages: userMessages.map(m => ({ role: m.role, content: m.content })), context }),
     });
@@ -563,26 +568,32 @@ const Auri = () => {
               </div>
               <h3 className="text-2xl font-bold mb-2 text-center">Olá! Eu sou a Auri</h3>
               <p className="text-muted-foreground text-center max-w-sm">
-                Sua assistente inteligente do JTC FluxPDV. Pergunte sobre vendas, clientes, produtos ou qualquer coisa sobre seu negócio!
+                Sua assistente inteligente do JTC FluxPDV. Posso ajudar com informações e também <strong>executar ações</strong> no seu sistema!
+              </p>
+              <p className="text-xs text-muted-foreground text-center max-w-sm mt-1">
+                Desenvolvido por <span className="font-semibold">Jardiel De Sousa Lopes</span> — JTC
               </p>
               
               <div className="grid grid-cols-2 gap-3 mt-8 w-full max-w-md">
                 {[
-                  "Qual foi minha venda de hoje?",
-                  "Quem está me devendo?",
-                  "Quais produtos estão em baixa?",
-                  "Como está meu negócio?"
+                  { text: "Cadastrar um produto", icon: <Package className="h-4 w-4 mr-1.5 text-violet-500" /> },
+                  { text: "Cadastrar um cliente", icon: <Users className="h-4 w-4 mr-1.5 text-violet-500" /> },
+                  { text: "Cadastrar um fornecedor", icon: <Truck className="h-4 w-4 mr-1.5 text-violet-500" /> },
+                  { text: "Quem está me devendo?", icon: null },
+                  { text: "Quais produtos estão em baixa?", icon: null },
+                  { text: "Como está meu negócio?", icon: null },
                 ].map((suggestion, i) => (
                   <Button
                     key={i}
                     variant="outline"
-                    className="h-auto py-3 px-4 text-left text-sm whitespace-normal"
+                    className="h-auto py-3 px-4 text-left text-sm whitespace-normal flex items-center"
                     onClick={() => {
-                      setInput(suggestion);
+                      setInput(suggestion.text);
                       inputRef.current?.focus();
                     }}
                   >
-                    {suggestion}
+                    {suggestion.icon}
+                    {suggestion.text}
                   </Button>
                 ))}
               </div>
@@ -600,7 +611,13 @@ const Auri = () => {
                       : "bg-muted rounded-bl-md"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  {message.role === "assistant" ? (
+                    <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>p:last-child]:mb-0">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))
