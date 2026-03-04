@@ -107,7 +107,7 @@ const ProductForm = () => {
         photo_url: product.photos?.[0] || "",
         hasSupplier: !!product.supplier_id,
         supplier_id: product.supplier_id || "",
-        product_type: product.product_type || "unidade",
+        product_type: (product.product_type || "unidade") as "peso" | "unidade" | "servico",
         hasStock: product.product_type === "servico" ? (product.stock_quantity > 0) : true,
         hasBarcode: product.product_type === "servico" ? !!product.barcode : true,
       });

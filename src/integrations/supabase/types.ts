@@ -197,27 +197,39 @@ export type Database = {
       email_logs: {
         Row: {
           created_at: string
+          customer_email: string | null
+          document_type: string | null
           id: string
-          recipient_email: string
+          recipient_email: string | null
           sale_id: string | null
+          sender_email: string | null
+          sent_at: string | null
           status: string | null
           subject: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
+          customer_email?: string | null
+          document_type?: string | null
           id?: string
-          recipient_email: string
+          recipient_email?: string | null
           sale_id?: string | null
+          sender_email?: string | null
+          sent_at?: string | null
           status?: string | null
           subject?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
+          customer_email?: string | null
+          document_type?: string | null
           id?: string
-          recipient_email?: string
+          recipient_email?: string | null
           sale_id?: string | null
+          sender_email?: string | null
+          sent_at?: string | null
           status?: string | null
           subject?: string | null
           user_id?: string
@@ -865,10 +877,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_weekly_code_for_user: {
-        Args: { p_code: string; p_user_id: string; p_week_start: string }
-        Returns: string
-      }
+      create_weekly_code_for_user:
+        | { Args: { p_user_id: string }; Returns: string }
+        | {
+            Args: { p_code: string; p_user_id: string; p_week_start: string }
+            Returns: string
+          }
       get_profile_created_at_by_email: {
         Args: { p_email: string }
         Returns: {
