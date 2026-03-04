@@ -786,7 +786,13 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          days_to_add: number
           id: string
+          mercado_pago_payment_id: string | null
+          mercado_pago_pix_copy_paste: string | null
+          mercado_pago_qr_code: string | null
+          mercado_pago_qr_code_base64: string | null
+          paid_at: string | null
           payment_id: string | null
           plan_type: string
           qr_code: string | null
@@ -799,7 +805,13 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          days_to_add?: number
           id?: string
+          mercado_pago_payment_id?: string | null
+          mercado_pago_pix_copy_paste?: string | null
+          mercado_pago_qr_code?: string | null
+          mercado_pago_qr_code_base64?: string | null
+          paid_at?: string | null
           payment_id?: string | null
           plan_type: string
           qr_code?: string | null
@@ -812,7 +824,13 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          days_to_add?: number
           id?: string
+          mercado_pago_payment_id?: string | null
+          mercado_pago_pix_copy_paste?: string | null
+          mercado_pago_qr_code?: string | null
+          mercado_pago_qr_code_base64?: string | null
+          paid_at?: string | null
           payment_id?: string | null
           plan_type?: string
           qr_code?: string | null
