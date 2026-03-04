@@ -939,21 +939,14 @@ const Auth = () => {
                         <div className="relative">
                           <Input
                             id="confirmPassword"
-                            type={showConfirmPassword ? "text" : "password"}
+                            type={showPassword ? "text" : "password"}
                             placeholder="Repita a senha"
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                             required
                             disabled={isLoading}
-                            className={`h-12 pr-11 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${formData.confirmPassword.length > 0 ? (formData.password === formData.confirmPassword ? "border-green-500 ring-green-500/20" : "border-destructive ring-destructive/20") : ""}`}
+                            className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${formData.confirmPassword.length > 0 ? (formData.password === formData.confirmPassword ? "border-green-500 ring-green-500/20" : "border-destructive ring-destructive/20") : ""}`}
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-200"
-                          >
-                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
                         </div>
                       </div>
                     </div>
