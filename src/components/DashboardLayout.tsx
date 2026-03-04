@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { AuriChat } from "@/components/AuriChat";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -262,6 +263,16 @@ const DashboardLayoutInner = () => {
           )}
         </motion.div>
       </main>
+
+      {/* Footer com créditos */}
+      <footer className="py-4 px-4 text-center border-t border-border/30">
+        <p className="text-xs text-muted-foreground">
+          Sistema desenvolvido por <span className="font-semibold text-foreground/70">Jardiel De Sousa Lopes</span> — Criador da <span className="font-semibold text-primary">JTC</span>
+        </p>
+      </footer>
+
+      {/* Botão flutuante Auri IA */}
+      <AuriChat />
     </div>
   );
 };
