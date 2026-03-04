@@ -89,7 +89,8 @@ const Products = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
 
       const [productsRes, categoriesRes, suppliersRes] = await Promise.all([

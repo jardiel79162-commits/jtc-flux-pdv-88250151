@@ -84,7 +84,8 @@ const Reports = () => {
     error?.code === "PGRST205" || error?.code === "42P01";
 
   const fetchSalesData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return;
 
     let query = supabase

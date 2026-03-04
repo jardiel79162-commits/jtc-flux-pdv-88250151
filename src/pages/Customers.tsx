@@ -71,7 +71,8 @@ const Customers = () => {
     error?.code === "PGRST205" || error?.code === "42P01";
 
   const fetchCustomers = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return;
 
     const { data, error } = await supabase

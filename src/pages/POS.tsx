@@ -136,82 +136,68 @@ const POS = () => {
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
 
-  const fetchProducts = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+  const loadInitialData = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) {
       setProductsLoading(false);
       return;
     }
 
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("is_active", true);
+    const [productsRes, customersRes, storeRes] = await Promise.all([
+      supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true),
+      supabase.from("customers").select("*").eq("user_id", user.id).order("name"),
+      supabase.from("store_settings").select("store_name, pix_key_type, pix_key, pix_receiver_name, logo_url, pix_mode, mercado_pago_cpf, mercado_pago_name").eq("user_id", user.id).maybeSingle(),
+    ]);
 
-    if (error) {
-      if (isMissingTableError(error)) {
-        setProducts([]);
-      } else {
+    // Products
+    if (productsRes.error) {
+      if (!isMissingTableError(productsRes.error)) {
         toast({ title: "Erro ao carregar produtos", variant: "destructive" });
       }
+    } else {
+      setProducts(productsRes.data || []);
+    }
+    setProductsLoading(false);
+
+    // Customers
+    if (customersRes.error) {
+      if (!isMissingTableError(customersRes.error)) {
+        toast({ title: "Erro ao carregar clientes", variant: "destructive" });
+      }
+    } else {
+      setCustomers(customersRes.data || []);
+    }
+
+    // Store settings
+    const storeData = storeRes.data;
+    if (storeData?.store_name) setStoreName(storeData.store_name);
+    if (storeData?.logo_url) setLogoUrl(storeData.logo_url);
+    
+    const isManualConfigured = (!storeData?.pix_mode || storeData?.pix_mode === 'manual') && storeData?.pix_key && storeData?.pix_receiver_name;
+    const isAutomaticConfigured = storeData?.pix_mode === 'automatic' && storeData?.mercado_pago_cpf && storeData?.mercado_pago_name;
+    
+    if (isManualConfigured || isAutomaticConfigured) {
+      setPixSettings({
+        pix_key_type: storeData.pix_key_type,
+        pix_key: storeData.pix_key,
+        pix_receiver_name: storeData.pix_receiver_name,
+        pix_mode: storeData.pix_mode || 'manual',
+      });
+    }
+  };
+
+  const fetchProducts = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) { setProductsLoading(false); return; }
+    const { data, error } = await supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true);
+    if (error) {
+      if (!isMissingTableError(error)) toast({ title: "Erro ao carregar produtos", variant: "destructive" });
     } else {
       setProducts(data || []);
     }
     setProductsLoading(false);
-  };
-
-  const fetchCustomers = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("name");
-
-    if (error) {
-      if (isMissingTableError(error)) {
-        setCustomers([]);
-        return;
-      }
-      toast({ title: "Erro ao carregar clientes", variant: "destructive" });
-    } else {
-      setCustomers(data || []);
-    }
-  };
-
-  const fetchStoreName = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("store_settings")
-      .select("store_name, pix_key_type, pix_key, pix_receiver_name, logo_url, pix_mode, mercado_pago_cpf, mercado_pago_name")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (data?.store_name) {
-      setStoreName(data.store_name);
-    }
-    
-    if (data?.logo_url) {
-      setLogoUrl(data.logo_url);
-    }
-    
-    // Verificar se PIX está configurado (manual OU automático)
-    const isManualConfigured = (!data?.pix_mode || data?.pix_mode === 'manual') && data?.pix_key && data?.pix_receiver_name;
-    const isAutomaticConfigured = data?.pix_mode === 'automatic' && data?.mercado_pago_cpf && data?.mercado_pago_name;
-    
-    if (isManualConfigured || isAutomaticConfigured) {
-      setPixSettings({
-        pix_key_type: data.pix_key_type,
-        pix_key: data.pix_key,
-        pix_receiver_name: data.pix_receiver_name,
-        pix_mode: data.pix_mode || 'manual',
-      });
-    }
   };
 
   // Função para tocar som de notificação
@@ -253,9 +239,7 @@ const POS = () => {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-    fetchStoreName();
-    fetchCustomers();
+    loadInitialData();
 
     // Realtime: atualizar produtos automaticamente
     const channel = supabase
