@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,8 @@ import { SubscriptionBlocker } from "@/components/SubscriptionBlocker";
 import { useThemeContext } from "@/components/ThemeProvider";
 import { PermissionsProvider, usePermissions } from "@/hooks/usePermissions";
 import { MENU_PERMISSIONS, ROUTE_PERMISSIONS } from "@/lib/permissions";
+
+const DRAWER_WIDTH = 300;
 
 const ALLOWED_WHEN_EXPIRED = ["/dashboard", "/configuracoes", "/assinatura"];
 
