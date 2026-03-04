@@ -180,26 +180,6 @@ export const SubscriptionBlocker = ({ isTrial = false, isEmployee = false }: Sub
                   </div>
                 )}
               </div>
-                
-                <div className="flex gap-2 justify-center">
-                  <Button
-                    onClick={handleCopyCode}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    {copied ? "Copiado!" : "Copiar Código"}
-                  </Button>
-                  
-                  <Button
-                    onClick={handleShare}
-                    className="gap-2 bg-accent hover:bg-accent/90"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Compartilhar
-                  </Button>
-                </div>
-              </div>
 
               <div className="bg-primary/5 rounded-lg p-4 text-sm text-left space-y-2">
                 <h4 className="font-semibold text-foreground">Como funciona:</h4>
