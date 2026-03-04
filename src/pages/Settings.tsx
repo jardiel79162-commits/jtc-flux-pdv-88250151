@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Store, Save, Zap, BookOpen, ShoppingCart, Package, Users, FileText, Settings as SettingsIcon, CreditCard, History, Smartphone, Eye, EyeOff, Gift, Copy, Check, Share2, Download, CheckCircle, Loader2, Trash2 } from "lucide-react";
+import { Store, Save, Zap, BookOpen, ShoppingCart, Package, Users, FileText, Settings as SettingsIcon, CreditCard, History, Smartphone, Eye, EyeOff, Gift, Copy, Check, Share2, Download, CheckCircle, Loader2, Trash2, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useNavigate } from "react-router-dom";
+import { generateInviteCode } from "@/lib/inviteCode";
 
 const Settings = () => {
   const [loading, setLoading] = useState(false);
@@ -733,7 +734,25 @@ const Settings = () => {
                     ) : inviteCode ? (
                       inviteCode
                     ) : (
-                      <span className="text-lg text-destructive">Código não encontrado</span>
+                      <div className="space-y-3">
+                        <span className="text-lg text-muted-foreground">Nenhum código encontrado</span>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              const code = await generateInviteCode();
+                              if (code) setInviteCode(code);
+                              toast({ title: "Código gerado com sucesso!" });
+                            } catch {
+                              toast({ title: "Erro ao gerar código", variant: "destructive" });
+                            }
+                          }}
+                          className="gap-2"
+                          size="sm"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          Gerar Meu Código
+                        </Button>
+                      </div>
                     )}
                   </div>
                   
