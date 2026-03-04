@@ -32,7 +32,7 @@ const tools = [
     type: "function",
     function: {
       name: "edit_product",
-      description: "Editar um produto existente pelo nome ou ID",
+      description: "Editar um produto existente pelo nome ou ID. Pode alterar qualquer campo incluindo adicionar, substituir ou remover a foto/imagem do produto.",
       parameters: {
         type: "object",
         properties: {
@@ -45,6 +45,8 @@ const tools = [
           barcode: { type: "string", description: "Novo código de barras (opcional)" },
           description: { type: "string", description: "Nova descrição (opcional)" },
           min_stock_quantity: { type: "integer", description: "Novo estoque mínimo (opcional)" },
+          photo_url: { type: "string", description: "Nova URL da foto/imagem do produto. Use quando o usuário enviar uma imagem para adicionar ou substituir a foto do produto." },
+          remove_photo: { type: "boolean", description: "Se true, remove a foto atual do produto" },
         },
         required: [],
       },
@@ -229,6 +231,8 @@ async function executeToolCall(
         if (args.barcode !== undefined) updates.barcode = args.barcode;
         if (args.description !== undefined) updates.description = args.description;
         if (args.min_stock_quantity !== undefined) updates.min_stock_quantity = args.min_stock_quantity;
+        if (args.photo_url) updates.photos = [args.photo_url];
+        if (args.remove_photo) updates.photos = null;
         updates.updated_at = new Date().toISOString();
 
         const { data, error } = await supabaseAdmin
@@ -239,7 +243,7 @@ async function executeToolCall(
           .select()
           .single();
         if (error) return JSON.stringify({ success: false, error: error.message });
-        return JSON.stringify({ success: true, message: `Produto "${data.name}" atualizado com sucesso!` });
+        return JSON.stringify({ success: true, message: `Produto "${data.name}" atualizado com sucesso!${args.photo_url ? ' Foto atualizada.' : ''}${args.remove_photo ? ' Foto removida.' : ''}` });
       }
 
       case "delete_product": {
