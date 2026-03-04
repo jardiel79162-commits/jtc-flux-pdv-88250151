@@ -11,8 +11,8 @@ import { Search, Plus, Minus, Trash2, DollarSign, ShoppingCart, ArrowRight, Down
 import { Progress } from "@/components/ui/progress";
 
 // Imagens dos métodos de pagamento
-import paymentCredit from "@/assets/payment-credit.jpg";
-import paymentDebit from "@/assets/payment-debit.jpg";
+import paymentCredit from "@/assets/payment-credit.png";
+import paymentDebit from "@/assets/payment-debit.png";
 import paymentPix from "@/assets/payment-pix.png";
 import paymentCash from "@/assets/payment-cash.png";
 import paymentFiado from "@/assets/payment-fiado.png";
