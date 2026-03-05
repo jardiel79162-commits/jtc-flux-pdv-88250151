@@ -256,6 +256,27 @@ const Auth = () => {
       }
 
       await signIn(identifier, password);
+      
+      // Check if user is blocked
+      const { data: { session: loginSession } } = await supabase.auth.getSession();
+      if (loginSession) {
+        const { data: userProfile } = await supabase.from('profiles').select('is_blocked').eq('user_id', loginSession.user.id).single();
+        if (userProfile && (userProfile as any).is_blocked) {
+          await supabase.auth.signOut();
+          setAuthError("Seu acesso foi bloqueado pelo administrador.");
+          setIsLoading(false);
+          return;
+        }
+        
+        // Check if system admin - redirect to admin panel
+        const { data: isSysAdmin } = await (supabase.rpc as any)('is_system_admin', { _user_id: loginSession.user.id });
+        if (isSysAdmin) {
+          toast({ title: "Bem-vindo, Administrador!", description: "Redirecionando para o painel administrativo." });
+          navigate("/admin");
+          return;
+        }
+      }
+      
       toast({ title: "Bem-vindo!", description: "Login realizado com sucesso." });
       navigate("/dashboard");
     } catch (error: any) {

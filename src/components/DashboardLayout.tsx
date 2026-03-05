@@ -3,6 +3,7 @@ import { AuriChat } from "@/components/AuriChat";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -21,6 +22,7 @@ import {
   Sun,
   Moon,
   RefreshCw,
+  Shield,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -42,6 +44,10 @@ const DashboardLayoutInner = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState("");
+  const [maintenanceImageUrl, setMaintenanceImageUrl] = useState<string | null>(null);
+  const [isSystemAdmin, setIsSystemAdmin] = useState(false);
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
   const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
@@ -89,6 +95,28 @@ const DashboardLayoutInner = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Check maintenance mode and system admin status
+  useEffect(() => {
+    if (!session) return;
+    const check = async () => {
+      try {
+        const [settingsRes, adminRes] = await Promise.all([
+          supabase.from('system_settings_global' as any).select('*').maybeSingle() as any,
+          (supabase.rpc as any)('is_system_admin', { _user_id: session.user.id }),
+        ]);
+        const isSysAdmin = !!adminRes.data;
+        setIsSystemAdmin(isSysAdmin);
+        const settings = settingsRes.data as any;
+        if (settings?.maintenance_mode && !isSysAdmin) {
+          setMaintenanceMode(true);
+          setMaintenanceMessage(settings.maintenance_message || '');
+          setMaintenanceImageUrl(settings.maintenance_image_url);
+        }
+      } catch {}
+    };
+    check();
+  }, [session]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -105,6 +133,7 @@ const DashboardLayoutInner = () => {
     { icon: Settings, label: "Configurações", path: "/configuracoes" },
     { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
     { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
+    ...(isSystemAdmin ? [{ icon: Shield, label: "Painel Admin", path: "/admin" }] : []),
   ];
 
   const menuItems = allMenuItems.filter((item) => {
@@ -143,6 +172,10 @@ const DashboardLayoutInner = () => {
         </div>
       </div>
     );
+  }
+
+  if (maintenanceMode) {
+    return <MaintenanceScreen message={maintenanceMessage} imageUrl={maintenanceImageUrl} onLogout={handleLogout} />;
   }
 
   return (
