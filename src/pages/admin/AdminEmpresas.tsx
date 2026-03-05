@@ -27,11 +27,22 @@ interface UserProfile {
   trial_ends_at: string | null;
   invite_code: string | null;
   referred_by_code: string | null;
+  cep: string | null;
+  street: string | null;
+  number: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
   roles: string[];
   is_system_admin: boolean;
   store_name: string | null;
   store_logo: string | null;
   store_category: string | null;
+  store_phone: string | null;
+  store_address: string | null;
+  store_pix_key: string | null;
+  store_pix_type: string | null;
+  store_operation: string | null;
   friends_invited: number;
 }
 
@@ -191,7 +202,9 @@ export default function AdminEmpresas() {
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm truncate">{user.store_name || user.full_name || "Sem nome"}</p>
-                        <p className="text-xs text-muted-foreground truncate">{user.full_name} • {user.store_category || "Sem categoria"}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {user.full_name}{user.phone ? ` • ${user.phone}` : ""}{user.store_category ? ` • ${user.store_category}` : ""}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {user.is_blocked && <Badge variant="destructive" className="text-[10px] px-1.5">Suspenso</Badge>}
@@ -278,11 +291,14 @@ export default function AdminEmpresas() {
                         <div><span className="text-muted-foreground block text-xs">Nome</span><span className="font-medium">{detail.profile?.full_name || "-"}</span></div>
                         <div><span className="text-muted-foreground block text-xs">E-mail</span><span className="font-medium break-all">{detail.profile?.email || "-"}</span></div>
                         <div><span className="text-muted-foreground block text-xs">CPF</span><span className="font-medium">{detail.profile?.cpf || "-"}</span></div>
-                        <div><span className="text-muted-foreground block text-xs">Telefone</span><span className="font-medium">{detail.profile?.phone || "-"}</span></div>
+                        <div><span className="text-muted-foreground block text-xs">Telefone Pessoal</span><span className="font-medium">{detail.profile?.phone || "-"}</span></div>
+                        <div><span className="text-muted-foreground block text-xs">Endereço</span><span className="font-medium">{[detail.profile?.street, detail.profile?.number].filter(Boolean).join(', ') || "-"}</span></div>
+                        <div><span className="text-muted-foreground block text-xs">Bairro</span><span className="font-medium">{detail.profile?.neighborhood || "-"}</span></div>
                         <div><span className="text-muted-foreground block text-xs">Cidade/UF</span><span className="font-medium">{detail.profile?.city || "-"}/{detail.profile?.state || "-"}</span></div>
                         <div><span className="text-muted-foreground block text-xs">CEP</span><span className="font-medium">{detail.profile?.cep || "-"}</span></div>
                         <div><span className="text-muted-foreground block text-xs">Cadastro</span><span className="font-medium">{detail.profile?.created_at ? format(new Date(detail.profile.created_at), "dd/MM/yyyy HH:mm") : "-"}</span></div>
                         <div><span className="text-muted-foreground block text-xs">Código Convite</span><span className="font-medium">{detail.profile?.invite_code || "-"}</span></div>
+                        <div><span className="text-muted-foreground block text-xs">Convidado por</span><span className="font-medium">{detail.profile?.referred_by_code || "-"}</span></div>
                       </div>
 
                       {detail.storeSettings && (
@@ -291,10 +307,16 @@ export default function AdminEmpresas() {
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div><span className="text-muted-foreground block text-xs">Nome da Loja</span><span className="font-medium">{detail.storeSettings.store_name || "-"}</span></div>
                             <div><span className="text-muted-foreground block text-xs">Categoria</span><span className="font-medium">{detail.storeSettings.category || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">Tipo Operação</span><span className="font-medium">{detail.storeSettings.operation_type || "-"}</span></div>
                             <div><span className="text-muted-foreground block text-xs">Tel. Comercial</span><span className="font-medium">{detail.storeSettings.commercial_phone || "-"}</span></div>
-                            <div><span className="text-muted-foreground block text-xs">Endereço</span><span className="font-medium">{detail.storeSettings.store_address || "-"}</span></div>
-                            <div><span className="text-muted-foreground block text-xs">PIX</span><span className="font-medium">{detail.storeSettings.pix_key || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">Endereço da Loja</span><span className="font-medium">{detail.storeSettings.store_address || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">Chave PIX</span><span className="font-medium break-all">{detail.storeSettings.pix_key || "-"}</span></div>
                             <div><span className="text-muted-foreground block text-xs">Tipo PIX</span><span className="font-medium">{detail.storeSettings.pix_key_type || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">Modo PIX</span><span className="font-medium">{detail.storeSettings.pix_mode || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">Nome Recebedor PIX</span><span className="font-medium">{detail.storeSettings.pix_receiver_name || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">MercadoPago CPF</span><span className="font-medium">{detail.storeSettings.mercado_pago_cpf || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">MercadoPago Nome</span><span className="font-medium">{detail.storeSettings.mercado_pago_name || "-"}</span></div>
+                            <div><span className="text-muted-foreground block text-xs">Cor Primária</span><span className="font-medium">{detail.storeSettings.primary_color || "-"}</span></div>
                           </div>
                         </div>
                       )}
