@@ -90,7 +90,7 @@ serve(async (req) => {
         });
       }
 
-      // ==================== USERS ====================
+      // ==================== EMPRESAS ====================
       case 'list_users': {
         const { search, page = 1, per_page = 20 } = params;
         let query = supabaseAdmin.from('profiles').select('*', { count: 'exact' });
@@ -99,14 +99,26 @@ serve(async (req) => {
         const { data, count } = await query.order('created_at', { ascending: false }).range(from, from + per_page - 1);
         if (data) {
           const userIds = data.map((p: any) => p.user_id);
-          const [{ data: roles }, { data: admins }] = await Promise.all([
+          const [{ data: roles }, { data: admins }, { data: stores }, { data: invites }] = await Promise.all([
             supabaseAdmin.from('user_roles').select('user_id, role').in('user_id', userIds),
             supabaseAdmin.from('system_admins').select('user_id').in('user_id', userIds),
+            supabaseAdmin.from('store_settings').select('user_id, store_name, logo_url, category').in('user_id', userIds),
+            supabaseAdmin.from('invite_codes').select('owner_user_id, is_used').in('owner_user_id', userIds),
           ]);
           const adminSet = new Set((admins || []).map((a: any) => a.user_id));
           const roleMap: Record<string, string[]> = {};
           (roles || []).forEach((r: any) => { if (!roleMap[r.user_id]) roleMap[r.user_id] = []; roleMap[r.user_id].push(r.role); });
-          const enriched = data.map((p: any) => ({ ...p, roles: roleMap[p.user_id] || [], is_system_admin: adminSet.has(p.user_id) }));
+          const storeMap: Record<string, any> = {};
+          (stores || []).forEach((s: any) => { storeMap[s.user_id] = s; });
+          const inviteMap: Record<string, number> = {};
+          (invites || []).forEach((i: any) => { if (i.is_used) inviteMap[i.owner_user_id] = (inviteMap[i.owner_user_id] || 0) + 1; });
+          const enriched = data.map((p: any) => ({
+            ...p, roles: roleMap[p.user_id] || [], is_system_admin: adminSet.has(p.user_id),
+            store_name: storeMap[p.user_id]?.store_name || null,
+            store_logo: storeMap[p.user_id]?.logo_url || null,
+            store_category: storeMap[p.user_id]?.category || null,
+            friends_invited: inviteMap[p.user_id] || 0,
+          }));
           return jsonResponse({ users: enriched, total: count });
         }
         return jsonResponse({ users: [], total: 0 });
@@ -114,20 +126,27 @@ serve(async (req) => {
 
       case 'get_user_detail': {
         const { user_id: targetId } = params;
-        const [{ data: profile }, { data: sales }, { data: products }, { data: customers }, { data: storeSettings }] = await Promise.all([
+        const [
+          { data: profile }, { data: sales, count: salesCount }, { count: productsCount },
+          { count: customersCount }, { data: storeSettings }, { data: subPayments },
+          { data: inviteCodes }, { count: suppliersCount },
+        ] = await Promise.all([
           supabaseAdmin.from('profiles').select('*').eq('user_id', targetId).maybeSingle(),
-          supabaseAdmin.from('sales').select('id, total_amount, payment_method, created_at', { count: 'exact' }).eq('user_id', targetId).order('created_at', { ascending: false }).limit(10),
+          supabaseAdmin.from('sales').select('id, total_amount, payment_method, created_at, customer_name, discount', { count: 'exact' }).eq('user_id', targetId).order('created_at', { ascending: false }).limit(20),
           supabaseAdmin.from('products').select('id', { count: 'exact', head: true }).eq('user_id', targetId),
           supabaseAdmin.from('customers').select('id', { count: 'exact', head: true }).eq('user_id', targetId),
           supabaseAdmin.from('store_settings').select('*').eq('user_id', targetId).maybeSingle(),
+          supabaseAdmin.from('subscription_payments').select('*').eq('user_id', targetId).order('created_at', { ascending: false }),
+          supabaseAdmin.from('invite_codes').select('code, is_used, used_by_user_id, created_at').eq('owner_user_id', targetId),
+          supabaseAdmin.from('suppliers').select('id', { count: 'exact', head: true }).eq('user_id', targetId),
         ]);
+        const totalSalesRevenue = (sales || []).reduce((sum: number, s: any) => sum + Number(s.total_amount), 0);
+        const friendsInvited = (inviteCodes || []).filter((i: any) => i.is_used).length;
         return jsonResponse({
-          profile,
-          recentSales: sales || [],
-          totalSales: sales?.length || 0,
-          totalProducts: products || 0,
-          totalCustomers: customers || 0,
-          storeSettings,
+          profile, storeSettings, recentSales: sales || [], totalSales: salesCount || 0,
+          totalSalesRevenue, totalProducts: productsCount || 0, totalCustomers: customersCount || 0,
+          totalSuppliers: suppliersCount || 0, subscriptionPayments: subPayments || [],
+          inviteCodes: inviteCodes || [], friendsInvited,
         });
       }
 
