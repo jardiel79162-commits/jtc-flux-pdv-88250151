@@ -263,7 +263,7 @@ const Auth = () => {
         const { data: userProfile } = await supabase.from('profiles').select('is_blocked').eq('user_id', loginSession.user.id).single();
         if (userProfile && (userProfile as any).is_blocked) {
           await supabase.auth.signOut();
-          setAuthError("Seu acesso foi bloqueado pelo administrador.");
+          setAuthError("Sua conta foi suspensa pelo administrador.");
           setIsLoading(false);
           return;
         }

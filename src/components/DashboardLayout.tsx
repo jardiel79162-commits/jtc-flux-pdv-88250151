@@ -23,6 +23,7 @@ import {
   Moon,
   RefreshCw,
   Shield,
+  ShieldOff,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -95,17 +96,27 @@ const DashboardLayoutInner = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Check maintenance mode and system admin status
+  const [isSuspended, setIsSuspended] = useState(false);
+
+  // Check maintenance mode, system admin status, and suspension
   useEffect(() => {
     if (!session) return;
     const check = async () => {
       try {
-        const [settingsRes, adminRes] = await Promise.all([
+        const [settingsRes, adminRes, profileRes] = await Promise.all([
           supabase.from('system_settings_global' as any).select('*').maybeSingle() as any,
           (supabase.rpc as any)('is_system_admin', { _user_id: session.user.id }),
+          supabase.from('profiles').select('is_blocked').eq('user_id', session.user.id).maybeSingle(),
         ]);
         const isSysAdmin = !!adminRes.data;
         setIsSystemAdmin(isSysAdmin);
+        
+        // Check suspension
+        if (profileRes.data?.is_blocked && !isSysAdmin) {
+          setIsSuspended(true);
+          return;
+        }
+        
         const settings = settingsRes.data as any;
         if (settings?.maintenance_mode && !isSysAdmin) {
           setMaintenanceMode(true);
@@ -169,6 +180,26 @@ const DashboardLayoutInner = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isSuspended) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center max-w-md space-y-6">
+          <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <ShieldOff className="w-10 h-10 text-destructive" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Conta Suspensa</h1>
+          <p className="text-muted-foreground">
+            Sua conta foi suspensa pelo administrador do sistema. Se você acredita que isso é um erro, entre em contato com o suporte.
+          </p>
+          <Button variant="outline" onClick={handleLogout} className="gap-2">
+            <LogOut className="w-4 h-4" />
+            Sair
+          </Button>
         </div>
       </div>
     );

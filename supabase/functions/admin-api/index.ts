@@ -288,12 +288,6 @@ serve(async (req) => {
         return jsonResponse({ success: true, new_end: newEnd.toISOString() });
       }
 
-      case 'revoke_subscription': {
-        const { user_id: targetId } = params;
-        await supabaseAdmin.from('profiles').update({ subscription_ends_at: new Date(0).toISOString(), trial_ends_at: new Date(0).toISOString() }).eq('user_id', targetId);
-        await supabaseAdmin.from('system_logs').insert({ user_id: user.id, event_type: 'subscription_revoked', description: 'Assinatura revogada', metadata: { target_user_id: targetId } });
-        return jsonResponse({ success: true });
-      }
 
       // ==================== PAYMENTS ====================
       case 'list_payments': {

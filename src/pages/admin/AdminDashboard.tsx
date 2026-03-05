@@ -38,7 +38,7 @@ export default function AdminDashboard() {
 
   const statCards = [
     { title: "Empresas", value: stats.users, icon: Users, color: "text-blue-500", link: "/admin/empresas" },
-    { title: "Bloqueados", value: stats.blocked, icon: UserX, color: "text-red-500", link: "/admin/empresas" },
+    { title: "Suspensos", value: stats.blocked, icon: UserX, color: "text-red-500", link: "/admin/empresas" },
     { title: "Assinaturas Ativas", value: stats.activeSubscriptions, icon: UserCheck, color: "text-emerald-500", link: "/admin/assinaturas" },
     { title: "Lojas", value: stats.totalStores, icon: Store, color: "text-purple-500", link: "/admin/empresas" },
     { title: "Produtos", value: stats.totalProducts, icon: Package, color: "text-orange-500", link: "/admin/produtos" },
@@ -48,9 +48,9 @@ export default function AdminDashboard() {
   ];
 
   const eventLabels: Record<string, string> = {
-    user_blocked: "Usuário bloqueado", user_unblocked: "Desbloqueado", user_deleted: "Deletado",
+    user_blocked: "Usuário suspenso", user_unblocked: "Reativado", user_deleted: "Deletado",
     user_updated: "Atualizado", maintenance_updated: "Manutenção", admin_setup: "Admin configurado",
-    user_login: "Login", subscription_extended: "Assinatura estendida", subscription_revoked: "Assinatura revogada",
+    user_login: "Login", subscription_extended: "Assinatura estendida",
     product_deleted: "Produto deletado", sale_deleted: "Venda deletada", password_reset: "Senha redefinida",
   };
 

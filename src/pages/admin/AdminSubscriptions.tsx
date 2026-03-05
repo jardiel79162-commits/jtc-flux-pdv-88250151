@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, MinusCircle, CalendarPlus } from "lucide-react";
+import { Loader2, CalendarPlus } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -47,15 +47,7 @@ export default function AdminSubscriptions() {
     }
   };
 
-  const handleRevoke = async (userId: string) => {
-    try {
-      await adminApi("revoke_subscription", { user_id: userId });
-      toast({ title: "Assinatura revogada" });
-      loadSubs();
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Erro", description: err.message });
-    }
-  };
+
 
   const getStatus = (sub: any) => {
     const now = new Date();
@@ -124,9 +116,6 @@ export default function AdminSubscriptions() {
                           <div className="flex gap-1 justify-end">
                             <Button size="sm" variant="outline" onClick={() => { setExtendDialog(sub); setDays("30"); }}>
                               <CalendarPlus className="w-3 h-3 mr-1" /> Estender
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleRevoke(sub.user_id)} title="Revogar">
-                              <MinusCircle className="w-4 h-4 text-red-500" />
                             </Button>
                           </div>
                         </td>
