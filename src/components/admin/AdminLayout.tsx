@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CreditCard, FileText, Shield, LogOut, Menu, X,
-  Loader2, Package, ShoppingCart, Building2, UserCog, Database
+  Loader2, Building2, UserCog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminApi } from "@/hooks/useAdminApi";
@@ -11,12 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 const menuItems = [
   { path: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "/admin/empresas", label: "Empresas", icon: Building2, end: false },
-  { path: "/admin/produtos", label: "Produtos", icon: Package, end: false },
-  { path: "/admin/vendas", label: "Vendas", icon: ShoppingCart, end: false },
   { path: "/admin/pagamentos", label: "Pagamentos", icon: CreditCard, end: false },
   { path: "/admin/assinaturas", label: "Assinaturas", icon: UserCog, end: false },
   { path: "/admin/logs", label: "Logs", icon: FileText, end: false },
-  { path: "/admin/dados", label: "Banco de Dados", icon: Database, end: false },
   { path: "/admin/manutencao", label: "Manutenção", icon: Shield, end: false },
 ];
 
