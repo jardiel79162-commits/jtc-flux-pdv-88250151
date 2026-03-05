@@ -172,7 +172,7 @@ export default function AdminEmpresas() {
             <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : (
             <>
-              {users.map((user) => {
+              {users.filter(u => !u.is_system_admin).map((user) => {
                 const sub = getSubStatus(user);
                 const isSelected = selectedUser?.user_id === user.user_id;
                 return (
