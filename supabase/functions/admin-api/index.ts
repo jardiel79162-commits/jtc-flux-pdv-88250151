@@ -94,7 +94,7 @@ serve(async (req) => {
       case 'list_users': {
         const { search, page = 1, per_page = 20 } = params;
         let query = supabaseAdmin.from('profiles').select('*', { count: 'exact' });
-        if (search) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,cpf.ilike.%${search}%`);
+        if (search) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,cpf.ilike.%${search}%,phone.ilike.%${search}%`);
         const from = (page - 1) * per_page;
         const { data, count } = await query.order('created_at', { ascending: false }).range(from, from + per_page - 1);
         if (data) {
@@ -102,7 +102,7 @@ serve(async (req) => {
           const [{ data: roles }, { data: admins }, { data: stores }, { data: invites }] = await Promise.all([
             supabaseAdmin.from('user_roles').select('user_id, role').in('user_id', userIds),
             supabaseAdmin.from('system_admins').select('user_id').in('user_id', userIds),
-            supabaseAdmin.from('store_settings').select('user_id, store_name, logo_url, category').in('user_id', userIds),
+            supabaseAdmin.from('store_settings').select('user_id, store_name, logo_url, category, commercial_phone, store_address, pix_key, pix_key_type, operation_type, pix_mode, mercado_pago_cpf, mercado_pago_name').in('user_id', userIds),
             supabaseAdmin.from('invite_codes').select('owner_user_id, is_used').in('owner_user_id', userIds),
           ]);
           const adminSet = new Set((admins || []).map((a: any) => a.user_id));
@@ -117,6 +117,11 @@ serve(async (req) => {
             store_name: storeMap[p.user_id]?.store_name || null,
             store_logo: storeMap[p.user_id]?.logo_url || null,
             store_category: storeMap[p.user_id]?.category || null,
+            store_phone: storeMap[p.user_id]?.commercial_phone || null,
+            store_address: storeMap[p.user_id]?.store_address || null,
+            store_pix_key: storeMap[p.user_id]?.pix_key || null,
+            store_pix_type: storeMap[p.user_id]?.pix_key_type || null,
+            store_operation: storeMap[p.user_id]?.operation_type || null,
             friends_invited: inviteMap[p.user_id] || 0,
           }));
           return jsonResponse({ users: enriched, total: count });
