@@ -67,6 +67,7 @@ const App = () => (
             <Route path="logs" element={<AdminLogs />} />
             <Route path="dados" element={<AdminDatabase />} />
             <Route path="manutencao" element={<AdminMaintenance />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 
           <Route element={<DashboardLayout />}>

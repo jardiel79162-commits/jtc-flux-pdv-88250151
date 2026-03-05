@@ -111,8 +111,14 @@ const DashboardLayoutInner = () => {
         const isSysAdmin = !!adminRes.data;
         setIsSystemAdmin(isSysAdmin);
         
+        // If system admin, redirect to admin panel
+        if (isSysAdmin) {
+          navigate('/admin');
+          return;
+        }
+        
         // Check suspension
-        if (profileRes.data?.is_blocked && !isSysAdmin) {
+        if (profileRes.data?.is_blocked) {
           setIsSuspended(true);
           return;
         }
