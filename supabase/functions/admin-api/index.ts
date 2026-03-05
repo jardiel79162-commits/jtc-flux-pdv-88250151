@@ -285,11 +285,53 @@ serve(async (req) => {
 
       case 'extend_subscription': {
         const { user_id: targetId, days } = params;
-        const { data: profile } = await supabaseAdmin.from('profiles').select('subscription_ends_at').eq('user_id', targetId).maybeSingle();
-        const baseDate = profile?.subscription_ends_at && new Date(profile.subscription_ends_at) > new Date() ? new Date(profile.subscription_ends_at) : new Date();
-        const newEnd = new Date(baseDate.getTime() + days * 86400000);
-        await supabaseAdmin.from('profiles').update({ subscription_ends_at: newEnd.toISOString() }).eq('user_id', targetId);
-        await supabaseAdmin.from('system_logs').insert({ user_id: user.id, event_type: 'subscription_extended', description: `Assinatura estendida em ${days} dias`, metadata: { target_user_id: targetId, days } });
+        const daysToAdd = Number(days);
+
+        if (!Number.isFinite(daysToAdd) || daysToAdd <= 0) {
+          return jsonResponse({ error: 'Quantidade de dias inválida' }, 400);
+        }
+
+        const { data: profile, error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .select('subscription_ends_at, trial_ends_at')
+          .eq('user_id', targetId)
+          .maybeSingle();
+
+        if (profileError) throw profileError;
+        if (!profile) return jsonResponse({ error: 'Usuário não encontrado' }, 404);
+
+        const now = new Date();
+        const currentSubEnd = profile.subscription_ends_at ? new Date(profile.subscription_ends_at) : null;
+        const currentTrialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+
+        // Regra: sempre somar no maior prazo ainda ativo (trial ou assinatura), senão começa de agora.
+        const activeBases = [currentSubEnd, currentTrialEnd].filter((d): d is Date => !!d && d > now);
+        const baseDate = activeBases.length > 0
+          ? new Date(Math.max(...activeBases.map((d) => d.getTime())))
+          : now;
+
+        const newEnd = new Date(baseDate.getTime() + daysToAdd * 86400000);
+
+        const { error: updateError } = await supabaseAdmin
+          .from('profiles')
+          .update({ subscription_ends_at: newEnd.toISOString() })
+          .eq('user_id', targetId);
+
+        if (updateError) throw updateError;
+
+        await supabaseAdmin.from('system_logs').insert({
+          user_id: user.id,
+          event_type: 'subscription_extended',
+          description: `Assinatura estendida em ${daysToAdd} dias`,
+          metadata: {
+            target_user_id: targetId,
+            days: daysToAdd,
+            previous_subscription_ends_at: profile.subscription_ends_at,
+            previous_trial_ends_at: profile.trial_ends_at,
+            new_subscription_ends_at: newEnd.toISOString(),
+          },
+        });
+
         return jsonResponse({ success: true, new_end: newEnd.toISOString() });
       }
 
