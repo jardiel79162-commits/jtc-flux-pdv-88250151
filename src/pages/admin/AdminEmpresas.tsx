@@ -107,8 +107,26 @@ export default function AdminEmpresas() {
     try {
       await adminApi(action, { user_id: userId, ...params });
       toast({ title: "Ação realizada com sucesso" });
-      loadUsers();
-      if (selectedUser?.user_id === userId) loadDetail(selectedUser);
+      
+      // Reload users list
+      const data = await adminApi("list_users", { search: search || undefined, page, per_page: 20 });
+      const newUsers = data.users || [];
+      setUsers(newUsers);
+      setTotal(data.total || 0);
+      
+      // Update selectedUser with fresh data and reload detail
+      if (selectedUser?.user_id === userId) {
+        const updatedUser = newUsers.find((u: UserProfile) => u.user_id === userId);
+        if (updatedUser) {
+          setSelectedUser(updatedUser);
+          setDetailLoading(true);
+          try {
+            const detailData = await adminApi("get_user_detail", { user_id: userId });
+            setDetail(detailData);
+          } catch (err) { console.error(err); }
+          finally { setDetailLoading(false); }
+        }
+      }
     } catch (err: any) {
       toast({ variant: "destructive", title: "Erro", description: err.message });
     } finally { setActionLoading(null); }
