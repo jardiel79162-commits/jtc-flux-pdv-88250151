@@ -7,6 +7,7 @@ interface SubscriptionStatus {
   isTrial: boolean;
   daysLeft: number;
   planType: string | null;
+  subscriptionEndsAt: string | null;
 }
 
 export const useSubscription = () => {
@@ -16,6 +17,7 @@ export const useSubscription = () => {
     isTrial: false,
     daysLeft: 0,
     planType: null,
+    subscriptionEndsAt: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +32,7 @@ export const useSubscription = () => {
 
       const { data: profile, error } = await supabase
         .from("profiles")
-        .select("created_at")
+        .select("created_at, subscription_ends_at, trial_ends_at")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -40,18 +42,54 @@ export const useSubscription = () => {
         return;
       }
 
-      const createdAt = profile?.created_at ? new Date(profile.created_at) : new Date();
-      const trialEnd = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
       const now = new Date();
-      const isExpired = now > trialEnd;
-      const daysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
+      // 1) Check active subscription (set by admin or payment)
+      if (profile?.subscription_ends_at) {
+        const subEnd = new Date(profile.subscription_ends_at);
+        if (subEnd > now) {
+          const daysLeft = Math.max(0, Math.ceil((subEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+          setStatus({
+            isActive: true,
+            isExpired: false,
+            isTrial: false,
+            daysLeft,
+            planType: "paid",
+            subscriptionEndsAt: profile.subscription_ends_at,
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2) Check trial period
+      // Use trial_ends_at if set, otherwise fallback to created_at + 3 days
+      const trialEnd = profile?.trial_ends_at
+        ? new Date(profile.trial_ends_at)
+        : new Date((profile?.created_at ? new Date(profile.created_at) : new Date()).getTime() + 3 * 24 * 60 * 60 * 1000);
+
+      if (trialEnd > now) {
+        const daysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        setStatus({
+          isActive: true,
+          isExpired: false,
+          isTrial: true,
+          daysLeft,
+          planType: "trial",
+          subscriptionEndsAt: null,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 3) Expired
       setStatus({
-        isActive: !isExpired,
-        isExpired,
-        isTrial: !isExpired,
-        daysLeft,
-        planType: !isExpired ? "trial" : null,
+        isActive: false,
+        isExpired: true,
+        isTrial: false,
+        daysLeft: 0,
+        planType: null,
+        subscriptionEndsAt: profile?.subscription_ends_at || null,
       });
       
       setLoading(false);
