@@ -37,10 +37,10 @@ export default function AdminDashboard() {
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
   const statCards = [
-    { title: "Usuários", value: stats.users, icon: Users, color: "text-blue-500", link: "/admin/usuarios" },
-    { title: "Bloqueados", value: stats.blocked, icon: UserX, color: "text-red-500", link: "/admin/usuarios" },
+    { title: "Empresas", value: stats.users, icon: Users, color: "text-blue-500", link: "/admin/empresas" },
+    { title: "Bloqueados", value: stats.blocked, icon: UserX, color: "text-red-500", link: "/admin/empresas" },
     { title: "Assinaturas Ativas", value: stats.activeSubscriptions, icon: UserCheck, color: "text-emerald-500", link: "/admin/assinaturas" },
-    { title: "Lojas", value: stats.totalStores, icon: Store, color: "text-purple-500", link: "/admin/lojas" },
+    { title: "Lojas", value: stats.totalStores, icon: Store, color: "text-purple-500", link: "/admin/empresas" },
     { title: "Produtos", value: stats.totalProducts, icon: Package, color: "text-orange-500", link: "/admin/produtos" },
     { title: "Vendas", value: stats.totalSales, icon: ShoppingCart, color: "text-cyan-500", link: "/admin/vendas" },
     { title: "Receita Vendas", value: `R$ ${stats.salesRevenue.toFixed(2)}`, icon: DollarSign, color: "text-green-500", link: "/admin/vendas" },
