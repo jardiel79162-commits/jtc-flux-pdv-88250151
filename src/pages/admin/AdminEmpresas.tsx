@@ -8,8 +8,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Search, Loader2, Ban, CheckCircle, Trash2, Edit, KeyRound, ChevronRight,
-  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus, MinusCircle
+  Search, Loader2, ShieldOff, ShieldCheck, Trash2, Edit, KeyRound, ChevronRight,
+  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus
 } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
@@ -134,9 +134,6 @@ export default function AdminEmpresas() {
     setExtendUser(null);
   };
 
-  const handleRevoke = async (userId: string) => {
-    await handleAction("revoke_subscription", userId);
-  };
 
   const getSubStatus = (user: any) => {
     const now = new Date();
@@ -197,7 +194,7 @@ export default function AdminEmpresas() {
                         <p className="text-xs text-muted-foreground truncate">{user.full_name} • {user.store_category || "Sem categoria"}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        {user.is_blocked && <Badge variant="destructive" className="text-[10px] px-1.5">Bloq</Badge>}
+                        {user.is_blocked && <Badge variant="destructive" className="text-[10px] px-1.5">Suspenso</Badge>}
                         <Badge variant={sub.variant} className="text-[10px] px-1.5">{sub.label}</Badge>
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </div>
@@ -245,19 +242,16 @@ export default function AdminEmpresas() {
                   <Button size="sm" variant="outline" onClick={() => openEdit(selectedUser)}><Edit className="w-3 h-3 mr-1" />Editar</Button>
                   <Button size="sm" variant="outline" onClick={() => { setPasswordDialog(selectedUser); setNewPassword(""); }}><KeyRound className="w-3 h-3 mr-1" />Senha</Button>
                   {selectedUser.is_blocked ? (
-                    <Button size="sm" variant="outline" onClick={() => handleAction("unblock_user", selectedUser.user_id)} disabled={actionLoading === selectedUser.user_id}>
-                      <CheckCircle className="w-3 h-3 mr-1" />Desbloquear
+                    <Button size="sm" variant="outline" className="text-green-600 border-green-600/30" onClick={() => handleAction("unblock_user", selectedUser.user_id)} disabled={actionLoading === selectedUser.user_id}>
+                      <ShieldCheck className="w-3 h-3 mr-1" />Reativar
                     </Button>
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => handleAction("block_user", selectedUser.user_id)} disabled={actionLoading === selectedUser.user_id || selectedUser.is_system_admin}>
-                      <Ban className="w-3 h-3 mr-1" />Bloquear
+                    <Button size="sm" variant="outline" className="text-orange-600 border-orange-600/30" onClick={() => handleAction("block_user", selectedUser.user_id)} disabled={actionLoading === selectedUser.user_id || selectedUser.is_system_admin}>
+                      <ShieldOff className="w-3 h-3 mr-1" />Suspender
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => { setExtendUser(selectedUser); setExtendDays("30"); }}>
                     <CalendarPlus className="w-3 h-3 mr-1" />Estender
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleRevoke(selectedUser.user_id)}>
-                    <MinusCircle className="w-3 h-3 mr-1" />Revogar
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => setDeleteUser(selectedUser)} disabled={selectedUser.is_system_admin}>
                     <Trash2 className="w-3 h-3 mr-1" />Deletar
@@ -354,7 +348,6 @@ export default function AdminEmpresas() {
                       </div>
                       <div className="flex gap-2 pt-2">
                         <Button size="sm" onClick={() => { setExtendUser(selectedUser); setExtendDays("30"); }}><CalendarPlus className="w-3 h-3 mr-1" />Estender</Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleRevoke(selectedUser!.user_id)}><MinusCircle className="w-3 h-3 mr-1" />Revogar</Button>
                       </div>
                     </TabsContent>
 
