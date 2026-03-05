@@ -30,8 +30,13 @@ import DashboardLayout from "./components/DashboardLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminSales from "./pages/admin/AdminSales";
+import AdminStores from "./pages/admin/AdminStores";
 import AdminPayments from "./pages/admin/AdminPayments";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLogs from "./pages/admin/AdminLogs";
+import AdminDatabase from "./pages/admin/AdminDatabase";
 import AdminMaintenance from "./pages/admin/AdminMaintenance";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -56,8 +61,13 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="usuarios" element={<AdminUsers />} />
+            <Route path="produtos" element={<AdminProducts />} />
+            <Route path="vendas" element={<AdminSales />} />
+            <Route path="lojas" element={<AdminStores />} />
             <Route path="pagamentos" element={<AdminPayments />} />
+            <Route path="assinaturas" element={<AdminSubscriptions />} />
             <Route path="logs" element={<AdminLogs />} />
+            <Route path="dados" element={<AdminDatabase />} />
             <Route path="manutencao" element={<AdminMaintenance />} />
           </Route>
 
