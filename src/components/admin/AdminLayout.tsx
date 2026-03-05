@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, CreditCard, FileText, Shield, LogOut, Menu, X, ArrowLeft, Loader2
+  LayoutDashboard, Users, CreditCard, FileText, Shield, LogOut, Menu, X,
+  Loader2, Package, ShoppingCart, Store, UserCog, Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminApi } from "@/hooks/useAdminApi";
@@ -10,8 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 const menuItems = [
   { path: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "/admin/usuarios", label: "Usuários", icon: Users, end: false },
+  { path: "/admin/produtos", label: "Produtos", icon: Package, end: false },
+  { path: "/admin/vendas", label: "Vendas", icon: ShoppingCart, end: false },
+  { path: "/admin/lojas", label: "Lojas", icon: Store, end: false },
   { path: "/admin/pagamentos", label: "Pagamentos", icon: CreditCard, end: false },
-  { path: "/admin/logs", label: "Logs do Sistema", icon: FileText, end: false },
+  { path: "/admin/assinaturas", label: "Assinaturas", icon: UserCog, end: false },
+  { path: "/admin/logs", label: "Logs", icon: FileText, end: false },
+  { path: "/admin/dados", label: "Banco de Dados", icon: Database, end: false },
   { path: "/admin/manutencao", label: "Manutenção", icon: Shield, end: false },
 ];
 
@@ -29,7 +35,6 @@ export default function AdminLayout() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate("/auth"); return; }
-
       const result = await adminApi("check_or_setup_admin");
       if (result.is_admin) setAuthState("admin");
       else if (result.can_setup) setAuthState("setup");
@@ -71,10 +76,7 @@ export default function AdminLayout() {
           <Shield className="w-16 h-16 text-destructive mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Acesso Negado</h1>
           <p className="text-muted-foreground mb-6">Você não tem permissão para acessar o painel administrativo.</p>
-          <Button onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao Dashboard
-          </Button>
+          <Button onClick={() => navigate("/auth")}>Voltar ao Login</Button>
         </div>
       </div>
     );
@@ -90,7 +92,7 @@ export default function AdminLayout() {
             Nenhum administrador foi configurado ainda. Deseja se tornar o administrador do sistema?
           </p>
           <div className="flex gap-3 justify-center">
-            <Button variant="outline" onClick={() => navigate("/dashboard")}>Cancelar</Button>
+            <Button variant="outline" onClick={() => navigate("/auth")}>Cancelar</Button>
             <Button onClick={handleClaim} disabled={claiming}>
               {claiming ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Shield className="w-4 h-4 mr-2" />}
               Tornar-me Administrador
@@ -103,16 +105,19 @@ export default function AdminLayout() {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Desktop Sidebar */}
+      {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform lg:translate-x-0 lg:static ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h1 className="text-lg font-bold text-white">JTC FLUX Admin</h1>
+          <div>
+            <h1 className="text-lg font-bold text-white">JTC FLUX</h1>
+            <p className="text-xs text-slate-400">Painel Administrativo</p>
+          </div>
           <button className="lg:hidden text-slate-300 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X size={20} />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1 flex-1">
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 130px)" }}>
           {menuItems.map((item) => (
             <NavLink
               key={item.path}
@@ -131,14 +136,7 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-slate-700 space-y-1">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={18} />
-            Voltar ao PDV
-          </button>
+        <div className="p-3 border-t border-slate-700">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
