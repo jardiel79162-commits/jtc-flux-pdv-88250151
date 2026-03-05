@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import PageLoader from "@/components/PageLoader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,47 +57,73 @@ const Subscription = () => {
   ];
 
   // Buscar dados reais da assinatura/trial
+  const fetchSubscriptionData = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('created_at, subscription_ends_at, trial_ends_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!profile) return;
+
+    const now = new Date();
+    const fallbackTrialEnd = profile.created_at
+      ? new Date(new Date(profile.created_at).getTime() + 3 * 24 * 60 * 60 * 1000)
+      : null;
+
+    const paidEnd = profile.subscription_ends_at ? new Date(profile.subscription_ends_at) : null;
+    const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : fallbackTrialEnd;
+
+    // Prioridade: assinatura estendida/paga > trial ativo
+    let effectiveEnd: Date | null = null;
+    if (paidEnd && paidEnd > now) {
+      effectiveEnd = paidEnd;
+      setDaysLabel("dias grátis / bônus");
+    } else if (trialEnd && trialEnd > now) {
+      effectiveEnd = trialEnd;
+      setDaysLabel("dias grátis");
+    }
+
+    if (!effectiveEnd) {
+      setSubscriptionEndDate(null);
+      setDaysRemaining(0);
+      return;
+    }
+
+    setSubscriptionEndDate(effectiveEnd);
+    const diffTime = effectiveEnd.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    setDaysRemaining(Math.max(0, diffDays));
+  }, []);
+
   useEffect(() => {
-    const fetchSubscriptionData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    fetchSubscriptionData();
+  }, [fetchSubscriptionData, paymentStatus]);
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('created_at, subscription_ends_at, trial_ends_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (!profile) return;
-
-      const now = new Date();
-      const fallbackTrialEnd = profile.created_at
-        ? new Date(new Date(profile.created_at).getTime() + 3 * 24 * 60 * 60 * 1000)
-        : null;
-
-      const paidEnd = profile.subscription_ends_at ? new Date(profile.subscription_ends_at) : null;
-      const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : fallbackTrialEnd;
-
-      // Prioridade: assinatura estendida/paga > trial
-      let effectiveEnd: Date | null = null;
-      if (paidEnd && paidEnd > now) {
-        effectiveEnd = paidEnd;
-        setDaysLabel("dias grátis / bônus");
-      } else if (trialEnd) {
-        effectiveEnd = trialEnd;
-        setDaysLabel("dias grátis");
+  // Atualização automática para refletir extensão feita no admin sem precisar recarregar
+  useEffect(() => {
+    const onFocusOrVisible = () => {
+      if (document.visibilityState === "visible") {
+        fetchSubscriptionData();
       }
-
-      if (!effectiveEnd) return;
-
-      setSubscriptionEndDate(effectiveEnd);
-      const diffTime = effectiveEnd.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setDaysRemaining(Math.max(0, diffDays));
     };
 
-    fetchSubscriptionData();
-  }, [paymentStatus]);
+    const refreshInterval = setInterval(() => {
+      fetchSubscriptionData();
+    }, 15000);
+
+    window.addEventListener("focus", onFocusOrVisible);
+    document.addEventListener("visibilitychange", onFocusOrVisible);
+
+    return () => {
+      clearInterval(refreshInterval);
+      window.removeEventListener("focus", onFocusOrVisible);
+      document.removeEventListener("visibilitychange", onFocusOrVisible);
+    };
+  }, [fetchSubscriptionData]);
 
   // Limpar intervalo ao desmontar
   useEffect(() => {
