@@ -14,68 +14,70 @@ Deno.serve(async (req) => {
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
+      { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Create the test user
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: 'jtc.tst.flux.pdv@gmail.com',
-      password: 'TST.ABC.JTC',
-      email_confirm: true,
-      user_metadata: {
-        full_name: 'Testador Google Play',
-        cpf: '00000000000',
-        phone: '00000000000',
-        cep: '00000000',
-        street: 'Teste',
-        number: '0',
-        neighborhood: 'Teste',
-        city: 'Teste',
-        state: 'TS',
-        is_test_account: true
-      }
-    })
+    const body = await req.json().catch(() => ({}))
+    const action = body.action || 'create_admin'
 
-    if (authError) {
-      console.error('Auth error:', authError)
-      return new Response(
-        JSON.stringify({ error: authError.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    console.log('User created:', authData.user?.id)
-
-    // Update profile to have permanent subscription (100 years)
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .update({
-        subscription_ends_at: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        subscription_plan: 'ativo',
-        trial_ends_at: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString()
+    if (action === 'create_admin') {
+      // Create admin user
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: 'jtc.adm@gmail.com',
+        password: 'Jardiel021.L',
+        email_confirm: true,
+        user_metadata: {
+          full_name: 'JTC ADM',
+          cpf: '629.555.083-57',
+          phone: '',
+          cep: '',
+          street: '',
+          number: '',
+          neighborhood: '',
+          city: '',
+          state: '',
+        }
       })
-      .eq('id', authData.user?.id)
 
-    if (profileError) {
-      console.error('Profile error:', profileError)
+      if (authError) {
+        return new Response(
+          JSON.stringify({ error: authError.message }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const userId = authData.user?.id
+      if (!userId) throw new Error('User ID not found')
+
+      // Add to system_admins
+      const { error: adminError } = await supabaseAdmin.from('system_admins').insert({ user_id: userId })
+      if (adminError) console.error('Admin insert error:', adminError)
+
+      // Give permanent subscription
+      await supabaseAdmin
+        .from('profiles')
+        .update({
+          subscription_ends_at: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+          trial_ends_at: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .eq('user_id', userId)
+
+      // Log
+      await supabaseAdmin.from('system_logs').insert({
+        user_id: userId,
+        event_type: 'admin_setup',
+        description: 'Conta de administrador JTC ADM criada',
+      })
+
       return new Response(
-        JSON.stringify({ error: profileError.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: true, message: 'Admin JTC ADM criado com sucesso!', user_id: userId }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Usuário de teste criado com sucesso!',
-        email: 'jtc.tst.flux.pdv@gmail.com'
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'Ação inválida' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error: unknown) {
