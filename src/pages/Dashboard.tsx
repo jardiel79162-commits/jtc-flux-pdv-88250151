@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -87,11 +87,7 @@ const Dashboard = () => {
     return true;
   });
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
@@ -106,7 +102,11 @@ const Dashboard = () => {
 
       // Run ALL queries in parallel
       const [profileRes, storeSettingsRes, salesTodayRes, salesMonthRes, productsRes, recentSalesRes] = await Promise.all([
-        supabase.from("profiles").select("created_at").eq("user_id", effectiveUserId).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("created_at, subscription_ends_at, trial_ends_at")
+          .eq("user_id", effectiveUserId)
+          .maybeSingle(),
         supabase.from("store_settings").select("quick_actions_enabled, hide_trial_message").eq("user_id", effectiveUserId).maybeSingle(),
         supabase.from("sales").select("total_amount").eq("user_id", effectiveUserId).gte("created_at", today.toISOString()),
         supabase.from("sales").select("total_amount").eq("user_id", effectiveUserId).gte("created_at", firstDayOfMonth.toISOString()),
@@ -121,21 +121,27 @@ const Dashboard = () => {
         hideTrialMessage = storeSettingsRes.data.hide_trial_message ?? false;
       }
 
-      const createdAt = profileRes.data?.created_at ? new Date(profileRes.data.created_at) : new Date();
-      const trialEnd = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
       const now = new Date();
-      const isTrialActive = now <= trialEnd;
+      const fallbackTrialEnd = profileRes.data?.created_at
+        ? new Date(new Date(profileRes.data.created_at).getTime() + 3 * 24 * 60 * 60 * 1000)
+        : null;
+
+      const paidEnd = profileRes.data?.subscription_ends_at ? new Date(profileRes.data.subscription_ends_at) : null;
+      const trialEnd = profileRes.data?.trial_ends_at ? new Date(profileRes.data.trial_ends_at) : fallbackTrialEnd;
 
       let trialDaysLeft = 0;
       let subscriptionDaysLeft = 0;
       let subscriptionEndDate: Date | undefined = undefined;
       let subscriptionStatus: "active" | "trial" | "expired" = "expired";
 
-      if (isTrialActive) {
-        const diffTime = trialEnd.getTime() - now.getTime();
-        trialDaysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (paidEnd && paidEnd > now) {
+        subscriptionStatus = "active";
+        subscriptionEndDate = paidEnd;
+        subscriptionDaysLeft = Math.max(0, Math.ceil((paidEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      } else if (trialEnd && trialEnd > now) {
         subscriptionStatus = "trial";
         subscriptionEndDate = trialEnd;
+        trialDaysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         subscriptionDaysLeft = trialDaysLeft;
       }
 
@@ -170,7 +176,28 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getEffectiveUserId]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  useEffect(() => {
+    const refresh = () => loadDashboardData();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+
+    const interval = setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [loadDashboardData]);
 
   if (loading) {
     return (
@@ -250,10 +277,10 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <CardTitle className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                        Período de Teste Ativo
+                        Período Gratuito Ativo
                       </CardTitle>
                       <CardDescription className="text-muted-foreground/80">
-                        Explore todos os recursos do sistema
+                        Você tem {data.trialDaysLeft} {data.trialDaysLeft === 1 ? 'dia grátis' : 'dias grátis'} disponíveis
                       </CardDescription>
                     </div>
                   </div>
@@ -317,11 +344,10 @@ const Dashboard = () => {
                       <CardTitle className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                         Assinatura Ativa
                       </CardTitle>
-                      {data.subscriptionEndDate && (
-                        <CardDescription className="text-muted-foreground/80">
-                          Válido até {data.subscriptionEndDate.toLocaleDateString('pt-BR')}
-                        </CardDescription>
-                      )}
+                      <CardDescription className="text-muted-foreground/80">
+                        Você tem {data.subscriptionDaysLeft} {data.subscriptionDaysLeft === 1 ? 'dia' : 'dias'} disponíveis
+                        {data.subscriptionEndDate ? ` • até ${data.subscriptionEndDate.toLocaleDateString('pt-BR')}` : ''}
+                      </CardDescription>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
