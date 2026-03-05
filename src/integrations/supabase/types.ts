@@ -467,6 +467,7 @@ export type Database = {
           full_name: string | null
           id: string
           invite_code: string | null
+          is_blocked: boolean | null
           neighborhood: string | null
           number: string | null
           phone: string | null
@@ -488,6 +489,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           invite_code?: string | null
+          is_blocked?: boolean | null
           neighborhood?: string | null
           number?: string | null
           phone?: string | null
@@ -509,6 +511,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           invite_code?: string | null
+          is_blocked?: boolean | null
           neighborhood?: string | null
           number?: string | null
           phone?: string | null
@@ -881,6 +884,78 @@ export type Database = {
         }
         Relationships: []
       }
+      system_admins: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      system_logs: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_settings_global: {
+        Row: {
+          id: string
+          maintenance_image_url: string | null
+          maintenance_message: string | null
+          maintenance_mode: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          maintenance_image_url?: string | null
+          maintenance_message?: string | null
+          maintenance_mode?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          maintenance_image_url?: string | null
+          maintenance_message?: string | null
+          maintenance_mode?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -963,6 +1038,7 @@ export type Database = {
         Returns: boolean
       }
       is_cpf_blocked: { Args: { check_cpf: string }; Returns: boolean }
+      is_system_admin: { Args: { _user_id: string }; Returns: boolean }
       redeem_weekly_code: {
         Args: { p_code: string; p_user_id: string }
         Returns: Json

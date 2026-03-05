@@ -27,6 +27,12 @@ import Calculator from "./pages/Calculator";
 import Manuals from "./pages/Manuals";
 
 import DashboardLayout from "./components/DashboardLayout";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminLogs from "./pages/admin/AdminLogs";
+import AdminMaintenance from "./pages/admin/AdminMaintenance";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 
@@ -45,6 +51,16 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/confirmar-email" element={<ConfirmEmail />} />
           <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="usuarios" element={<AdminUsers />} />
+            <Route path="pagamentos" element={<AdminPayments />} />
+            <Route path="logs" element={<AdminLogs />} />
+            <Route path="manutencao" element={<AdminMaintenance />} />
+          </Route>
+
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/assinatura" element={<Subscription />} />
@@ -67,7 +83,6 @@ const App = () => (
             <Route path="/calculadora" element={<Calculator />} />
             <Route path="/auri" element={<Auri />} />
             <Route path="/manuais" element={<Manuals />} />
-            
           </Route>
 
           <Route path="*" element={<NotFound />} />
