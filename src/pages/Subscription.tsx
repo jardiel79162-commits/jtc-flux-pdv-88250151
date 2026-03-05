@@ -16,6 +16,7 @@ const Subscription = () => {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
   const [subscriptionEndDate, setSubscriptionEndDate] = useState<Date | null>(null);
+  const [daysLabel, setDaysLabel] = useState("dias grátis");
   const [paymentData, setPaymentData] = useState<{
     paymentId: string;
     qrCodeBase64: string;
@@ -55,7 +56,7 @@ const Subscription = () => {
     },
   ];
 
-  // Buscar dados da assinatura
+  // Buscar dados reais da assinatura/trial
   useEffect(() => {
     const fetchSubscriptionData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -63,20 +64,36 @@ const Subscription = () => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('created_at')
+        .select('created_at, subscription_ends_at, trial_ends_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (profile?.created_at) {
-        const createdAt = new Date(profile.created_at);
-        const endDate = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
+      if (!profile) return;
 
-        setSubscriptionEndDate(endDate);
-        const now = new Date();
-        const diffTime = endDate.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        setDaysRemaining(Math.max(0, diffDays));
+      const now = new Date();
+      const fallbackTrialEnd = profile.created_at
+        ? new Date(new Date(profile.created_at).getTime() + 3 * 24 * 60 * 60 * 1000)
+        : null;
+
+      const paidEnd = profile.subscription_ends_at ? new Date(profile.subscription_ends_at) : null;
+      const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : fallbackTrialEnd;
+
+      // Prioridade: assinatura estendida/paga > trial
+      let effectiveEnd: Date | null = null;
+      if (paidEnd && paidEnd > now) {
+        effectiveEnd = paidEnd;
+        setDaysLabel("dias grátis / bônus");
+      } else if (trialEnd) {
+        effectiveEnd = trialEnd;
+        setDaysLabel("dias grátis");
       }
+
+      if (!effectiveEnd) return;
+
+      setSubscriptionEndDate(effectiveEnd);
+      const diffTime = effectiveEnd.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setDaysRemaining(Math.max(0, diffDays));
     };
 
     fetchSubscriptionData();
@@ -256,8 +273,8 @@ const Subscription = () => {
                   <Clock className="w-7 h-7 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Seu plano expira em</p>
-                  <p className="text-3xl font-bold text-primary">{daysRemaining} dias</p>
+                  <p className="text-sm text-muted-foreground">Você tem</p>
+                  <p className="text-3xl font-bold text-primary">{daysRemaining} {daysLabel}</p>
                   {subscriptionEndDate && (
                     <p className="text-xs text-muted-foreground">
                       Válido até {subscriptionEndDate.toLocaleDateString('pt-BR')}
