@@ -55,18 +55,48 @@ const DashboardLayoutInner = () => {
   const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
   useSystemColor();
 
-  // Bloquear scroll do body quando o menu está aberto
+  // Bloquear scroll global quando o menu está aberto (inclui iOS overscroll)
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
+      const scrollY = window.scrollY;
+      document.body.dataset.lockScrollY = String(scrollY);
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.overscrollBehavior = "none";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
     } else {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
+      const savedScrollY = Number(document.body.dataset.lockScrollY || 0);
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.overscrollBehavior = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+      if (savedScrollY) window.scrollTo(0, savedScrollY);
+      delete document.body.dataset.lockScrollY;
     }
+
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
+      const savedScrollY = Number(document.body.dataset.lockScrollY || 0);
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.overscrollBehavior = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+      if (savedScrollY) window.scrollTo(0, savedScrollY);
+      delete document.body.dataset.lockScrollY;
     };
   }, [isMobileMenuOpen]);
 
@@ -271,6 +301,7 @@ const DashboardLayoutInner = () => {
               className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm touch-none"
               onClick={() => setIsMobileMenuOpen(false)}
               onTouchMove={(e) => e.preventDefault()}
+              onWheel={(e) => e.preventDefault()}
             />
             {/* Drawer */}
             <motion.div
@@ -286,7 +317,7 @@ const DashboardLayoutInner = () => {
                   setIsMobileMenuOpen(false);
                 }
               }}
-              className="fixed top-0 left-0 bottom-0 z-50 bg-card border-r border-border/50 shadow-2xl overflow-y-auto touch-pan-y"
+              className="fixed top-0 left-0 bottom-0 z-50 bg-card border-r border-border/50 shadow-2xl overflow-y-auto touch-pan-y overscroll-contain"
               style={{ width: DRAWER_WIDTH }}
             >
               {/* Drawer Header */}
