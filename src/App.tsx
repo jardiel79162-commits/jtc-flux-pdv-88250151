@@ -34,9 +34,11 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminMaintenance from "./pages/admin/AdminMaintenance";
+import AdminMessages from "./pages/admin/AdminMessages";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import About from "./pages/About";
+import Inbox from "./pages/Inbox";
 
 const queryClient = new QueryClient();
 
