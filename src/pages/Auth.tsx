@@ -490,6 +490,7 @@ const Auth = () => {
     setInviteCode("");
     setCodeValidationStatus("idle");
     setAccountCreated(false);
+    setCaptchaVerified(false);
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
