@@ -54,6 +54,14 @@ export default function AdminMessages() {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
+  // Auto-open user from query param
+  useEffect(() => {
+    const userId = searchParams.get("user");
+    if (userId) {
+      openChat(userId);
+    }
+  }, [searchParams]);
+
   // Load conversations
   useEffect(() => {
     loadConversations();
