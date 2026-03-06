@@ -412,7 +412,12 @@ const DashboardLayoutInner = () => {
                           }`}
                         >
                           <Icon className={`w-5 h-5 ${isActive ? "text-primary" : ""}`} />
-                          {item.label}
+                          <span className="flex-1 text-left">{item.label}</span>
+                          {item.path === "/caixa-de-mensagem" && unreadMessages > 0 && (
+                            <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                              {unreadMessages > 9 ? "9+" : unreadMessages}
+                            </span>
+                          )}
                         </Button>
                       </Link>
                     </motion.div>
