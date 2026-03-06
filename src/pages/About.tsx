@@ -27,18 +27,20 @@ const VideoLoop = ({ src }: { src: string }) => {
   return <video ref={videoRef} src={src} autoPlay loop muted playsInline preload="auto" className="w-full h-auto" />;
 };
 
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-60px" },
-  transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.5, delay, ease: EASE },
 });
 
 const scaleIn = (delay = 0) => ({
   initial: { opacity: 0, scale: 0.9 },
   whileInView: { opacity: 1, scale: 1 },
   viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.45, delay, ease: EASE },
 });
 
 const About = () => {
