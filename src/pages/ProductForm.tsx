@@ -149,6 +149,7 @@ const ProductForm = () => {
     };
 
     try {
+      let productId = id;
       if (isEditing) {
         const { error } = await supabase.from("products").update(productData).eq("id", id);
         if (error) {
@@ -157,13 +158,25 @@ const ProductForm = () => {
         }
         toast({ title: "Produto atualizado com sucesso" });
       } else {
-        const { error } = await supabase.from("products").insert([productData]);
-        if (error) {
+        const { data: inserted, error } = await supabase.from("products").insert([productData]).select("id").single();
+        if (error || !inserted) {
           toast({ title: "Erro ao criar produto", variant: "destructive" });
           return;
         }
+        productId = inserted.id;
         toast({ title: "Produto criado com sucesso" });
       }
+
+      // Save image to product_images if a new image was uploaded with a code
+      if (form.photo_image_code && form.photo_url && productId) {
+        await supabase.from("product_images").insert({
+          product_id: productId,
+          image_code: form.photo_image_code,
+          image_url: form.photo_url,
+          user_id: user.id,
+        });
+      }
+
       clearPersisted();
       navigate("/produtos");
     } finally {
