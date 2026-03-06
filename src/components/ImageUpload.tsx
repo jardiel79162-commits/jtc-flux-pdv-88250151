@@ -9,9 +9,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 interface ImageUploadProps {
   bucket: string;
   currentImageUrl: string | null;
-  onImageUploaded: (url: string) => void;
+  onImageUploaded: (url: string, imageCode?: string) => void;
   label: string;
 }
+
+const generateImageCode = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'IMG_';
+  for (let i = 0; i < 10; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
 
 export const ImageUpload = ({ bucket, currentImageUrl, onImageUploaded, label }: ImageUploadProps) => {
   const [uploading, setUploading] = useState(false);
@@ -37,19 +46,19 @@ export const ImageUpload = ({ bucket, currentImageUrl, onImageUploaded, label }:
         return;
       }
 
-      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+      const imageCode = generateImageCode();
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileName = `${user.id}/${imageCode}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, { upsert: true });
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
       
-      onImageUploaded(data.publicUrl);
+      onImageUploaded(data.publicUrl, imageCode);
       toast({ title: "Upload realizado com sucesso!" });
     } catch (error) {
       toast({ title: "Erro ao fazer upload", variant: "destructive" });
