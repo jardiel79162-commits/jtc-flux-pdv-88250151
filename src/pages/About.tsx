@@ -7,7 +7,46 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import logo from "@/assets/logo.jpg";
 
-const About = () => {
+const VideoLoop = ({ src }: { src: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const attemptPlay = async () => {
+      try {
+        await video.play();
+      } catch {
+        video.muted = true;
+        try { await video.play(); } catch {}
+      }
+    };
+
+    attemptPlay();
+
+    const handleEnded = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+    video.addEventListener("ended", handleEnded);
+    return () => video.removeEventListener("ended", handleEnded);
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      className="w-full h-auto"
+    />
+  );
+};
+
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
