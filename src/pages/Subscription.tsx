@@ -504,6 +504,19 @@ const Subscription = () => {
           )}
         </Card>
       )}
+
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-2xl p-2">
+          <DialogTitle className="sr-only">Detalhes do plano</DialogTitle>
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Detalhes do plano"
+              className="w-full h-auto rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
     </PageLoader>
   );
