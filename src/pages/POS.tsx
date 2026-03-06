@@ -273,8 +273,11 @@ const POS = () => {
       const savedCustomer = sessionStorage.getItem("pos_selected_customer");
       if (savedCustomer) {
         try {
-          setSelectedCustomer(JSON.parse(savedCustomer));
+          const customer = JSON.parse(savedCustomer);
+          setSelectedCustomer(customer);
+          setCurrentPaymentMethod("fiado");
           setPaymentMethod("fiado");
+          setCurrentStep("payment");
         } catch {}
       }
     }
