@@ -1215,6 +1215,9 @@ const Auth = () => {
 
                     {/* Errors shown via modal */}
 
+                    {/* CAPTCHA */}
+                    <JTCCaptcha onVerified={setCaptchaVerified} />
+
                     <div className="flex gap-3 mt-8">
                       <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
                         <ChevronLeft className="mr-2 h-5 w-5" />Voltar
@@ -1223,7 +1226,7 @@ const Auth = () => {
                         type="button"
                         onClick={handleGoToEmailVerification}
                         className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
-                        disabled={isLoading || hasInviteCode === null || (hasInviteCode && codeValidationStatus !== "valid" && inviteCode.length > 0)}
+                        disabled={isLoading || !captchaVerified || hasInviteCode === null || (hasInviteCode && codeValidationStatus !== "valid" && inviteCode.length > 0)}
                       >
                         Próximo<ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
