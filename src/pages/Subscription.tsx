@@ -295,26 +295,41 @@ const Subscription = () => {
 
       {/* Card de status do plano */}
       {daysRemaining !== null && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Clock className="w-7 h-7 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Você tem</p>
-                  <p className="text-3xl font-bold text-primary">{daysRemaining} {daysLabel}</p>
-                  {subscriptionEndDate && (
-                    <p className="text-xs text-muted-foreground">
-                      Válido até {subscriptionEndDate.toLocaleDateString('pt-BR')}
-                    </p>
-                  )}
-                </div>
+        <Card className={`overflow-hidden border-0 shadow-lg ${daysRemaining > 7 ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10' : 'bg-gradient-to-r from-destructive/10 via-destructive/5 to-orange-500/10'}`}>
+          <CardContent className="py-5 px-5">
+            <div className="flex items-center gap-4">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${daysRemaining > 7 ? 'bg-primary/15' : 'bg-destructive/15'}`}>
+                <span className="text-3xl font-extrabold text-foreground">{daysRemaining}</span>
               </div>
-              <Badge variant={daysRemaining > 7 ? "default" : "destructive"} className="text-sm px-3 py-1">
-                {daysRemaining > 7 ? "Plano Ativo" : "Expirando em breve"}
-              </Badge>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge 
+                    variant={daysRemaining > 7 ? "default" : "destructive"} 
+                    className="text-xs px-2 py-0.5"
+                  >
+                    {daysRemaining > 7 ? "✅ Ativo" : "⚠️ Expirando"}
+                  </Badge>
+                </div>
+                <p className="text-sm font-semibold text-foreground">
+                  {daysRemaining > 0 
+                    ? `${daysRemaining} dia${daysRemaining !== 1 ? 's' : ''} restante${daysRemaining !== 1 ? 's' : ''}`
+                    : 'Seu acesso expirou'}
+                </p>
+                {subscriptionEndDate && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Válido até {subscriptionEndDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
+              {daysRemaining <= 7 && (
+                <Button 
+                  size="sm" 
+                  className="flex-shrink-0"
+                  onClick={() => document.getElementById('plans-section')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Renovar
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
