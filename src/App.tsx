@@ -27,6 +27,7 @@ import SupplierForm from "./pages/SupplierForm";
 import WeeklyRedemption from "./pages/WeeklyRedemption";
 import Calculator from "./pages/Calculator";
 import Manuals from "./pages/Manuals";
+import PrizeWheel from "./pages/PrizeWheel";
 
 import DashboardLayout from "./components/DashboardLayout";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -103,6 +104,7 @@ const App = () => {
               <Route path="/calculadora" element={<Calculator />} />
               <Route path="/auri" element={<Auri />} />
               <Route path="/manuais" element={<Manuals />} />
+              <Route path="/roleta" element={<PrizeWheel />} />
               <Route path="/caixa-de-mensagem" element={<Inbox />} />
             </Route>
 
