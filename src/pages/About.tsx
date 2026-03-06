@@ -1,5 +1,7 @@
 import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -7,6 +9,13 @@ import logo from "@/assets/logo.jpg";
 
 const About = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
 
   const features = [
     { icon: ShoppingCart, title: "PDV Rápido", desc: "Ponto de venda intuitivo com finalização em segundos.", color: "from-primary to-primary/70" },
@@ -40,11 +49,11 @@ const About = () => {
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Button
             variant="ghost"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar ao Login
+            {isLoggedIn ? "Voltar ao Dashboard" : "Voltar ao Login"}
           </Button>
           <div className="flex items-center gap-2">
             <img src={logo} alt="JTC FluxPDV" className="w-8 h-8 rounded-full object-cover" />
@@ -224,12 +233,14 @@ const About = () => {
         {/* CTA */}
         <section className="text-center space-y-4 pb-8">
           <h2 className="text-2xl font-bold text-foreground">Pronto para começar?</h2>
-          <p className="text-muted-foreground">Crie sua conta agora e teste grátis por 3 dias.</p>
+          <p className="text-muted-foreground">
+            {isLoggedIn ? "Volte ao sistema e continue gerenciando seu negócio." : "Crie sua conta agora e teste grátis por 3 dias."}
+          </p>
           <Button
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")}
             className="h-12 px-8 text-base font-bold rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg"
           >
-            Criar Conta Grátis
+            {isLoggedIn ? "Ir para o Dashboard" : "Criar Conta Grátis"}
           </Button>
         </section>
 

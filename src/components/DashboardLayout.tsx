@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Shield,
   ShieldOff,
+  Info,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -150,6 +151,7 @@ const DashboardLayoutInner = () => {
     { icon: Settings, label: "Configurações", path: "/configuracoes" },
     { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
     { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
+    { icon: Info, label: "Sobre", path: "/sobre" },
     ...(isSystemAdmin ? [{ icon: Shield, label: "Painel Admin", path: "/admin" }] : []),
   ];
 
