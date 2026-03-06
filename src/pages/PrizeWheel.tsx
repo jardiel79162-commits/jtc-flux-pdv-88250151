@@ -73,6 +73,33 @@ const PrizeWheel = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Realtime: auto-update when admin grants spins
+  useEffect(() => {
+    let channel: any;
+    const setupRealtime = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      channel = supabase
+        .channel('prize-wheel-spins')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'prize_wheel_spins',
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          () => {
+            loadData();
+            toast({ title: "🎉 Nova rodada!", description: "Você recebeu uma rodada grátis na roleta!" });
+          }
+        )
+        .subscribe();
+    };
+    setupRealtime();
+    return () => { if (channel) supabase.removeChannel(channel); };
+  }, [loadData]);
+
   const copyInviteLink = async () => {
     const link = `${window.location.origin}/auth?invite=${inviteCode}`;
     await navigator.clipboard.writeText(link);

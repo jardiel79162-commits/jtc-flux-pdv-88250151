@@ -524,6 +524,51 @@ serve(async (req) => {
         return jsonResponse({ success: true });
       }
 
+      case 'list_spin_history': {
+        const page = Number(params.page || 1);
+        const perPage = Number(params.per_page || 20);
+        const from = (page - 1) * perPage;
+        const to = from + perPage - 1;
+
+        const { data: spins, count } = await supabaseAdmin
+          .from('prize_wheel_spins')
+          .select('*', { count: 'exact' })
+          .not('prize_label', 'is', null)
+          .order('used_at', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        // Enrich with profile data
+        const enrichedSpins = [];
+        if (spins && spins.length > 0) {
+          const userIds = [...new Set(spins.map((s: any) => s.user_id))];
+          const { data: profiles } = await supabaseAdmin
+            .from('profiles')
+            .select('user_id, full_name, email')
+            .in('user_id', userIds);
+          const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+          for (const spin of spins) {
+            const profile = profileMap.get((spin as any).user_id) || {};
+            enrichedSpins.push({ ...spin, profiles: profile });
+          }
+        }
+
+        // Also get admin-granted spins (unused ones granted by admin)
+        const { data: grantedSpins, count: grantedCount } = await supabaseAdmin
+          .from('system_logs')
+          .select('*', { count: 'exact' })
+          .eq('event_type', 'spin_granted')
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        return jsonResponse({
+          spins: enrichedSpins,
+          granted_logs: grantedSpins || [],
+          total: count || 0,
+          granted_total: grantedCount || 0,
+        });
+      }
+
       // ==================== CUSTOM SHORTCUTS ====================
       case 'list_shortcuts': {
         const { data } = await supabaseAdmin.from('custom_shortcuts').select('*').order('sort_order', { ascending: true });
