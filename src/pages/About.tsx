@@ -47,6 +47,7 @@ const VideoLoop = ({ src }: { src: string }) => {
   );
 };
 
+const About = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
