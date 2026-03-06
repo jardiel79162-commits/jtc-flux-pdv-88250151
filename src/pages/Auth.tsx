@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield } from "lucide-react";
+import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield, Sparkles, Lock } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth";
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fetchCEP, fetchEstados, fetchCidades, type Estado, type Cidade } from "@/lib/location";
 import JTCCaptcha from "@/components/JTCCaptcha";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -534,14 +535,47 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
+        {/* Floating particles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 rounded-full"
+            style={{
+              background: i % 2 === 0 ? 'hsl(229 100% 65% / 0.4)' : 'hsl(163 100% 44% / 0.4)',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.2, 0.8, 0.2],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-20 items-center relative z-10">
         {/* Branding section */}
-        <div className="hidden lg:flex flex-col justify-center space-y-8 p-8">
+        <motion.div 
+          className="hidden lg:flex flex-col justify-center space-y-8 p-8"
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <div className="space-y-8">
             <div className="flex items-center gap-7">
-              <div className="relative group">
+              <motion.div 
+                className="relative group"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+              >
                 <div className="absolute -inset-3 bg-gradient-to-r from-primary via-accent to-primary rounded-full blur-lg opacity-50 group-hover:opacity-70 transition-all duration-700 animate-[pulse_3s_ease-in-out_infinite]" />
                 <div className="relative">
                   <img src={logo} alt="JTC FluxPDV" className="relative w-32 h-32 rounded-full object-cover shadow-2xl ring-2 ring-white/20" />
@@ -549,7 +583,7 @@ const Auth = () => {
                     <CheckCircle2 className="w-6 h-6 text-white" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
               <div className="space-y-3">
                 <h1 className="text-5xl xl:text-6xl font-black tracking-tight">
                   <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</span>
@@ -567,10 +601,12 @@ const Auth = () => {
               { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", gradient: "from-accent to-accent/70", shadow: "shadow-accent/20" },
               { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", gradient: "from-success to-success/70", shadow: "shadow-success/20" },
             ].map((item, i) => (
-              <div
+              <motion.div
                 key={i}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
                 className="flex items-center gap-5 p-5 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] hover:shadow-xl group cursor-pointer"
-                style={{ animationDelay: `${i * 100}ms` }}
               >
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg ${item.shadow} group-hover:scale-110 transition-transform duration-300`}>
                   <item.icon className="w-7 h-7 text-white" />
@@ -579,11 +615,16 @@ const Auth = () => {
                   <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
                   <p className="text-muted-foreground text-sm">{item.desc}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          <div className="flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/30 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5 }}
+            className="flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/30 backdrop-blur-sm"
+          >
             <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
               <Gift className="w-6 h-6 text-accent" />
             </div>
@@ -593,20 +634,36 @@ const Auth = () => {
                 Convide amigos e ganhe <span className="text-accent font-bold">1 mês grátis</span>!
               </p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Form card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+        >
         <Card className="auth-card">
           <div className="auth-card-glow-tr" />
           <div className="auth-card-glow-bl" />
 
           <CardHeader className="text-center pb-4 pt-8 relative z-10">
             <div className="flex flex-col items-center gap-5 mb-2">
-              <div className="relative group">
+              <motion.div 
+                className="relative group"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <div className="auth-logo-glow" />
                 <img src={logo} alt="JTC FluxPDV" className="relative w-20 h-20 rounded-full object-cover shadow-xl ring-2 ring-white/10" />
-              </div>
+                <motion.div
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.8, type: "spring" }}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-white" />
+                </motion.div>
+              </motion.div>
               <div className="text-center space-y-1">
                 <CardTitle className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</CardTitle>
                 <CardDescription className="text-base text-muted-foreground">Acesse sua conta ou crie uma nova</CardDescription>
@@ -629,10 +686,14 @@ const Auth = () => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* LOGIN TAB */}
               <TabsContent value="login" className="space-y-6">
                 {showUnconfirmedEmailUI ? (
-                  <div className="space-y-5">
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <div className="text-center">
                       <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${signupExpired ? "bg-green-500/10" : "bg-amber-500/10"}`}>
                         <Mail className={`w-10 h-10 ${signupExpired ? "text-green-500" : "text-amber-500"}`} />
@@ -746,9 +807,20 @@ const Auth = () => {
                     >
                       Voltar para o Login
                     </Button>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <form onSubmit={handleLogin} className="space-y-6">
+                  <motion.form
+                    onSubmit={handleLogin}
+                    className="space-y-6"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg shadow-primary/10">
+                        <Lock className="w-7 h-7 text-primary" />
+                      </div>
+                    </div>
                     <div className="space-y-3">
                       <Label htmlFor="identifier" className="text-sm font-semibold text-foreground/90">E-mail ou CPF</Label>
                       <Input
@@ -795,7 +867,7 @@ const Auth = () => {
                         "Entrar na Conta"
                       )}
                     </Button>
-                  </form>
+                  </motion.form>
                 )}
 
                 <div className="lg:hidden pt-6 border-t border-border/30 mt-6">
@@ -1467,6 +1539,7 @@ const Auth = () => {
             </Tabs>
           </CardContent>
         </Card>
+        </motion.div>
       </div>
 
       {/* Modal de erro */}

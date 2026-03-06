@@ -9,6 +9,7 @@ import { WheelSVG, PRIZES, SLICE_DEG } from "@/components/prize-wheel/WheelSVG";
 import { CenterButton } from "@/components/prize-wheel/CenterButton";
 import { Pointer } from "@/components/prize-wheel/Pointer";
 import { LEDs } from "@/components/prize-wheel/LEDs";
+import { useWheelSound } from "@/hooks/useWheelSound";
 
 function pickPrize(): number {
   const total = PRIZES.reduce((s, p) => s + p.weight, 0);
@@ -30,6 +31,7 @@ const PrizeWheel = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [referralStats, setReferralStats] = useState({ total: 0, activated: 0 });
+  const { startSpinSound, stopSpinSound, playWin } = useWheelSound();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -126,6 +128,7 @@ const PrizeWheel = () => {
     setIsSpinning(true);
     setShowResult(false);
     setWonPrize(null);
+    startSpinSound(5500);
 
     const idx = pickPrize();
     const prize = PRIZES[idx];
@@ -143,9 +146,11 @@ const PrizeWheel = () => {
     setRotation((prev) => prev + fullSpins + delta);
 
     setTimeout(async () => {
+      stopSpinSound();
       setIsSpinning(false);
       setWonPrize(prize);
       setShowResult(true);
+      if (prize.days > 0) playWin();
 
       // Mark a spin as used
       try {
