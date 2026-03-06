@@ -201,7 +201,7 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
           </div>
 
           {/* 3x3 Grid */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 select-none" style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}>
             {gridData.cells.map((cell) => {
               const isSelected = selectedIndices.has(cell.index);
               return (
