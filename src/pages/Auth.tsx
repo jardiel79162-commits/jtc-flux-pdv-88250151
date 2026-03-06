@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info } from "lucide-react";
+import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth";
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
@@ -369,6 +369,19 @@ const Auth = () => {
     setAuthError(null);
     if (registerStep === 1 && validateStep1()) setRegisterStep(2);
     else if (registerStep === 2 && validateStep2()) setRegisterStep(3);
+    else if (registerStep === 3) {
+      // Validate invite code if needed, then go to CAPTCHA step
+      if (hasInviteCode === null) {
+        setAuthError("Selecione se possui código de convite.");
+        return;
+      }
+      if (hasInviteCode && inviteCode && codeValidationStatus !== "valid") {
+        setAuthError("Código de convite inválido.");
+        return;
+      }
+      setCaptchaVerified(false);
+      setRegisterStep(4);
+    }
   };
 
   const handleGoToEmailVerification = async () => {
@@ -795,14 +808,16 @@ const Auth = () => {
 
               {/* REGISTER TAB */}
               <TabsContent value="register" className="space-y-5">
-                <div className="flex justify-center items-center gap-3 mb-8 py-2">
+                <div className="flex justify-center items-center gap-2 mb-8 py-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className={`flex-1 h-1 rounded-full max-w-10 transition-all duration-500 ${registerStep > 1 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 1 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
                   <StepIndicator step={2} label="Endereço" icon={MapPin} />
-                  <div className={`flex-1 h-1 rounded-full max-w-10 transition-all duration-500 ${registerStep > 2 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 2 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
                   <StepIndicator step={3} label="Código" icon={Ticket} />
-                  <div className={`flex-1 h-1 rounded-full max-w-10 transition-all duration-500 ${registerStep > 3 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
-                  <StepIndicator step={4} label="E-mail" icon={Mail} />
+                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 3 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <StepIndicator step={4} label="Captcha" icon={Shield} />
+                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 4 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <StepIndicator step={5} label="E-mail" icon={Mail} />
                 </div>
 
                 {/* Step 1 */}
@@ -1216,18 +1231,15 @@ const Auth = () => {
 
                     {/* Errors shown via modal */}
 
-                    {/* CAPTCHA */}
-                    <JTCCaptcha onVerified={setCaptchaVerified} />
-
                     <div className="flex gap-3 mt-8">
                       <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
                         <ChevronLeft className="mr-2 h-5 w-5" />Voltar
                       </Button>
                       <Button
                         type="button"
-                        onClick={handleGoToEmailVerification}
+                        onClick={handleNextStep}
                         className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
-                        disabled={isLoading || !captchaVerified || hasInviteCode === null || (hasInviteCode && codeValidationStatus !== "valid" && inviteCode.length > 0)}
+                        disabled={isLoading || hasInviteCode === null || (hasInviteCode && codeValidationStatus !== "valid" && inviteCode.length > 0)}
                       >
                         Próximo<ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
@@ -1238,6 +1250,36 @@ const Auth = () => {
                         ? "Você ganhará 1 mês + 3 dias de teste grátis! 🎉"
                         : "Você ganhará 3 dias de teste grátis"}
                     </p>
+                  </div>
+                )}
+
+                {/* Step 4 - CAPTCHA */}
+                {registerStep === 4 && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="text-center mb-4">
+                      <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Complete o desafio para continuar</p>
+                    </div>
+
+                    <JTCCaptcha onVerified={setCaptchaVerified} />
+
+                    <div className="flex gap-3 mt-6">
+                      <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
+                        <ChevronLeft className="mr-2 h-5 w-5" />Voltar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleGoToEmailVerification}
+                        className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
+                        disabled={isLoading || !captchaVerified}
+                      >
+                        {isLoading ? (
+                          <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Criando...</>
+                        ) : (
+                          <>Criar Conta<ChevronRight className="ml-2 h-5 w-5" /></>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 )}
 
