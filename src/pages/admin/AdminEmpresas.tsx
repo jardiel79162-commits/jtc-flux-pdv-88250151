@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search, Loader2, ShieldOff, ShieldCheck, Trash2, Edit, KeyRound, ChevronRight,
-  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus
+  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus, MessageCircle
 } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +48,7 @@ interface UserProfile {
 }
 
 export default function AdminEmpresas() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -286,6 +288,9 @@ export default function AdminEmpresas() {
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => setDeleteUser(selectedUser)} disabled={selectedUser.is_system_admin}>
                     <Trash2 className="w-3 h-3 mr-1" />Deletar
+                  </Button>
+                  <Button size="sm" variant="outline" className="text-blue-600 border-blue-600/30" onClick={() => navigate(`/admin/mensagens?user=${selectedUser.user_id}`)}>
+                    <MessageCircle className="w-3 h-3 mr-1" />Conversar
                   </Button>
                 </div>
               </CardHeader>

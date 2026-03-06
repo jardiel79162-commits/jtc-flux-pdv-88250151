@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ interface Message {
 }
 
 export default function AdminMessages() {
+  const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -51,6 +53,14 @@ export default function AdminMessages() {
   const scrollToBottom = () => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
+
+  // Auto-open user from query param
+  useEffect(() => {
+    const userId = searchParams.get("user");
+    if (userId) {
+      openChat(userId);
+    }
+  }, [searchParams]);
 
   // Load conversations
   useEffect(() => {
