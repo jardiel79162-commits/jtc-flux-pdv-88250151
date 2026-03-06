@@ -28,6 +28,7 @@ const Subscription = () => {
     planName: string;
   } | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('pending');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const plans = [
