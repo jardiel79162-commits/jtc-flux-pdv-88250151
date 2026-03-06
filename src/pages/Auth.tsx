@@ -1446,12 +1446,18 @@ const Auth = () => {
                         ? "Você ganhará 1 mês + 3 dias de teste grátis! 🎉"
                         : "Você ganhará 3 dias de teste grátis"}
                     </p>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 4 - CAPTCHA */}
                 {registerStep === 4 && (
-                  <div className="space-y-6 animate-fade-in">
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-4"
+                  >
                     <div className="text-center mb-4">
                       <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
                       <p className="text-sm text-muted-foreground mt-1">Complete o desafio para continuar</p>
