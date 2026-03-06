@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,15 +68,30 @@ const Products = () => {
     return val;
   };
 
-  const handleExportCsv = () => {
+  const handleExportCsv = async () => {
     if (!products || products.length === 0) {
       toast({ title: "Nenhum produto para exportar", variant: "destructive" });
       return;
     }
 
-    const header = "name,price,stock_quantity,barcode,description,min_stock_quantity,cost_price,product_type\n";
-    const rows = products.map(p =>
-      [
+    // Fetch image codes for all products
+    const productIds = products.map(p => p.id);
+    const { data: productImages } = await supabase
+      .from("product_images")
+      .select("product_id, image_code, image_url")
+      .in("product_id", productIds);
+
+    const imageMap = new Map<string, { code: string; url: string }>();
+    productImages?.forEach(img => {
+      if (!imageMap.has(img.product_id)) {
+        imageMap.set(img.product_id, { code: img.image_code, url: img.image_url });
+      }
+    });
+
+    const header = "name,price,stock_quantity,barcode,description,min_stock_quantity,cost_price,product_type,image_code\n";
+    const rows = products.map(p => {
+      const img = imageMap.get(p.id);
+      return [
         escapeCsv(p.name),
         p.price,
         p.stock_quantity || 0,
@@ -83,19 +100,44 @@ const Products = () => {
         p.min_stock_quantity || 0,
         p.cost_price || 0,
         escapeCsv(p.product_type || "unidade"),
-      ].join(",")
-    ).join("\n");
+        img?.code || "",
+      ].join(",");
+    }).join("\n");
 
     const bom = "\uFEFF";
-    const blob = new Blob([bom + header + rows], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const csvContent = bom + header + rows;
+
+    // Check if there are images to include
+    const hasImages = Array.from(imageMap.values()).some(v => v.url);
+
+    if (hasImages) {
+      toast({ title: "Preparando exportação com imagens..." });
+      const zip = new JSZip();
+      zip.file("products.csv", csvContent);
+      const imagesFolder = zip.folder("images");
+
+      // Download and add images
+      for (const [, img] of imageMap) {
+        if (img.url) {
+          try {
+            const response = await fetch(img.url);
+            if (response.ok) {
+              const blob = await response.blob();
+              const ext = img.url.split(".").pop()?.split("?")[0] || "jpg";
+              imagesFolder?.file(`${img.code}.${ext}`, blob);
+            }
+          } catch {
+            // Skip failed image downloads
+          }
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.zip`);
+    } else {
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      saveAs(blob, `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.csv`);
+    }
 
     toast({ title: "Produtos exportados com sucesso!" });
   };
