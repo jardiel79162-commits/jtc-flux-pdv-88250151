@@ -60,9 +60,9 @@ const Products = () => {
       return;
     }
 
-    const header = "ID|NOME|PRECO|PRECO_CUSTO|ESTOQUE|ESTOQUE_MIN|TIPO|BARCODE|DESCRICAO\n";
+    const header = "NOME|PRECO|PRECO_CUSTO|ESTOQUE|ESTOQUE_MIN|TIPO|BARCODE|DESCRICAO\n";
     const rows = products.map(p => 
-      `${p.id}|${p.name}|${p.price}|${p.cost_price || 0}|${p.stock_quantity || 0}|${p.min_stock_quantity || 0}|${p.product_type || ''}|${p.barcode || ''}|${p.description || ''}`
+      `${p.name}|${p.price}|${p.cost_price || 0}|${p.stock_quantity || 0}|${p.min_stock_quantity || 0}|${p.product_type || ''}|${p.barcode || ''}|${p.description || ''}`
     ).join("\n");
 
     const blob = new Blob([header + rows], { type: "text/plain" });
@@ -103,48 +103,73 @@ const Products = () => {
 
         const productsToImport = [];
         
-        // Pular o cabeçalho se existir (detectado pela palavra ID ou NOME)
-        const startLine = (lines[0].toUpperCase().includes("ID") || lines[0].toUpperCase().includes("NOME")) ? 1 : 0;
+        // Detectar cabeçalho
+        const firstLine = lines[0].toUpperCase().trim();
+        const hasHeader = firstLine.includes("NOME") || firstLine.includes("PRECO") || firstLine.includes("ID");
+        const startLine = hasHeader ? 1 : 0;
+
+        // Mapear índices a partir do cabeçalho se existir
+        let headerMap: Record<string, number> = {};
+        if (hasHeader) {
+          const headerParts = lines[0].split("|").map(h => h.trim().toUpperCase());
+          headerParts.forEach((h, i) => { headerMap[h] = i; });
+        }
 
         for (let i = startLine; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
           const parts = line.split("|");
-          if (parts.length < 2) continue; // Nome e preço são o mínimo esperado
+          if (parts.length < 2) continue;
 
-          // Mapeamento seguro conforme solicitado
-          // Ordem esperada baseada na exportação: ID|NOME|PRECO|PRECO_CUSTO|ESTOQUE|ESTOQUE_MIN|TIPO|BARCODE|DESCRICAO
-          // Se for um arquivo simples sem ID, ajustamos os índices
-          const hasId = parts[0].length > 20; // IDs do Supabase são UUIDs longos
-          const offset = hasId ? 1 : 0;
+          let productData: any;
 
-          const productData: any = {
-            user_id: user.id,
-            name: parts[offset] || "Produto sem nome",
-            price: parseFloat(parts[offset + 1]?.replace(",", ".")) || 0,
-            cost_price: parseFloat(parts[offset + 2]?.replace(",", ".")) || 0,
-            stock_quantity: parseFloat(parts[offset + 3]) || 0,
-            min_stock_quantity: parseFloat(parts[offset + 4]) || 0,
-            product_type: parts[offset + 5] || "unit",
-            barcode: parts[offset + 6] || null,
-            description: parts[offset + 7] || "",
-          };
-
-          // Se tiver ID válido, incluímos para o upsert
-          if (hasId) productData.id = parts[0];
+          if (hasHeader && Object.keys(headerMap).length > 0) {
+            // Mapeamento baseado no cabeçalho
+            const get = (keys: string[]) => {
+              for (const k of keys) {
+                if (headerMap[k] !== undefined && parts[headerMap[k]]) return parts[headerMap[k]].trim();
+              }
+              return null;
+            };
+            productData = {
+              user_id: user.id,
+              name: get(["NOME", "NAME"]) || "Produto sem nome",
+              price: parseFloat((get(["PRECO", "PRICE"]) || "0").replace(",", ".")) || 0,
+              cost_price: parseFloat((get(["PRECO_CUSTO", "COST_PRICE"]) || "0").replace(",", ".")) || 0,
+              stock_quantity: parseInt(get(["ESTOQUE", "STOCK", "STOCK_QUANTITY"]) || "0") || 0,
+              min_stock_quantity: parseInt(get(["ESTOQUE_MIN", "MIN_STOCK", "MIN_STOCK_QUANTITY"]) || "0") || 0,
+              product_type: get(["TIPO", "UNIT", "PRODUCT_TYPE"]) || "unidade",
+              barcode: get(["BARCODE"]) || null,
+              description: get(["DESCRICAO", "DESCRIPTION"]) || "",
+            };
+          } else {
+            // Mapeamento posicional: NOME|PRECO|PRECO_CUSTO|ESTOQUE|ESTOQUE_MIN|TIPO|BARCODE|DESCRICAO
+            productData = {
+              user_id: user.id,
+              name: parts[0]?.trim() || "Produto sem nome",
+              price: parseFloat((parts[1] || "0").replace(",", ".")) || 0,
+              cost_price: parseFloat((parts[2] || "0").replace(",", ".")) || 0,
+              stock_quantity: parseInt(parts[3] || "0") || 0,
+              min_stock_quantity: parseInt(parts[4] || "0") || 0,
+              product_type: parts[5]?.trim() || "unidade",
+              barcode: parts[6]?.trim() || null,
+              description: parts[7]?.trim() || "",
+            };
+          }
 
           productsToImport.push(productData);
         }
 
         if (productsToImport.length === 0) {
           toast({ title: "Nenhum produto válido encontrado", description: "Verifique a formatação do arquivo.", variant: "destructive" });
+          setIsImporting(false);
           return;
         }
 
         const { error } = await supabase
           .from("products")
-          .upsert(productsToImport, { onConflict: 'id' });
+          .insert(productsToImport);
 
         if (error) throw error;
 
