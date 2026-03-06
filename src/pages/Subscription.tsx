@@ -8,6 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
+import planoAnualImg from "@/assets/plano-anual.png";
+import planoTrimestralImg from "@/assets/plano-trimestral.png";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const Subscription = () => {
   const { toast } = useToast();
