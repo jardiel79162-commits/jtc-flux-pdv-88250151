@@ -201,7 +201,8 @@ export default function Inbox() {
 
       {/* Messages - apenas esta área tem scroll */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-2"
+        ref={messagesContainerRef}
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-2"
         style={{
           backgroundImage: "radial-gradient(circle at 1px 1px, hsl(var(--muted)) 1px, transparent 0)",
           backgroundSize: "24px 24px",
