@@ -83,9 +83,8 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
     onVerified(false);
   }, [onVerified]);
 
-  const [selectionOrder, setSelectionOrder] = useState<number[]>([]);
 
-  const selectedIndices = useMemo(() => new Set(selectionOrder), [selectionOrder]);
+
 
   const handleCellClick = (index: number) => {
     if (status === "correct" || cooldown > 0) return;
