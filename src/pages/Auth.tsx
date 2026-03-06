@@ -76,6 +76,7 @@ const Auth = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [codeValidationStatus, setCodeValidationStatus] = useState<"idle" | "valid" | "invalid" | "used">("idle");
   const [isValidatingCode, setIsValidatingCode] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
