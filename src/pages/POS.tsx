@@ -1647,237 +1647,127 @@ ${paymentInfo}
             </CardContent>
           </Card>
 
-          {/* Seleção do Modo de Pagamento */}
-          {!paymentMode && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Tipo de Pagamento</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    variant="outline"
-                    className="h-24 flex-col border-2 hover:border-primary hover:bg-primary-light"
-                    onClick={() => setPaymentMode("single")}
-                  >
-                    <DollarSign className="h-8 w-8 mb-2" />
-                    <span className="text-sm font-medium">Pagamento Único</span>
-                    <span className="text-xs text-muted-foreground">Tudo em uma forma</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-24 flex-col border-2 hover:border-accent hover:bg-accent-light"
-                    onClick={() => setPaymentMode("multiple")}
-                  >
-                    <img src={paymentCredit} alt="Múltiplo" className="h-8 w-8 mb-2 rounded object-cover" />
-                    <span className="text-sm font-medium">Pagamento Múltiplo</span>
-                    <span className="text-xs text-muted-foreground">Dividir em várias formas</span>
-                  </Button>
+          {/* Pagamento Unificado */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pagamento</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Resumo de valores */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">TOTAL</p>
+                  <p className="text-lg font-bold">R$ {total.toFixed(2)}</p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Pagamento Único */}
-          {paymentMode === "single" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Forma de Pagamento</span>
-                  <Button variant="ghost" size="sm" onClick={() => setPaymentMode(null)}>
-                    Voltar
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  {paymentMethods.map((method) => (
-                    <Button
-                      key={method.value}
-                      variant={paymentMethod === method.value ? "default" : "outline"}
-                      className={`h-24 flex-col ${
-                        paymentMethod === method.value
-                          ? "bg-accent hover:bg-accent-hover border-2 border-accent"
-                          : ""
-                      }`}
-                      disabled={pixPaymentStatus === 'approved'}
-                      onClick={() => {
-                        if (pixPaymentStatus === 'approved') return;
-                        if (method.value === "pix") {
-                          handlePixPayment();
-                        } else {
-                          setPaymentMethod(method.value);
-                          if (method.value === "fiado") {
-                            sessionStorage.setItem("pos_cart", JSON.stringify(cart));
-                            navigate("/pdv/clientes");
-                          }
-                        }
-                      }}
-                    >
-                      <img src={method.image} alt={method.label} className="h-10 w-10 mb-2 rounded object-cover" />
-                      <span className="text-sm">{method.label}</span>
-                    </Button>
-                  ))}
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">PAGO</p>
+                  <p className="text-lg font-bold text-green-600">R$ {totalPaid.toFixed(2)}</p>
                 </div>
+                <div className={`text-center p-3 rounded-lg ${remainingToPay > 0 ? 'bg-destructive/10' : 'bg-accent/10'}`}>
+                  <p className="text-xs text-muted-foreground">RESTANTE</p>
+                  <p className={`text-lg font-bold ${remainingToPay > 0 ? 'text-destructive' : 'text-accent'}`}>
+                    R$ {remainingToPay.toFixed(2)}
+                  </p>
+                </div>
+              </div>
 
-                {paymentMethod === "fiado" && (
-                  <div className="mt-4 p-4 bg-muted rounded-lg">
-                    {selectedCustomer ? (
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Cliente selecionado:</p>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold">{selectedCustomer.name}</p>
-                            <p className="text-xs text-muted-foreground">CPF: {selectedCustomer.cpf}</p>
-                          </div>
-                          <Button variant="outline" size="sm" onClick={() => { sessionStorage.setItem("pos_cart", JSON.stringify(cart)); navigate("/pdv/clientes"); }}>
-                            Trocar
+              {/* Lista de pagamentos adicionados */}
+              {payments.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Pagamentos registrados:</p>
+                  {payments.map((payment, index) => {
+                    const methodLabel = paymentMethods.find(m => m.value === payment.method)?.label || payment.method;
+                    return (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span className="text-sm">{methodLabel}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">R$ {payment.amount.toFixed(2)}</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6"
+                            onClick={() => removePayment(index)}
+                          >
+                            <Trash2 className="h-3 w-3 text-destructive" />
                           </Button>
                         </div>
                       </div>
-                    ) : (
-                      <div className="text-center space-y-2">
-                        <p className="text-sm text-destructive font-medium">Por favor, selecione um cliente.</p>
-                        <Button variant="outline" size="sm" onClick={() => { sessionStorage.setItem("pos_cart", JSON.stringify(cart)); navigate("/pdv/clientes"); }}>
-                          Selecionar Cliente
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Pagamento Múltiplo */}
-          {paymentMode === "multiple" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Pagamento Múltiplo</span>
-                  <Button variant="ghost" size="sm" onClick={() => setPaymentMode(null)}>
-                    Voltar
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Lista de pagamentos adicionados */}
-                {payments.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Pagamentos adicionados:</p>
-                    {payments.map((payment, index) => {
-                      const methodLabel = paymentMethods.find(m => m.value === payment.method)?.label || payment.method;
-                      return (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                          <span>{methodLabel}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">R$ {payment.amount.toFixed(2)}</span>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-6 w-6"
-                              onClick={() => removePayment(index)}
-                            >
-                              <Trash2 className="h-3 w-3 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div className="border-t pt-2 space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>Total pago:</span>
-                        <span className="font-semibold">R$ {totalPaid.toFixed(2)}</span>
-                      </div>
-                      {remainingToPay > 0 ? (
-                        <div className="flex justify-between text-sm text-destructive">
-                          <span>Falta pagar:</span>
-                          <span className="font-semibold">R$ {remainingToPay.toFixed(2)}</span>
-                        </div>
-                      ) : changeAmount > 0 ? (
-                        <div className="flex justify-between text-lg text-green-600 font-bold bg-green-50 p-2 rounded">
-                          <span>TROCO:</span>
-                          <span>R$ {changeAmount.toFixed(2)}</span>
-                        </div>
-                      ) : null}
+                    );
+                  })}
+                  {changeAmount > 0 && (
+                    <div className="flex justify-between text-lg font-bold bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                      <span>TROCO:</span>
+                      <span className="text-green-600">R$ {changeAmount.toFixed(2)}</span>
                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* Adicionar pagamento */}
+              {remainingToPay > 0 && (
+                <div className="space-y-3 border-t pt-4">
+                  <p className="text-sm font-medium">Forma de pagamento:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {paymentMethods.map((method) => (
+                      <Button
+                        key={method.value}
+                        variant={currentPaymentMethod === method.value ? "default" : "outline"}
+                        className={`h-20 flex-col text-xs p-2 ${
+                          currentPaymentMethod === method.value ? "bg-accent hover:bg-accent-hover" : ""
+                        }`}
+                        onClick={() => {
+                          if (method.value === "fiado") {
+                            setCurrentPaymentMethod("fiado");
+                            sessionStorage.setItem("pos_cart", JSON.stringify(cart));
+                            navigate("/pdv/clientes");
+                            return;
+                          }
+                          if (method.value === "pix") {
+                            const amountForPix = parseFloat(currentPaymentAmount) || remainingToPay;
+                            handlePixPayment(amountForPix);
+                            return;
+                          }
+                          setCurrentPaymentMethod(method.value);
+                        }}
+                      >
+                        <img src={method.image} alt={method.label} className="h-8 w-8 mb-1 rounded object-contain" />
+                        <span className="text-center leading-tight">{method.label}</span>
+                      </Button>
+                    ))}
                   </div>
-                )}
 
-                {/* Adicionar novo pagamento - só mostra se ainda falta pagar */}
-                {remainingToPay > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-sm font-medium">Adicionar pagamento:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {paymentMethods.map((method) => (
-                        <Button
-                          key={method.value}
-                          variant={paymentMethod === method.value ? "default" : "outline"}
-                          className={`h-20 flex-col text-xs p-2 ${
-                            paymentMethod === method.value ? "bg-accent hover:bg-accent-hover" : ""
-                          }`}
-                          onClick={() => {
-                            setPaymentMethod(method.value);
-                            if (method.value === "fiado") {
-                              sessionStorage.setItem("pos_cart", JSON.stringify(cart));
-                              navigate("/pdv/clientes");
-                            }
-                            // Mostrar QR code PIX automaticamente em múltiplos pagamentos
-                            if (method.value === "pix") {
-                              const isManualConfigured = (!pixSettings?.pix_mode || pixSettings?.pix_mode === 'manual') && pixSettings?.pix_key && pixSettings?.pix_receiver_name;
-                              const isAutomaticConfigured = pixSettings?.pix_mode === 'automatic';
-
-                              if (!isManualConfigured && !isAutomaticConfigured) {
-                                toast({
-                                  title: "PIX não configurado",
-                                  description: "Configure o PIX nas configurações antes de usar este método",
-                                  variant: "destructive",
-                                });
-                                setPaymentMethod("");
-                                return;
-                              }
-
-                              setPaymentMethod("pix");
-                              const amountForPix = paymentMode === "multiple"
-                                ? (parseFloat(currentPaymentAmount) || remainingToPay)
-                                : total;
-                              showPixFeeQuestion(amountForPix);
-                            }
-                          }}
-                        >
-                          <img src={method.image} alt={method.label} className="h-8 w-8 mb-1 rounded object-contain" />
-                          <span className="text-center leading-tight">{method.label}</span>
-                        </Button>
-                      ))}
-                    </div>
-
-                  {paymentMethod && (
+                  {currentPaymentMethod && currentPaymentMethod !== "pix" && (
                     <div className="flex gap-2">
                       <Input
                         type="number"
                         step="0.01"
-                        placeholder="Valor"
+                        placeholder={`Valor (máx R$ ${remainingToPay.toFixed(2)})`}
                         value={currentPaymentAmount}
                         onChange={(e) => setCurrentPaymentAmount(e.target.value)}
                         className="flex-1"
                       />
-                      <Button onClick={addPayment}>
+                      <Button onClick={() => {
+                        if (!currentPaymentAmount) {
+                          setCurrentPaymentAmount(remainingToPay.toFixed(2));
+                          return;
+                        }
+                        addPayment();
+                      }}>
                         <Plus className="h-4 w-4 mr-1" />
                         Adicionar
                       </Button>
                     </div>
                   )}
 
-                  {paymentMethod === "fiado" && selectedCustomer && (
+                  {currentPaymentMethod === "fiado" && selectedCustomer && (
                     <div className="p-2 bg-muted rounded text-sm">
                       Cliente: <span className="font-semibold">{selectedCustomer.name}</span>
                     </div>
                   )}
                 </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
 
           {/* Dialog do QR Code PIX */}
           <Dialog open={showPixQrCode} onOpenChange={(open) => {
