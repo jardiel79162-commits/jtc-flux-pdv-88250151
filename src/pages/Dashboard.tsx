@@ -37,6 +37,14 @@ interface DashboardData {
   hideTrialMessage: boolean;
 }
 
+interface CustomShortcut {
+  id: string;
+  label: string;
+  url: string;
+  icon_url: string | null;
+  sort_order: number;
+}
+
 const quickActions = [
   { label: "Produtos", path: "/produtos", image: quickActionProdutos },
   { label: "Venda", path: "/pdv", image: quickActionVenda },
