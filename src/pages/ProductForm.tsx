@@ -311,7 +311,7 @@ const ProductForm = () => {
         <ImageUpload
           bucket="product-photos"
           currentImageUrl={form.photo_url}
-          onImageUploaded={(url) => setForm({ ...form, photo_url: url })}
+          onImageUploaded={(url, imageCode) => setForm({ ...form, photo_url: url, photo_image_code: imageCode || "" })}
           label="Foto do Produto (opcional)"
         />
 
