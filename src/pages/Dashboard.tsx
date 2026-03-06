@@ -408,8 +408,10 @@ const Dashboard = () => {
                   </motion.div>
                 </Link>
               ))}
-              {/* Custom shortcuts from admin */}
-              {customShortcuts.map((shortcut) => {
+              {/* Custom shortcuts from admin (exclude duplicates of hardcoded actions) */}
+              {customShortcuts
+                .filter((shortcut) => !quickActions.some((qa) => qa.path === shortcut.url))
+                .map((shortcut) => {
                 const isExternal = shortcut.url.startsWith("http");
                 const content = (
                   <motion.div
