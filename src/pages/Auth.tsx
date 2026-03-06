@@ -686,10 +686,14 @@ const Auth = () => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* LOGIN TAB */}
               <TabsContent value="login" className="space-y-6">
                 {showUnconfirmedEmailUI ? (
-                  <div className="space-y-5">
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <div className="text-center">
                       <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${signupExpired ? "bg-green-500/10" : "bg-amber-500/10"}`}>
                         <Mail className={`w-10 h-10 ${signupExpired ? "text-green-500" : "text-amber-500"}`} />
