@@ -1,4 +1,4 @@
-import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone, MessageCircle, Quote } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
@@ -9,6 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import logo from "@/assets/logo.jpg";
 import puzzleIntegration from "@/assets/puzzle-integration.png";
 import jtcPartnership from "@/assets/jtc-partnership.jpg";
+import feedbackWoman from "@/assets/feedback-woman.jpg";
+import feedbackMan from "@/assets/feedback-man.jpg";
+
+
 
 const VideoLoop = ({ src }: { src: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -295,6 +299,55 @@ const About = () => {
                 <strong className="text-foreground">Processado via Mercado Pago:</strong> Utilizamos a infraestrutura tecnológica do Mercado Pago para garantir segurança, rapidez e confiabilidade em todas as transações Pix do seu estabelecimento.
               </p>
             </div>
+          </div>
+        </motion.section>
+
+        <Separator className="my-8" />
+
+        {/* Depoimentos */}
+        <motion.section className="space-y-6" {...fadeUp()}>
+          <h2 className="text-2xl font-bold text-center text-foreground flex items-center justify-center gap-2">
+            <MessageCircle className="w-6 h-6 text-accent" />
+            O que dizem nossos clientes
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              {
+                name: "Camila Oliveira",
+                role: "Dona de Loja de Roupas",
+                photo: feedbackWoman,
+                text: "O JTC FluxPDV transformou a gestão da minha loja! Antes eu anotava tudo no caderno, agora tenho controle total do estoque e das vendas. Super fácil de usar!",
+                stars: 5,
+              },
+              {
+                name: "Rafael Mendes",
+                role: "Dono de Mercearia",
+                photo: feedbackMan,
+                text: "Melhor investimento que fiz pro meu negócio. O sistema de fiado e o controle de clientes me ajudam demais no dia a dia. Recomendo para todo empreendedor!",
+                stars: 5,
+              },
+            ].map((t, i) => (
+              <motion.div key={i} {...scaleIn(i * 0.1)}>
+                <Card className="border-border/50 h-full">
+                  <CardContent className="p-6 space-y-4">
+                    <Quote className="w-8 h-8 text-primary/20" />
+                    <p className="text-sm text-muted-foreground italic leading-relaxed">"{t.text}"</p>
+                    <div className="flex items-center gap-1 pt-1">
+                      {Array.from({ length: t.stars }).map((_, j) => (
+                        <Star key={j} className="w-4 h-4 fill-accent text-accent" />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3 pt-2 border-t border-border/30">
+                      <img src={t.photo} alt={t.name} className="w-12 h-12 rounded-full object-cover shadow-md" />
+                      <div>
+                        <p className="font-bold text-sm text-foreground">{t.name}</p>
+                        <p className="text-xs text-muted-foreground">{t.role}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </motion.section>
 
