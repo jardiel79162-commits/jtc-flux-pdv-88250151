@@ -1,119 +1,26 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { CheckCircle2, RefreshCw, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface CaptchaChallenge {
-  type: "math" | "emoji" | "sequence" | "word";
-  question: string;
-  answer: string;
-  options: string[];
+import captchaRegister from "@/assets/captcha-register.png";
+import captchaCart from "@/assets/captcha-cart.png";
+import captchaVip from "@/assets/captcha-vip.png";
+
+interface JTCCaptchaProps {
+  onVerified: (verified: boolean) => void;
 }
 
-function generateChallenge(): CaptchaChallenge {
-  const types: CaptchaChallenge["type"][] = ["math", "emoji", "sequence", "word"];
-  const type = types[Math.floor(Math.random() * types.length)];
-
-  switch (type) {
-    case "math": {
-      const ops = [
-        () => {
-          const a = Math.floor(Math.random() * 20) + 1;
-          const b = Math.floor(Math.random() * 20) + 1;
-          return { q: `${a} + ${b}`, a: String(a + b) };
-        },
-        () => {
-          const a = Math.floor(Math.random() * 20) + 10;
-          const b = Math.floor(Math.random() * 10) + 1;
-          return { q: `${a} - ${b}`, a: String(a - b) };
-        },
-        () => {
-          const a = Math.floor(Math.random() * 10) + 2;
-          const b = Math.floor(Math.random() * 10) + 2;
-          return { q: `${a} × ${b}`, a: String(a * b) };
-        },
-      ];
-      const op = ops[Math.floor(Math.random() * ops.length)]();
-      const correct = op.a;
-      const wrongSet = new Set<string>();
-      wrongSet.add(correct);
-      while (wrongSet.size < 4) {
-        const offset = Math.floor(Math.random() * 10) - 5;
-        const wrong = String(Number(correct) + offset);
-        if (wrong !== correct && Number(wrong) >= 0) wrongSet.add(wrong);
-      }
-      return {
-        type: "math",
-        question: `Quanto é ${op.q}?`,
-        answer: correct,
-        options: shuffle([...wrongSet]),
-      };
-    }
-
-    case "emoji": {
-      const emojiGroups = [
-        { label: "frutas", emojis: ["🍎", "🍊", "🍋", "🍇", "🍓", "🍌", "🍑", "🍒"] },
-        { label: "animais", emojis: ["🐶", "🐱", "🐭", "🐰", "🐻", "🐼", "🐸", "🦊"] },
-        { label: "esportes", emojis: ["⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🎱", "🏓"] },
-        { label: "veículos", emojis: ["🚗", "🚕", "🚌", "🏎️", "🚓", "🚑", "🚒", "🛵"] },
-      ];
-      const targetGroup = emojiGroups[Math.floor(Math.random() * emojiGroups.length)];
-      const correctEmoji = targetGroup.emojis[Math.floor(Math.random() * targetGroup.emojis.length)];
-      const otherGroups = emojiGroups.filter(g => g.label !== targetGroup.label);
-      const wrongEmojis: string[] = [];
-      while (wrongEmojis.length < 3) {
-        const rg = otherGroups[Math.floor(Math.random() * otherGroups.length)];
-        const re = rg.emojis[Math.floor(Math.random() * rg.emojis.length)];
-        if (!wrongEmojis.includes(re)) wrongEmojis.push(re);
-      }
-      return {
-        type: "emoji",
-        question: `Qual é um(a) ${targetGroup.label}?`,
-        answer: correctEmoji,
-        options: shuffle([correctEmoji, ...wrongEmojis]),
-      };
-    }
-
-    case "sequence": {
-      const start = Math.floor(Math.random() * 10) + 1;
-      const step = Math.floor(Math.random() * 3) + 2;
-      const seq = [start, start + step, start + step * 2];
-      const next = start + step * 3;
-      const wrongSet = new Set<string>();
-      wrongSet.add(String(next));
-      while (wrongSet.size < 4) {
-        const offset = Math.floor(Math.random() * 8) - 4;
-        const wrong = next + offset;
-        if (wrong !== next && wrong > 0) wrongSet.add(String(wrong));
-      }
-      return {
-        type: "sequence",
-        question: `Qual é o próximo? ${seq.join(", ")}, ?`,
-        answer: String(next),
-        options: shuffle([...wrongSet]),
-      };
-    }
-
-    case "word": {
-      const words = [
-        { q: "Qual cor tem o céu?", a: "Azul", wrong: ["Verde", "Vermelho", "Amarelo"] },
-        { q: "Quantas patas tem um gato?", a: "4", wrong: ["2", "6", "8"] },
-        { q: "Em que mês é o Natal?", a: "Dezembro", wrong: ["Janeiro", "Junho", "Outubro"] },
-        { q: "Qual é a capital do Brasil?", a: "Brasília", wrong: ["São Paulo", "Rio de Janeiro", "Salvador"] },
-        { q: "Quantos dias tem uma semana?", a: "7", wrong: ["5", "6", "10"] },
-        { q: "Qual destes é um animal?", a: "Cachorro", wrong: ["Mesa", "Cadeira", "Porta"] },
-        { q: "Quanto é 1 dúzia?", a: "12", wrong: ["6", "10", "24"] },
-        { q: "Qual planeta é o terceiro do Sol?", a: "Terra", wrong: ["Marte", "Vênus", "Júpiter"] },
-      ];
-      const w = words[Math.floor(Math.random() * words.length)];
-      return {
-        type: "word",
-        question: w.q,
-        answer: w.a,
-        options: shuffle([w.a, ...w.wrong]),
-      };
-    }
-  }
+interface CaptchaImage {
+  id: string;
+  src: string;
+  label: string;
 }
+
+const ALL_IMAGES: CaptchaImage[] = [
+  { id: "register", src: captchaRegister, label: "Caixa Registradora" },
+  { id: "cart", src: captchaCart, label: "Carrinho de Compras" },
+  { id: "vip", src: captchaVip, label: "VIP" },
+];
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -124,35 +31,81 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-interface JTCCaptchaProps {
-  onVerified: (verified: boolean) => void;
+function generateGrid() {
+  // Pick the target image randomly
+  const targetImage = ALL_IMAGES[Math.floor(Math.random() * ALL_IMAGES.length)];
+  
+  // We need exactly 3 correct cells + 6 wrong cells in a 3x3 grid
+  const correctCount = 3;
+  const wrongImages = ALL_IMAGES.filter(img => img.id !== targetImage.id);
+  
+  // Build 9 cells: 3 correct + 6 wrong (3 of each wrong type)
+  const cells: { image: CaptchaImage; isCorrect: boolean; index: number }[] = [];
+  
+  for (let i = 0; i < correctCount; i++) {
+    cells.push({ image: targetImage, isCorrect: true, index: 0 });
+  }
+  
+  // Fill remaining 6 with wrong images (3 each)
+  for (let i = 0; i < 3; i++) {
+    cells.push({ image: wrongImages[0], isCorrect: false, index: 0 });
+  }
+  for (let i = 0; i < 3; i++) {
+    cells.push({ image: wrongImages[1], isCorrect: false, index: 0 });
+  }
+  
+  // Shuffle and assign indices
+  const shuffled = shuffle(cells);
+  return {
+    targetImage,
+    cells: shuffled.map((cell, idx) => ({ ...cell, index: idx })),
+  };
 }
 
 export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
-  const [challenge, setChallenge] = useState<CaptchaChallenge>(generateChallenge);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [gridData, setGridData] = useState(() => generateGrid());
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [attempts, setAttempts] = useState(0);
   const [cooldown, setCooldown] = useState(0);
-  const cooldownRef = useRef<ReturnType<typeof setInterval>>();
 
-  useEffect(() => {
-    return () => {
-      if (cooldownRef.current) clearInterval(cooldownRef.current);
-    };
-  }, []);
+  const correctIndices = useMemo(
+    () => new Set(gridData.cells.filter(c => c.isCorrect).map(c => c.index)),
+    [gridData]
+  );
 
   const refresh = useCallback(() => {
-    setChallenge(generateChallenge());
-    setSelected(null);
+    setGridData(generateGrid());
+    setSelectedIndices(new Set());
     setStatus("idle");
-  }, []);
+    onVerified(false);
+  }, [onVerified]);
 
-  const handleSelect = (option: string) => {
+  const handleCellClick = (index: number) => {
     if (status === "correct" || cooldown > 0) return;
-    setSelected(option);
 
-    if (option === challenge.answer) {
+    setSelectedIndices(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+    // Reset wrong status when user changes selection
+    if (status === "wrong") setStatus("idle");
+  };
+
+  const handleVerify = () => {
+    if (cooldown > 0 || status === "correct") return;
+
+    // Check if selected exactly the correct 3 cells
+    const isCorrect =
+      selectedIndices.size === correctIndices.size &&
+      [...selectedIndices].every(i => correctIndices.has(i));
+
+    if (isCorrect) {
       setStatus("correct");
       onVerified(true);
     } else {
@@ -161,14 +114,13 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
 
-      // After 3 wrong attempts, add a cooldown
       if (newAttempts >= 3) {
         const cd = Math.min(newAttempts * 5, 30);
         setCooldown(cd);
-        cooldownRef.current = setInterval(() => {
+        const interval = setInterval(() => {
           setCooldown(prev => {
             if (prev <= 1) {
-              clearInterval(cooldownRef.current);
+              clearInterval(interval);
               refresh();
               return 0;
             }
@@ -178,25 +130,22 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
       } else {
         setTimeout(() => {
           refresh();
-        }, 1200);
+        }, 1500);
       }
     }
   };
 
-  const handleRefresh = () => {
-    if (cooldown > 0 || status === "correct") return;
-    onVerified(false);
-    refresh();
-  };
-
   return (
-    <div className={`rounded-xl border p-4 transition-all duration-300 ${
-      status === "correct"
-        ? "border-emerald-500/50 bg-emerald-500/5"
-        : status === "wrong"
-        ? "border-red-500/50 bg-red-500/5"
-        : "border-border/50 bg-muted/20"
-    }`}>
+    <div
+      className={`rounded-xl border p-4 transition-all duration-300 ${
+        status === "correct"
+          ? "border-emerald-500/50 bg-emerald-500/5"
+          : status === "wrong"
+          ? "border-red-500/50 bg-red-500/5"
+          : "border-border/50 bg-muted/20"
+      }`}
+    >
+      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Shield className={`w-4 h-4 ${status === "correct" ? "text-emerald-500" : "text-primary"}`} />
@@ -209,7 +158,7 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={handleRefresh}
+            onClick={refresh}
             disabled={cooldown > 0}
             className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
           >
@@ -230,26 +179,69 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
         </div>
       ) : (
         <>
-          <p className="text-sm font-medium text-foreground mb-3">{challenge.question}</p>
-          <div className="grid grid-cols-2 gap-2">
-            {challenge.options.map((option, i) => (
-              <button
-                key={`${challenge.question}-${i}`}
-                type="button"
-                onClick={() => handleSelect(option)}
-                disabled={status === "wrong"}
-                className={`px-3 py-2.5 rounded-lg text-sm font-medium border transition-all duration-200 ${
-                  selected === option
-                    ? status === "wrong"
-                      ? "border-red-500 bg-red-500/10 text-red-400"
-                      : "border-primary bg-primary/10 text-primary"
-                    : "border-border/50 bg-background hover:border-primary/50 hover:bg-primary/5 text-foreground"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
+          {/* Target image instruction */}
+          <div className="text-center mb-3">
+            <p className="text-sm font-semibold text-foreground mb-2">
+              Selecione a imagem igual a essa:
+            </p>
+            <div className="inline-block rounded-xl border-2 border-primary/50 bg-primary/5 p-2">
+              <img
+                src={gridData.targetImage.src}
+                alt={gridData.targetImage.label}
+                className="w-16 h-16 object-contain"
+                draggable={false}
+              />
+            </div>
           </div>
+
+          {/* 3x3 Grid */}
+          <div className="grid grid-cols-3 gap-2">
+            {gridData.cells.map((cell) => {
+              const isSelected = selectedIndices.has(cell.index);
+              return (
+                <button
+                  key={cell.index}
+                  type="button"
+                  onClick={() => handleCellClick(cell.index)}
+                  className={`relative aspect-square rounded-lg border-2 transition-all duration-200 p-2 flex items-center justify-center ${
+                    isSelected
+                      ? status === "wrong"
+                        ? "border-red-500 bg-red-500/10"
+                        : "border-primary bg-primary/10 ring-2 ring-primary/30"
+                      : "border-border/50 bg-background hover:border-primary/40 hover:bg-primary/5"
+                  }`}
+                >
+                  <img
+                    src={cell.image.src}
+                    alt=""
+                    className="w-full h-full object-contain pointer-events-none"
+                    draggable={false}
+                  />
+                  {isSelected && (
+                    <div className="absolute top-1 right-1 text-lg leading-none">
+                      ✅
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Verify button */}
+          <Button
+            type="button"
+            onClick={handleVerify}
+            disabled={selectedIndices.size === 0}
+            className="w-full mt-3 h-11 rounded-xl font-bold bg-gradient-to-r from-primary to-primary/90 shadow-md"
+          >
+            Verificar ({selectedIndices.size}/3 selecionadas)
+          </Button>
+
+          {status === "wrong" && (
+            <p className="text-xs text-center text-red-500 font-medium mt-2">
+              Seleção incorreta. Tente novamente!
+            </p>
+          )}
         </>
       )}
 
