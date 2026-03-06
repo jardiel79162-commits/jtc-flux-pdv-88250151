@@ -25,6 +25,7 @@ import {
   Shield,
   ShieldOff,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -50,6 +51,7 @@ const DashboardLayoutInner = () => {
   const [maintenanceMessage, setMaintenanceMessage] = useState("");
   const [maintenanceImageUrl, setMaintenanceImageUrl] = useState<string | null>(null);
   const [isSystemAdmin, setIsSystemAdmin] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
   const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
@@ -211,6 +213,32 @@ const DashboardLayoutInner = () => {
     };
   }, [session, navigate]);
 
+  // Unread messages count
+  useEffect(() => {
+    if (!session) return;
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from("admin_messages")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", session.user.id)
+        .eq("sender_type", "admin")
+        .eq("is_read", false);
+      setUnreadMessages(count || 0);
+    };
+    loadUnread();
+
+    const msgChannel = supabase
+      .channel("unread-messages")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "admin_messages", filter: `user_id=eq.${session.user.id}` },
+        () => loadUnread()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(msgChannel); };
+  }, [session]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -228,6 +256,7 @@ const DashboardLayoutInner = () => {
     { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
     { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
     { icon: Info, label: "Sobre", path: "/sobre" },
+    { icon: MessageCircle, label: "Caixa de Mensagem", path: "/caixa-de-mensagem" },
     ...(isSystemAdmin ? [{ icon: Shield, label: "Painel Admin", path: "/admin" }] : []),
   ];
 
@@ -383,7 +412,12 @@ const DashboardLayoutInner = () => {
                           }`}
                         >
                           <Icon className={`w-5 h-5 ${isActive ? "text-primary" : ""}`} />
-                          {item.label}
+                          <span className="flex-1 text-left">{item.label}</span>
+                          {item.path === "/caixa-de-mensagem" && unreadMessages > 0 && (
+                            <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                              {unreadMessages > 9 ? "9+" : unreadMessages}
+                            </span>
+                          )}
                         </Button>
                       </Link>
                     </motion.div>

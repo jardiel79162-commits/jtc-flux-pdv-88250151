@@ -34,9 +34,11 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminMaintenance from "./pages/admin/AdminMaintenance";
+import AdminMessages from "./pages/admin/AdminMessages";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import About from "./pages/About";
+import Inbox from "./pages/Inbox";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,7 @@ const App = () => (
             <Route path="assinaturas" element={<AdminSubscriptions />} />
             <Route path="logs" element={<AdminLogs />} />
             <Route path="manutencao" element={<AdminMaintenance />} />
+            <Route path="mensagens" element={<AdminMessages />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 
@@ -88,6 +91,7 @@ const App = () => (
             <Route path="/calculadora" element={<Calculator />} />
             <Route path="/auri" element={<Auri />} />
             <Route path="/manuais" element={<Manuals />} />
+            <Route path="/caixa-de-mensagem" element={<Inbox />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CreditCard, FileText, Shield, LogOut, Menu, X,
-  Loader2, Building2, UserCog
+  Loader2, Building2, UserCog, MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminApi } from "@/hooks/useAdminApi";
@@ -15,6 +15,7 @@ const menuItems = [
   { path: "/admin/assinaturas", label: "Assinaturas", icon: UserCog, end: false },
   { path: "/admin/logs", label: "Logs", icon: FileText, end: false },
   { path: "/admin/manutencao", label: "Manutenção", icon: Shield, end: false },
+  { path: "/admin/mensagens", label: "Mensagens", icon: MessageCircle, end: false },
 ];
 
 export default function AdminLayout() {
