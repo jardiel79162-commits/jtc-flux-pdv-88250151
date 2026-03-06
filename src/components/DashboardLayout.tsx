@@ -213,6 +213,32 @@ const DashboardLayoutInner = () => {
     };
   }, [session, navigate]);
 
+  // Unread messages count
+  useEffect(() => {
+    if (!session) return;
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from("admin_messages")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", session.user.id)
+        .eq("sender_type", "admin")
+        .eq("is_read", false);
+      setUnreadMessages(count || 0);
+    };
+    loadUnread();
+
+    const msgChannel = supabase
+      .channel("unread-messages")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "admin_messages", filter: `user_id=eq.${session.user.id}` },
+        () => loadUnread()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(msgChannel); };
+  }, [session]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
