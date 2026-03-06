@@ -809,7 +809,18 @@ const Auth = () => {
                     </Button>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleLogin} className="space-y-6">
+                  <motion.form
+                    onSubmit={handleLogin}
+                    className="space-y-6"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg shadow-primary/10">
+                        <Lock className="w-7 h-7 text-primary" />
+                      </div>
+                    </div>
                     <div className="space-y-3">
                       <Label htmlFor="identifier" className="text-sm font-semibold text-foreground/90">E-mail ou CPF</Label>
                       <Input
