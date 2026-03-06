@@ -260,11 +260,12 @@ const Products = () => {
               </div>
             </div>
 
-            {/* Desktop: tabela normal */}
+            {/* Desktop: tabela com foto */}
             <div className="hidden md:block rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[50px]"></TableHead>
                     <TableHead>Produto</TableHead>
                     <TableHead>Categoria</TableHead>
                     <TableHead>Preço</TableHead>
@@ -276,7 +277,7 @@ const Products = () => {
                 <TableBody>
                   {filteredProducts?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={7} className="h-24 text-center">
                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                           <PackageX className="h-8 w-8 mb-2" />
                           <p>Nenhum produto encontrado.</p>
@@ -284,75 +285,62 @@ const Products = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredProducts?.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{product.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {product.barcode || "Sem código"}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {product.categories?.name || "Sem categoria"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          }).format(product.price)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className={product.stock_quantity <= (product.min_stock_quantity || 0) ? "text-destructive font-bold" : ""}>
-                              {product.stock_quantity} {product.product_type}
-                            </span>
-                            {product.stock_quantity <= (product.min_stock_quantity || 0) && (
-                              <span className="text-[10px] text-destructive uppercase font-bold italic">
-                                Estoque Baixo
-                              </span>
+                    filteredProducts?.map((product) => {
+                      const photo = product.photos?.[0];
+                      return (
+                        <TableRow key={product.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedProduct(product)}>
+                          <TableCell className="w-[50px] pr-0">
+                            {photo ? (
+                              <img src={photo} alt={product.name} className="w-10 h-10 rounded-lg object-cover border" style={{ pointerEvents: 'auto' }} />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                                <Package className="w-5 h-5 text-muted-foreground" />
+                              </div>
                             )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={product.stock_quantity > 0 ? "default" : "destructive"}>
-                            {product.stock_quantity > 0 ? "Em estoque" : "Esgotado"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigate(`/produtos/editar/${product.id}`)}
-                            >
-                              Editar
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => {
-                                if (confirm("Tem certeza que deseja excluir este produto?")) {
-                                  deleteProduct.mutate(product.id);
-                                }
-                              }}
-                            >
-                              Excluir
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{product.name}</span>
+                              <span className="text-xs text-muted-foreground">{product.barcode || "Sem código"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{product.categories?.name || "Sem categoria"}</Badge>
+                          </TableCell>
+                          <TableCell className="font-semibold">
+                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(product.price)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className={product.stock_quantity <= (product.min_stock_quantity || 0) ? "text-destructive font-bold" : ""}>
+                                {product.stock_quantity} {product.product_type}
+                              </span>
+                              {product.stock_quantity <= (product.min_stock_quantity || 0) && (
+                                <span className="text-[10px] text-destructive uppercase font-bold italic">Estoque Baixo</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={product.stock_quantity > 0 ? "default" : "destructive"}>
+                              {product.stock_quantity > 0 ? "Em estoque" : "Esgotado"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedProduct(product)} title="Ver"><Eye className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/produtos/editar/${product.id}`)} title="Editar"><Pencil className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => { if (confirm("Excluir este produto?")) deleteProduct.mutate(product.id); }} title="Excluir"><Trash2 className="w-4 h-4" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
             </div>
 
-            {/* Mobile: cards */}
+            {/* Mobile: cards com foto */}
             <div className="md:hidden space-y-3">
               {filteredProducts?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
@@ -360,63 +348,126 @@ const Products = () => {
                   <p>Nenhum produto encontrado.</p>
                 </div>
               ) : (
-                filteredProducts?.map((product) => (
-                  <div key={product.id} className="rounded-lg border bg-card p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{product.barcode || "Sem código"}</p>
-                      </div>
-                      <Badge variant={product.stock_quantity > 0 ? "default" : "destructive"} className="shrink-0 text-[10px]">
-                        {product.stock_quantity > 0 ? "Em estoque" : "Esgotado"}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 text-sm">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Categoria</p>
-                        <p className="font-medium truncate text-xs">{product.categories?.name || "—"}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Preço</p>
-                        <p className="font-semibold text-xs">
-                          {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(product.price)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Estoque</p>
-                        <p className={`font-semibold text-xs ${product.stock_quantity <= (product.min_stock_quantity || 0) ? "text-destructive" : ""}`}>
-                          {product.stock_quantity} {product.product_type}
-                        </p>
-                        {product.stock_quantity <= (product.min_stock_quantity || 0) && (
-                          <span className="text-[9px] text-destructive uppercase font-bold italic">Baixo</span>
+                filteredProducts?.map((product) => {
+                  const photo = product.photos?.[0];
+                  return (
+                    <div key={product.id} className="rounded-xl border bg-card p-3 space-y-3 active:scale-[0.99] transition-transform" onClick={() => setSelectedProduct(product)}>
+                      <div className="flex items-center gap-3">
+                        {photo ? (
+                          <img src={photo} alt={product.name} className="w-14 h-14 rounded-xl object-cover border shrink-0" style={{ pointerEvents: 'auto' }} />
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                            <Package className="w-7 h-7 text-muted-foreground" />
+                          </div>
                         )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate text-sm">{product.name}</p>
+                          <p className="text-[11px] text-muted-foreground">{product.barcode || "Sem código"}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="font-bold text-sm text-primary">
+                              {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(product.price)}
+                            </span>
+                            <Badge variant={product.stock_quantity > 0 ? "default" : "destructive"} className="text-[9px] h-4 px-1.5">
+                              {product.stock_quantity > 0 ? `${product.stock_quantity} un` : "Esgotado"}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 pt-1 border-t" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={() => setSelectedProduct(product)}><Eye className="w-3.5 h-3.5" /> Ver</Button>
+                        <Button variant="ghost" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={() => navigate(`/produtos/editar/${product.id}`)}><Pencil className="w-3.5 h-3.5" /> Editar</Button>
+                        <Button variant="ghost" size="sm" className="flex-1 h-8 text-xs gap-1 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => { if (confirm("Excluir este produto?")) deleteProduct.mutate(product.id); }}><Trash2 className="w-3.5 h-3.5" /> Excluir</Button>
                       </div>
                     </div>
-
-                    <div className="flex gap-2 pt-1 border-t">
-                      <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => navigate(`/produtos/editar/${product.id}`)}>
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 h-8 text-xs text-destructive border-destructive/30 hover:bg-destructive/10"
-                        onClick={() => {
-                          if (confirm("Tem certeza que deseja excluir este produto?")) {
-                            deleteProduct.mutate(product.id);
-                          }
-                        }}
-                      >
-                        Excluir
-                      </Button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </CardContent>
         </Card>
+
+        {/* Modal de detalhes do produto */}
+        <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
+          <DialogContent className="max-w-md p-0 overflow-hidden">
+            {selectedProduct && (() => {
+              const p = selectedProduct;
+              const photo = p.photos?.[0];
+              return (
+                <div>
+                  {photo ? (
+                    <div className="w-full aspect-square bg-muted">
+                      <img src={photo} alt={p.name} className="w-full h-full object-cover" style={{ pointerEvents: 'auto' }} />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-[2/1] bg-muted flex items-center justify-center">
+                      <Package className="w-16 h-16 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <div className="p-5 space-y-4">
+                    <div>
+                      <h2 className="text-xl font-bold">{p.name}</h2>
+                      {p.description && <p className="text-sm text-muted-foreground mt-1">{p.description}</p>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg bg-muted/50 p-3">
+                        <p className="text-[10px] text-muted-foreground uppercase font-medium">Preço de venda</p>
+                        <p className="text-lg font-bold text-primary">
+                          {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.price)}
+                        </p>
+                      </div>
+                      {p.cost_price != null && p.cost_price > 0 && (
+                        <div className="rounded-lg bg-muted/50 p-3">
+                          <p className="text-[10px] text-muted-foreground uppercase font-medium">Preço de custo</p>
+                          <p className="text-lg font-bold">
+                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.cost_price)}
+                          </p>
+                        </div>
+                      )}
+                      {p.promotional_price != null && p.promotional_price > 0 && (
+                        <div className="rounded-lg bg-accent/10 p-3">
+                          <p className="text-[10px] uppercase font-medium" style={{ color: 'hsl(var(--accent))' }}>Promoção</p>
+                          <p className="text-lg font-bold" style={{ color: 'hsl(var(--accent))' }}>
+                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.promotional_price)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="rounded-lg bg-muted/50 p-3 text-center">
+                        <p className="text-[10px] text-muted-foreground uppercase font-medium">Estoque</p>
+                        <p className={`text-lg font-bold ${p.stock_quantity <= (p.min_stock_quantity || 0) ? "text-destructive" : ""}`}>{p.stock_quantity}</p>
+                      </div>
+                      <div className="rounded-lg bg-muted/50 p-3 text-center">
+                        <p className="text-[10px] text-muted-foreground uppercase font-medium">Mínimo</p>
+                        <p className="text-lg font-bold">{p.min_stock_quantity || 0}</p>
+                      </div>
+                      <div className="rounded-lg bg-muted/50 p-3 text-center">
+                        <p className="text-[10px] text-muted-foreground uppercase font-medium">Tipo</p>
+                        <p className="text-sm font-medium mt-1">{p.product_type || "unidade"}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {p.categories?.name && <Badge variant="outline">{p.categories.name}</Badge>}
+                      {p.barcode && <Badge variant="secondary" className="font-mono text-xs">{p.barcode}</Badge>}
+                      {p.internal_code && <Badge variant="secondary" className="text-xs">Cód: {p.internal_code}</Badge>}
+                      <Badge variant={p.stock_quantity > 0 ? "default" : "destructive"}>
+                        {p.stock_quantity > 0 ? "Em estoque" : "Esgotado"}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button className="flex-1 gap-2" onClick={() => { setSelectedProduct(null); navigate(`/produtos/editar/${p.id}`); }}>
+                        <Pencil className="w-4 h-4" /> Editar
+                      </Button>
+                      <Button variant="destructive" className="gap-2" onClick={() => { if (confirm("Excluir este produto?")) { deleteProduct.mutate(p.id); setSelectedProduct(null); } }}>
+                        <Trash2 className="w-4 h-4" /> Excluir
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       </div>
     </AnimatedPage>
   );
