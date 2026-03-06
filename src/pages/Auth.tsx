@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
+import { generateDeviceFingerprint } from "@/lib/fingerprint";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -419,9 +420,28 @@ const Auth = () => {
       await signUp(data);
 
       if (hasInviteCode && inviteCode && codeValidationStatus === "valid") {
+        // Register IP usage (existing)
         await supabase.functions.invoke('validate-invite-ip', {
           body: { invite_code: inviteCode, action: 'register' }
         });
+
+        // Register referral with anti-fraud system
+        try {
+          const fingerprint = await generateDeviceFingerprint();
+          const { data: { session: newSession } } = await supabase.auth.getSession();
+          await supabase.functions.invoke('register-referral', {
+            body: {
+              referral_code: inviteCode,
+              referred_user_id: newSession?.user?.id || null,
+              referred_email: data.email,
+              device_fingerprint: fingerprint,
+              user_agent: navigator.userAgent,
+            }
+          });
+        } catch (referralError) {
+          console.error('Erro ao registrar indicação antifraude:', referralError);
+          // Não bloqueia o cadastro se falhar
+        }
       }
 
       clearFormPersist();
