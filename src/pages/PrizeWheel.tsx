@@ -140,7 +140,7 @@ const PrizeWheel = () => {
     const delta = ((targetAngle - currentMod) % 360 + 360) % 360;
     const fullSpins = (7 + Math.floor(Math.random() * 3)) * 360;
 
-    setRotation((prev) => prev + spins + land);
+    setRotation((prev) => prev + fullSpins + delta);
 
     setTimeout(async () => {
       setIsSpinning(false);
