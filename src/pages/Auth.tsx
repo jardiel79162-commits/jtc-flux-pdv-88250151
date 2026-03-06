@@ -936,31 +936,77 @@ const Auth = () => {
                   </motion.form>
                 )}
 
-                <div className="lg:hidden pt-6 border-t border-border/30 mt-6">
-                  <div className="flex items-center justify-center gap-4 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
-                    <Gift className="w-6 h-6 text-accent" />
+                <motion.div 
+                  className="lg:hidden pt-6 border-t border-white/5 mt-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <div className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 backdrop-blur-sm">
+                    <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }}>
+                      <Gift className="w-6 h-6 text-accent" />
+                    </motion.div>
                     <span className="text-sm text-muted-foreground">Convide amigos e ganhe <strong className="text-accent font-bold">1 mês grátis</strong>!</span>
                   </div>
-                </div>
+                </motion.div>
               </TabsContent>
 
               {/* REGISTER TAB */}
               <TabsContent value="register" className="space-y-5">
                 <div className="flex justify-center items-center gap-2 mb-8 py-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 1 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 1 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={2} label="Endereço" icon={MapPin} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 2 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 2 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={3} label="Código" icon={Ticket} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 3 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 3 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={4} label="Captcha" icon={Shield} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 4 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 4 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={5} label="E-mail" icon={Mail} />
                 </div>
 
                 {/* Step 1 */}
                 {registerStep === 1 && (
-                  <div className="space-y-5 animate-fade-in">
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-1"
+                  >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Dados Pessoais</h3>
                       <p className="text-sm text-muted-foreground mt-1">Preencha suas informações básicas</p>
