@@ -615,6 +615,92 @@ export type Database = {
           },
         ]
       }
+      referral_rewards: {
+        Row: {
+          applied_at: string
+          days_added: number
+          id: string
+          referral_id: string
+          reward_type: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string
+          days_added?: number
+          id?: string
+          referral_id: string
+          reward_type?: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string
+          days_added?: number
+          id?: string
+          referral_id?: string
+          reward_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_rewards_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          device_fingerprint: string | null
+          fraud_reasons: Json | null
+          fraud_score: number
+          id: string
+          ip_address: string | null
+          referral_code: string
+          referred_user_id: string | null
+          referrer_user_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reward_applied: boolean
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint?: string | null
+          fraud_reasons?: Json | null
+          fraud_score?: number
+          id?: string
+          ip_address?: string | null
+          referral_code: string
+          referred_user_id?: string | null
+          referrer_user_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_applied?: boolean
+          status?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string | null
+          fraud_reasons?: Json | null
+          fraud_score?: number
+          id?: string
+          ip_address?: string | null
+          referral_code?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_applied?: boolean
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       sale_items: {
         Row: {
           cost_price: number | null

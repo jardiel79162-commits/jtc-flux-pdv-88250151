@@ -35,6 +35,7 @@ import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminMaintenance from "./pages/admin/AdminMaintenance";
 import AdminMessages from "./pages/admin/AdminMessages";
+import AdminReferrals from "./pages/admin/AdminReferrals";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import About from "./pages/About";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="logs" element={<AdminLogs />} />
             <Route path="manutencao" element={<AdminMaintenance />} />
             <Route path="mensagens" element={<AdminMessages />} />
+            <Route path="indicacoes" element={<AdminReferrals />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 
