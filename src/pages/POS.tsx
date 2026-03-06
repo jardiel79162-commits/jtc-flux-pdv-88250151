@@ -391,7 +391,7 @@ const POS = () => {
     } catch (error) {
       console.error('Erro ao verificar status:', error);
     }
-  }, [paymentMode, pixPaymentAmount, cleanupPixTimers, toast, playNotificationSound]);
+  }, [pixPaymentAmount, cleanupPixTimers, toast, playNotificationSound]);
 
   // Iniciar polling e countdown para PIX automático
   const startPixAutomaticFlow = useCallback((paymentId: string, amount: number) => {
@@ -543,10 +543,7 @@ const POS = () => {
 
   // Gerar novo QR Code PIX (após expiração)
   const regeneratePixQrCode = async () => {
-    const amount = paymentMode === "multiple" 
-      ? (parseFloat(currentPaymentAmount) || remainingToPay) 
-      : total;
-    // Para regenerar, usa o mesmo valor que já foi calculado (pixFinalAmount se disponível)
+    const amount = parseFloat(currentPaymentAmount) || remainingToPay;
     if (pixSettings?.pix_mode === 'automatic' && pixFinalAmount > 0) {
       await openPixDialog(pixFinalAmount, pixPassFeeToCustomer === true, pixOriginalAmount);
     } else {
@@ -575,8 +572,7 @@ const POS = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handlePixPayment = () => {
-    // Verificar se PIX está configurado (manual OU automático)
+  const handlePixPayment = (amount?: number) => {
     const isManualConfigured = (!pixSettings?.pix_mode || pixSettings?.pix_mode === 'manual') && pixSettings?.pix_key && pixSettings?.pix_receiver_name;
     const isAutomaticConfigured = pixSettings?.pix_mode === 'automatic';
     
@@ -588,8 +584,8 @@ const POS = () => {
       });
       return;
     }
-    setPaymentMethod("pix");
-    showPixFeeQuestion(total);
+    setCurrentPaymentMethod("pix");
+    showPixFeeQuestion(amount || remainingToPay);
   };
 
   const filteredProducts = products.filter(p =>
@@ -718,11 +714,11 @@ const POS = () => {
       toast({ title: "Carrinho vazio", description: "Adicione produtos ao carrinho primeiro", variant: "destructive" });
       return;
     }
-    setPaymentMode(null);
     setPayments([]);
     setCurrentPaymentAmount("");
+    setCurrentPaymentMethod("");
     setPaymentMethod("");
-    setPixManualConfirmed(false); // Resetar confirmação do PIX manual
+    setPixManualConfirmed(false);
     setCurrentStep("payment");
   };
 
@@ -731,9 +727,9 @@ const POS = () => {
   const remainingToPay = total - totalPaid;
   const changeAmount = totalPaid > total ? totalPaid - total : 0;
 
-  // Adicionar pagamento no modo múltiplo
+  // Adicionar pagamento
   const addPayment = () => {
-    if (!paymentMethod) {
+    if (!currentPaymentMethod) {
       toast({ title: "Selecione uma forma de pagamento", variant: "destructive" });
       return;
     }
@@ -742,7 +738,11 @@ const POS = () => {
       toast({ title: "Digite um valor válido", variant: "destructive" });
       return;
     }
-    if (paymentMethod === "fiado" && !selectedCustomer) {
+    if (amount > remainingToPay + 0.01) {
+      toast({ title: "Valor excede o restante", description: `Máximo: R$ ${remainingToPay.toFixed(2)}`, variant: "destructive" });
+      return;
+    }
+    if (currentPaymentMethod === "fiado" && !selectedCustomer) {
       toast({ 
         title: "Cliente não selecionado", 
         description: "Selecione um cliente para pagamento fiado",
@@ -750,9 +750,9 @@ const POS = () => {
       });
       return;
     }
-    setPayments([...payments, { method: paymentMethod, amount }]);
+    setPayments([...payments, { method: currentPaymentMethod, amount }]);
     setCurrentPaymentAmount("");
-    setPaymentMethod("");
+    setCurrentPaymentMethod("");
   };
 
   // Remover pagamento
