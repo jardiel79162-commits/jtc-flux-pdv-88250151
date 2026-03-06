@@ -18,6 +18,7 @@ import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth"
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fetchCEP, fetchEstados, fetchCidades, type Estado, type Cidade } from "@/lib/location";
+import JTCCaptcha from "@/components/JTCCaptcha";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ const Auth = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [codeValidationStatus, setCodeValidationStatus] = useState<"idle" | "valid" | "invalid" | "used">("idle");
   const [isValidatingCode, setIsValidatingCode] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -488,6 +490,7 @@ const Auth = () => {
     setInviteCode("");
     setCodeValidationStatus("idle");
     setAccountCreated(false);
+    setCaptchaVerified(false);
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
@@ -1213,6 +1216,9 @@ const Auth = () => {
 
                     {/* Errors shown via modal */}
 
+                    {/* CAPTCHA */}
+                    <JTCCaptcha onVerified={setCaptchaVerified} />
+
                     <div className="flex gap-3 mt-8">
                       <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
                         <ChevronLeft className="mr-2 h-5 w-5" />Voltar
@@ -1221,7 +1227,7 @@ const Auth = () => {
                         type="button"
                         onClick={handleGoToEmailVerification}
                         className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
-                        disabled={isLoading || hasInviteCode === null || (hasInviteCode && codeValidationStatus !== "valid" && inviteCode.length > 0)}
+                        disabled={isLoading || !captchaVerified || hasInviteCode === null || (hasInviteCode && codeValidationStatus !== "valid" && inviteCode.length > 0)}
                       >
                         Próximo<ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
