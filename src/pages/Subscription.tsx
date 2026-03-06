@@ -322,65 +322,64 @@ const Subscription = () => {
 
       {!paymentData ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {plans.map((plan) => (
-              <Card
-                key={plan.id}
-                className={plan.badge ? "border-primary shadow-lg" : ""}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                      <CardDescription className="mt-2">
-                        <span className="text-3xl font-bold text-foreground">
-                          R$ {plan.price.toFixed(2)}
-                        </span>
-                      </CardDescription>
-                    </div>
-                    {plan.badge && (
-                      <Badge className="bg-primary">{plan.badge}</Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>{plan.duration}</span>
-                  </div>
-
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-3">
-                        <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-success" />
-                        </div>
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => handleBuyPlan(plan.id)}
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Gerando PIX...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        Pagar com PIX
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             {plans.map((plan) => {
+               const img = plan.id === '1_year' ? planoAnualImg : planoTrimestralImg;
+               return (
+                 <Card
+                   key={plan.id}
+                   className={`overflow-hidden ${plan.badge ? "border-primary shadow-lg" : ""}`}
+                 >
+                   <div 
+                     className="cursor-pointer relative group"
+                     onClick={() => setPreviewImage(img)}
+                   >
+                     <img
+                       src={img}
+                       alt={plan.name}
+                       className="w-full h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                     />
+                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                       <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
+                         Clique para ampliar
+                       </span>
+                     </div>
+                   </div>
+                   <CardContent className="pt-4 pb-4 space-y-3">
+                     <div className="flex items-center justify-between">
+                       <span className="text-2xl font-bold text-foreground">
+                         R$ {plan.price.toFixed(2)}
+                       </span>
+                       {plan.badge && (
+                         <Badge className="bg-primary">{plan.badge}</Badge>
+                       )}
+                     </div>
+                     <p className="text-sm text-muted-foreground flex items-center gap-2">
+                       <Calendar className="w-4 h-4" />
+                       {plan.duration} de acesso completo
+                     </p>
+                     <Button
+                       className="w-full"
+                       size="lg"
+                       onClick={() => handleBuyPlan(plan.id)}
+                       disabled={isGenerating}
+                     >
+                       {isGenerating ? (
+                         <>
+                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                           Gerando PIX...
+                         </>
+                       ) : (
+                         <>
+                           <CreditCard className="w-5 h-5 mr-2" />
+                           Pagar com PIX
+                         </>
+                       )}
+                     </Button>
+                   </CardContent>
+                 </Card>
+               );
+             })}
           </div>
 
           <Card className="bg-muted/50">
