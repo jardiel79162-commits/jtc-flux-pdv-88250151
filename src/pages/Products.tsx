@@ -6,11 +6,15 @@ import { Input } from "@/components/ui/input";
 import { 
   Plus, 
   Search, 
-  FileText, 
   Download, 
   Upload, 
   PackageX,
-  Loader2
+  Loader2,
+  Eye,
+  Pencil,
+  Trash2,
+  X,
+  Package
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProductsSkeleton } from "@/components/skeletons";
 import AnimatedPage from "@/components/AnimatedPage";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -26,7 +31,7 @@ const Products = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isImporting, setIsImporting] = useState(false);
-
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
