@@ -11,6 +11,7 @@ import puzzleIntegration from "@/assets/puzzle-integration.png";
 import jtcPartnership from "@/assets/jtc-partnership.jpg";
 import feedbackWoman from "@/assets/feedback-woman.jpg";
 import feedbackMan from "@/assets/feedback-man.jpg";
+import developerPhoto from "@/assets/developer-photo.png";
 
 
 
@@ -367,9 +368,9 @@ const About = () => {
                   whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.15 }}
-                  className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto shadow-xl"
+                  className="w-24 h-24 rounded-full mx-auto shadow-xl ring-4 ring-primary/20 overflow-hidden"
                 >
-                  <span className="text-3xl font-black text-white">J</span>
+                  <img src={developerPhoto} alt="Jardiel De Sousa Lopes" className="w-full h-full object-cover" />
                 </motion.div>
                 <div>
                   <h3 className="text-xl font-black text-foreground">Jardiel De Sousa Lopes</h3>
