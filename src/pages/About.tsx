@@ -66,8 +66,8 @@ const About = () => {
 
   const plans = [
     { name: "Teste Grátis", price: "R$ 0", period: "3 dias", desc: "Experimente todas as funcionalidades. Compartilhe e ganhe mais tempo!", highlight: false },
-    { name: "Trimestral", price: "R$ 29,99", period: "/3 meses", desc: "Acesso completo por 3 meses com ótimo custo-benefício.", highlight: true },
-    { name: "Anual", price: "R$ 69,99", period: "/ano", desc: "O melhor plano! Acesso completo por 1 ano inteiro.", highlight: false },
+    { name: "Trimestral", price: "R$ 29,99", period: "/3 meses", desc: "Acesso completo por 3 meses com ótimo custo-benefício.", highlight: false },
+    { name: "Anual", price: "R$ 69,99", period: "/ano", desc: "O melhor plano! Acesso completo por 1 ano inteiro.", highlight: true },
   ];
 
   const stats = [
@@ -258,11 +258,11 @@ const About = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            <motion.div {...scaleIn(0.1)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card">
-              <img src={puzzleIntegration} alt="Integração JTC FluxPDV com Mercado Pago" className="w-full h-auto object-cover" />
+            <motion.div {...scaleIn(0.1)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card aspect-video flex items-center justify-center">
+              <img src={puzzleIntegration} alt="Integração JTC FluxPDV com Mercado Pago" className="w-full h-full object-contain p-2" />
             </motion.div>
-            <motion.div {...scaleIn(0.2)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card">
-              <img src={jtcPartnership} alt="Parceria JTC FluxPDV" className="w-full h-auto object-cover" />
+            <motion.div {...scaleIn(0.2)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card aspect-video flex items-center justify-center">
+              <img src={jtcPartnership} alt="Parceria JTC FluxPDV" className="w-full h-full object-contain p-2" />
             </motion.div>
           </div>
 
