@@ -258,11 +258,11 @@ const About = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            <motion.div {...scaleIn(0.1)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card aspect-video flex items-center justify-center">
-              <img src={puzzleIntegration} alt="Integração JTC FluxPDV com Mercado Pago" className="w-full h-full object-contain p-2" />
+            <motion.div {...scaleIn(0.1)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-white">
+              <img src={puzzleIntegration} alt="Integração JTC FluxPDV com Mercado Pago" className="w-full h-48 sm:h-40 object-contain" />
             </motion.div>
-            <motion.div {...scaleIn(0.2)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card aspect-video flex items-center justify-center">
-              <img src={jtcPartnership} alt="Parceria JTC FluxPDV" className="w-full h-full object-contain p-2" />
+            <motion.div {...scaleIn(0.2)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-white">
+              <img src={jtcPartnership} alt="Parceria JTC FluxPDV" className="w-full h-48 sm:h-40 object-contain" />
             </motion.div>
           </div>
 
