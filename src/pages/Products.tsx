@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -287,7 +287,7 @@ const Products = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={product.stock_quantity > 0 ? "success" : "destructive"}>
+                          <Badge variant={product.stock_quantity > 0 ? "default" : "destructive"}>
                             {product.stock_quantity > 0 ? "Em estoque" : "Esgotado"}
                           </Badge>
                         </TableCell>
