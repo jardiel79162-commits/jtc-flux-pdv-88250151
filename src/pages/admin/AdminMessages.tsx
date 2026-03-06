@@ -378,8 +378,8 @@ export default function AdminMessages() {
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            {selectedConv?.store_logo ? (
-              <img src={selectedConv.store_logo} alt="" className="w-8 h-8 rounded-full object-cover" />
+            {selectedUserInfo?.store_logo ? (
+              <img src={selectedUserInfo.store_logo} alt="" className="w-8 h-8 rounded-full object-cover" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                 <Store className="w-4 h-4 text-muted-foreground" />
@@ -387,9 +387,11 @@ export default function AdminMessages() {
             )}
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">
-                {selectedConv?.store_name || selectedConv?.full_name || "Usuário"}
+                {selectedUserInfo?.full_name || selectedUserInfo?.store_name || "Sem nome"}
               </p>
-              <p className="text-xs text-muted-foreground truncate">{selectedConv?.email}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {selectedUserInfo?.store_name && selectedUserInfo?.full_name ? selectedUserInfo.store_name + " • " : ""}{selectedUserInfo?.email}
+              </p>
             </div>
           </div>
 
