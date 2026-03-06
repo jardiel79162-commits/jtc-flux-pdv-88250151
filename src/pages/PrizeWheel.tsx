@@ -129,10 +129,16 @@ const PrizeWheel = () => {
 
     const idx = pickPrize();
     const prize = PRIZES[idx];
-    const center = idx * SLICE_DEG + SLICE_DEG / 2;
-    const jitter = (Math.random() - 0.5) * SLICE_DEG * 0.6;
-    const land = 360 - center + jitter;
-    const spins = (7 + Math.floor(Math.random() * 3)) * 360;
+    // The pointer is at the top (0°/360°). Slice i occupies [i*SLICE_DEG, (i+1)*SLICE_DEG].
+    // We need the wheel to stop so that the center of slice idx is at the top.
+    // Since the wheel rotates clockwise, landing angle = 360 - (center of slice).
+    const sliceCenter = idx * SLICE_DEG + SLICE_DEG / 2;
+    const jitter = (Math.random() - 0.5) * SLICE_DEG * 0.55; // stay well inside the slice
+    const targetAngle = 360 - sliceCenter + jitter;
+    // Normalize so we always add full spins relative to current position
+    const currentMod = rotation % 360;
+    const delta = ((targetAngle - currentMod) % 360 + 360) % 360;
+    const fullSpins = (7 + Math.floor(Math.random() * 3)) * 360;
 
     setRotation((prev) => prev + spins + land);
 
