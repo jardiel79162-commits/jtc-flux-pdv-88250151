@@ -64,10 +64,12 @@ function generateGrid() {
 
 export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
   const [gridData, setGridData] = useState(() => generateGrid());
-  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
+  const [selectionOrder, setSelectionOrder] = useState<number[]>([]);
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [attempts, setAttempts] = useState(0);
   const [cooldown, setCooldown] = useState(0);
+
+  const selectedIndices = useMemo(() => new Set(selectionOrder), [selectionOrder]);
 
   const correctIndices = useMemo(
     () => new Set(gridData.cells.filter(c => c.isCorrect).map(c => c.index)),
@@ -76,7 +78,7 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
 
   const refresh = useCallback(() => {
     setGridData(generateGrid());
-    setSelectedIndices(new Set());
+    setSelectionOrder([]);
     setStatus("idle");
     onVerified(false);
   }, [onVerified]);
