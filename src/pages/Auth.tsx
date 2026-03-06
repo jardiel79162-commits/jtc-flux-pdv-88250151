@@ -1221,12 +1221,18 @@ const Auth = () => {
                       Próximo
                       <ChevronRight className="ml-2 h-5 w-5" />
                     </Button>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 2 */}
                 {registerStep === 2 && (
-                  <div className="space-y-5 animate-fade-in">
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-2"
+                  >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Endereço</h3>
                       <p className="text-sm text-muted-foreground mt-1">Digite o CEP para preenchimento automático</p>
