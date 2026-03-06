@@ -51,6 +51,7 @@ const DashboardLayoutInner = () => {
   const [maintenanceMessage, setMaintenanceMessage] = useState("");
   const [maintenanceImageUrl, setMaintenanceImageUrl] = useState<string | null>(null);
   const [isSystemAdmin, setIsSystemAdmin] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
   const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
