@@ -63,10 +63,9 @@ const About = () => {
   ];
 
   const plans = [
-    { name: "Teste Grátis", price: "R$ 0", period: "3 dias", desc: "Experimente todas as funcionalidades sem compromisso.", highlight: false },
-    { name: "Mensal", price: "R$ 29,99", period: "/mês", desc: "Acesso completo a todas as funcionalidades.", highlight: true },
-    { name: "Trimestral", price: "R$ 79,99", period: "/3 meses", desc: "Economize com o plano trimestral.", highlight: false },
-    { name: "Semestral", price: "R$ 149,99", period: "/6 meses", desc: "Melhor custo-benefício para seu negócio.", highlight: false },
+    { name: "Teste Grátis", price: "R$ 0", period: "3 dias", desc: "Experimente todas as funcionalidades. Compartilhe e ganhe mais tempo!", highlight: false },
+    { name: "Trimestral", price: "R$ 29,99", period: "/3 meses", desc: "Acesso completo por 3 meses com ótimo custo-benefício.", highlight: true },
+    { name: "Anual", price: "R$ 69,99", period: "/ano", desc: "O melhor plano! Acesso completo por 1 ano inteiro.", highlight: false },
   ];
 
   const stats = [
