@@ -55,6 +55,21 @@ const DashboardLayoutInner = () => {
   const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
   useSystemColor();
 
+  // Bloquear scroll do body quando o menu está aberto
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isMobileMenuOpen]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
