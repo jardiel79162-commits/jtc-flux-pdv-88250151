@@ -244,6 +244,62 @@ const About = () => {
 
         <Separator className="my-8" />
 
+        {/* Integração Tecnológica */}
+        <motion.section className="space-y-6" {...fadeUp()}>
+          <h2 className="text-2xl font-bold text-center text-foreground flex items-center justify-center gap-2">
+            <Zap className="w-6 h-6 text-primary" />
+            Integração Tecnológica
+          </h2>
+          <p className="text-center text-lg font-semibold text-foreground">
+            Pix Automático em Tempo Real
+          </p>
+          <p className="text-center text-muted-foreground text-sm max-w-2xl mx-auto">
+            O JTC FluxPDV utiliza a infraestrutura do Mercado Pago para processar pagamentos Pix de forma automática, segura e instantânea.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            <motion.div {...scaleIn(0.1)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card">
+              <img src={puzzleIntegration} alt="Integração JTC FluxPDV com Mercado Pago" className="w-full h-auto object-cover" />
+            </motion.div>
+            <motion.div {...scaleIn(0.2)} className="rounded-2xl overflow-hidden border border-border/50 shadow-lg bg-card">
+              <img src={jtcPartnership} alt="Parceria JTC FluxPDV" className="w-full h-auto object-cover" />
+            </motion.div>
+          </div>
+
+          <div className="bg-card rounded-2xl p-6 border border-border/50 shadow-sm space-y-4 max-w-2xl mx-auto">
+            <h3 className="text-lg font-bold text-foreground text-center">Como funciona o Pix Automático?</h3>
+            <ul className="space-y-3">
+              {[
+                "QR Code dinâmico gerado automaticamente para cada venda",
+                "Confirmação do pagamento em tempo real",
+                "Valor da venda enviado automaticamente para sua conta",
+                "Sem necessidade de envio ou conferência de comprovante",
+              ].map((item, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, x: -12 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.35, delay: i * 0.08 }}
+                  className="flex items-start gap-3 text-sm text-foreground"
+                >
+                  <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Star className="w-3 h-3 text-primary" />
+                  </div>
+                  {item}
+                </motion.li>
+              ))}
+            </ul>
+            <div className="pt-2 border-t border-border/30">
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Processado via Mercado Pago:</strong> Utilizamos a infraestrutura tecnológica do Mercado Pago para garantir segurança, rapidez e confiabilidade em todas as transações Pix do seu estabelecimento.
+              </p>
+            </div>
+          </div>
+        </motion.section>
+
+        <Separator className="my-8" />
+
         {/* Desenvolvedor */}
         <motion.section className="space-y-4" {...fadeUp()}>
           <h2 className="text-2xl font-bold text-center text-foreground flex items-center justify-center gap-2">
