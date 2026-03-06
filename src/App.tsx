@@ -37,6 +37,7 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminMaintenance from "./pages/admin/AdminMaintenance";
+import AdminLegalDocs from "./pages/admin/AdminLegalDocs";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminShortcuts from "./pages/admin/AdminShortcuts";
@@ -83,6 +84,8 @@ const App = () => {
               <Route path="indicacoes" element={<AdminReferrals />} />
               <Route path="atalhos" element={<AdminShortcuts />} />
               <Route path="roleta" element={<AdminSpins />} />
+              <Route path="termos" element={<AdminLegalDocs />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
