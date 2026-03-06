@@ -329,7 +329,7 @@ const Products = () => {
             <div className="relative">
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv,.zip"
                 className="hidden"
                 id="import-csv-input"
                 onChange={handleImportCsv}
