@@ -213,7 +213,7 @@ export default function AdminEmpresas() {
                     onClick={() => loadDetail(user)}
                   >
                     <CardContent className="p-3 flex items-center gap-3">
-                      {user.store_logo ? (
+                      {user.store_logo && user.store_logo.trim() !== '' ? (
                         <img src={user.store_logo} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
@@ -255,7 +255,7 @@ export default function AdminEmpresas() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {selectedUser.store_logo ? (
+                    {selectedUser.store_logo && selectedUser.store_logo.trim() !== '' ? (
                       <img src={selectedUser.store_logo} alt="" className="w-12 h-12 rounded-xl object-cover" />
                     ) : (
                       <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center"><Store className="w-6 h-6 text-muted-foreground" /></div>
