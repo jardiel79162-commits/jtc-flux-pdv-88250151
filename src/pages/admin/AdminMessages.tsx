@@ -346,12 +346,12 @@ export default function AdminMessages() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm truncate">{conv.store_name || conv.full_name || "Sem nome"}</p>
+                      <p className="font-semibold text-sm truncate">{conv.full_name || conv.store_name || "Sem nome"}</p>
                       {conv.unread_count > 0 && (
                         <Badge className="text-[10px] px-1.5 h-5">{conv.unread_count}</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">{conv.last_message || "..."}</p>
+                    <p className="text-xs text-muted-foreground truncate">{conv.store_name && conv.full_name ? conv.store_name + " • " : ""}{conv.last_message || "..."}</p>
                   </div>
                   {conv.last_message_at && (
                     <span className="text-[10px] text-muted-foreground shrink-0">
