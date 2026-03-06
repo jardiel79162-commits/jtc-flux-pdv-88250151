@@ -506,6 +506,63 @@ serve(async (req) => {
         });
       }
 
+      // ==================== PRIZE WHEEL SPINS ====================
+      case 'grant_spin': {
+        const { user_id: targetId, quantity = 1 } = params;
+        const inserts = Array.from({ length: Number(quantity) }, () => ({
+          user_id: targetId,
+          is_used: false,
+        }));
+        const { error: spinError } = await supabaseAdmin.from('prize_wheel_spins').insert(inserts);
+        if (spinError) throw spinError;
+        await supabaseAdmin.from('system_logs').insert({
+          user_id: user.id,
+          event_type: 'spin_granted',
+          description: `${quantity} rodada(s) concedida(s) pelo admin`,
+          metadata: { target_user_id: targetId, quantity },
+        });
+        return jsonResponse({ success: true });
+      }
+
+      // ==================== CUSTOM SHORTCUTS ====================
+      case 'list_shortcuts': {
+        const { data } = await supabaseAdmin.from('custom_shortcuts').select('*').order('sort_order', { ascending: true });
+        return jsonResponse({ shortcuts: data || [] });
+      }
+
+      case 'create_shortcut': {
+        const { label, url, icon_url, sort_order = 0 } = params;
+        const { data, error: insertErr } = await supabaseAdmin.from('custom_shortcuts').insert({
+          label, url, icon_url, sort_order, created_by: user.id,
+        }).select().single();
+        if (insertErr) throw insertErr;
+        await supabaseAdmin.from('system_logs').insert({
+          user_id: user.id, event_type: 'shortcut_created',
+          description: `Atalho "${label}" criado`, metadata: { shortcut_id: data.id },
+        });
+        return jsonResponse({ success: true, shortcut: data });
+      }
+
+      case 'update_shortcut': {
+        const { shortcut_id, data: shortcutData } = params;
+        const allowedFields = ['label', 'url', 'icon_url', 'sort_order', 'is_active'];
+        const sanitized: Record<string, any> = {};
+        for (const key of allowedFields) { if (shortcutData[key] !== undefined) sanitized[key] = shortcutData[key]; }
+        sanitized.updated_at = new Date().toISOString();
+        await supabaseAdmin.from('custom_shortcuts').update(sanitized).eq('id', shortcut_id);
+        return jsonResponse({ success: true });
+      }
+
+      case 'delete_shortcut': {
+        const { shortcut_id } = params;
+        await supabaseAdmin.from('custom_shortcuts').delete().eq('id', shortcut_id);
+        await supabaseAdmin.from('system_logs').insert({
+          user_id: user.id, event_type: 'shortcut_deleted',
+          description: 'Atalho deletado', metadata: { shortcut_id },
+        });
+        return jsonResponse({ success: true });
+      }
+
       default:
         return jsonResponse({ error: 'Ação inválida' }, 400);
     }
