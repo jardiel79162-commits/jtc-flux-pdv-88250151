@@ -508,6 +508,9 @@ export type Database = {
           state: string | null
           street: string | null
           subscription_ends_at: string | null
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
+          terms_version: string | null
           trial_ends_at: string | null
           updated_at: string
           user_id: string
@@ -530,6 +533,9 @@ export type Database = {
           state?: string | null
           street?: string | null
           subscription_ends_at?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_id: string
@@ -552,6 +558,9 @@ export type Database = {
           state?: string | null
           street?: string | null
           subscription_ends_at?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
