@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const userCpf = profile.cpf
+    const userCpf = profile?.cpf
 
     // Step 2: Block the CPF
     if (userCpf) {
