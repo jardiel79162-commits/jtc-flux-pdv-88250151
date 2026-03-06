@@ -853,12 +853,30 @@ const Auth = () => {
                 ) : (
                   <motion.form
                     onSubmit={handleLogin}
-                    className="space-y-6"
-                    initial={{ opacity: 0, y: 10 }}
+                    className="space-y-5"
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <div className="space-y-3">
+                    {/* Welcome text */}
+                    <div className="text-center pb-2">
+                      <motion.p 
+                        className="text-lg font-semibold text-foreground"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        Bem-vindo de volta 👋
+                      </motion.p>
+                      <p className="text-sm text-muted-foreground mt-1">Entre com suas credenciais</p>
+                    </div>
+
+                    <motion.div 
+                      className="space-y-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.15 }}
+                    >
                       <Label htmlFor="identifier" className="text-sm font-semibold text-foreground/90">E-mail ou CPF</Label>
                       <Input
                         id="identifier"
@@ -868,9 +886,14 @@ const Auth = () => {
                         disabled={isLoading}
                         className="h-14 text-base bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-5 placeholder:text-muted-foreground/50 transition-all duration-300"
                       />
-                    </div>
+                    </motion.div>
 
-                    <div className="space-y-3">
+                    <motion.div 
+                      className="space-y-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
                       <div className="relative group">
                         <Input
                           id="password"
@@ -889,21 +912,27 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* Errors shown via modal */}
 
-                    <Button
-                      type="submit"
-                      className="w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
-                      disabled={isLoading}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35 }}
                     >
-                      {isLoading ? (
-                        <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
-                      ) : (
-                        "Entrar na Conta"
-                      )}
-                    </Button>
+                      <Button
+                        type="submit"
+                        className="auth-btn-primary w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
+                        ) : (
+                          "Entrar na Conta"
+                        )}
+                      </Button>
+                    </motion.div>
                   </motion.form>
                 )}
 
