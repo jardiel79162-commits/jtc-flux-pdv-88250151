@@ -156,6 +156,42 @@ export type Database = {
           },
         ]
       }
+      custom_shortcuts: {
+        Row: {
+          created_at: string
+          created_by: string
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       customer_transactions: {
         Row: {
           amount: number
