@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import logo from "@/assets/logo.jpg";
+import puzzleIntegration from "@/assets/puzzle-integration.jpg";
+import jtcPartnership from "@/assets/jtc-partnership.jpg";
 
 const VideoLoop = ({ src }: { src: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
