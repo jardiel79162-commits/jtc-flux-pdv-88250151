@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, Edit, Loader2, GripVertical, ExternalLink, Image, Ticket, Search } from "lucide-react";
+import { Plus, Trash2, Edit, Loader2, GripVertical, ExternalLink, Image } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,34 +22,18 @@ interface Shortcut {
   created_at: string;
 }
 
-interface UserResult {
-  user_id: string;
-  full_name: string | null;
-  email: string | null;
-}
-
 export default function AdminShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  // Shortcut form
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ label: "", url: "", sort_order: "0" });
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  // Spin grant
-  const [showSpinDialog, setShowSpinDialog] = useState(false);
-  const [spinSearch, setSpinSearch] = useState("");
-  const [spinResults, setSpinResults] = useState<UserResult[]>([]);
-  const [spinSearching, setSpinSearching] = useState(false);
-  const [spinUser, setSpinUser] = useState<UserResult | null>(null);
-  const [spinQty, setSpinQty] = useState("1");
-  const [spinGranting, setSpinGranting] = useState(false);
 
   useEffect(() => { loadShortcuts(); }, []);
 
@@ -102,9 +86,7 @@ export default function AdminShortcuts() {
     setSaving(true);
     try {
       let icon_url = iconPreview;
-      if (iconFile) {
-        icon_url = await uploadIcon(iconFile);
-      }
+      if (iconFile) icon_url = await uploadIcon(iconFile);
 
       if (editingId) {
         await adminApi("update_shortcut", {
@@ -144,58 +126,24 @@ export default function AdminShortcuts() {
     } catch (e) { console.error(e); }
   };
 
-  // Spin grant
-  const searchUsers = async () => {
-    if (!spinSearch.trim()) return;
-    setSpinSearching(true);
-    try {
-      const data = await adminApi("list_users", { search: spinSearch, per_page: 5 });
-      setSpinResults((data.users || []).map((u: any) => ({ user_id: u.user_id, full_name: u.full_name, email: u.email })));
-    } catch (e) { console.error(e); }
-    finally { setSpinSearching(false); }
-  };
-
-  const grantSpin = async () => {
-    if (!spinUser) return;
-    setSpinGranting(true);
-    try {
-      await adminApi("grant_spin", { user_id: spinUser.user_id, quantity: Number(spinQty) });
-      toast({ title: "Rodada(s) concedida(s)!", description: `${spinQty} rodada(s) para ${spinUser.full_name || spinUser.email}` });
-      setShowSpinDialog(false);
-      setSpinUser(null);
-      setSpinSearch("");
-      setSpinResults([]);
-      setSpinQty("1");
-    } catch (e: any) {
-      toast({ title: "Erro", description: e.message, variant: "destructive" });
-    } finally { setSpinGranting(false); }
-  };
-
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Atalhos & Roleta</h1>
-          <p className="text-muted-foreground text-sm">Gerencie atalhos do dashboard e rodadas grátis</p>
+          <h1 className="text-2xl font-bold">Atalhos do Dashboard</h1>
+          <p className="text-muted-foreground text-sm">Gerencie os ícones de atalho do dashboard</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowSpinDialog(true)} variant="outline" className="gap-2">
-            <Ticket className="w-4 h-4" />
-            Dar Rodada
-          </Button>
-          <Button onClick={openCreate} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Novo Atalho
-          </Button>
-        </div>
+        <Button onClick={openCreate} className="gap-2">
+          <Plus className="w-4 h-4" />
+          Novo Atalho
+        </Button>
       </div>
 
-      {/* Shortcuts List */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Atalhos do Dashboard</CardTitle>
+          <CardTitle className="text-lg">Atalhos Cadastrados</CardTitle>
         </CardHeader>
         <CardContent>
           {shortcuts.length === 0 ? (
@@ -286,65 +234,6 @@ export default function AdminShortcuts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Grant Spin Dialog */}
-      <Dialog open={showSpinDialog} onOpenChange={setShowSpinDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Dar Rodada Grátis</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Buscar Usuário</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={spinSearch}
-                  onChange={(e) => setSpinSearch(e.target.value)}
-                  placeholder="Nome, email ou CPF..."
-                  onKeyDown={(e) => e.key === "Enter" && searchUsers()}
-                />
-                <Button onClick={searchUsers} disabled={spinSearching} variant="outline" size="icon">
-                  {spinSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                </Button>
-              </div>
-            </div>
-
-            {spinResults.length > 0 && (
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {spinResults.map((u) => (
-                  <button
-                    key={u.user_id}
-                    onClick={() => setSpinUser(u)}
-                    className={`w-full text-left p-2 rounded-lg text-sm transition-colors ${
-                      spinUser?.user_id === u.user_id ? "bg-primary/10 border border-primary/30" : "hover:bg-muted"
-                    }`}
-                  >
-                    <p className="font-medium">{u.full_name || "Sem nome"}</p>
-                    <p className="text-xs text-muted-foreground">{u.email}</p>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {spinUser && (
-              <div className="bg-muted/50 rounded-xl p-3">
-                <p className="text-sm font-medium">{spinUser.full_name || spinUser.email}</p>
-                <div className="mt-2">
-                  <Label>Quantidade de Rodadas</Label>
-                  <Input type="number" min="1" max="10" value={spinQty} onChange={(e) => setSpinQty(e.target.value)} />
-                </div>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSpinDialog(false)}>Cancelar</Button>
-            <Button onClick={grantSpin} disabled={!spinUser || spinGranting}>
-              {spinGranting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Ticket className="w-4 h-4 mr-2" />}
-              Conceder
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

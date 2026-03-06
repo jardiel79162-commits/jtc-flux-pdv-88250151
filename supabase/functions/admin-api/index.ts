@@ -524,6 +524,36 @@ serve(async (req) => {
         return jsonResponse({ success: true });
       }
 
+      case 'list_spin_history': {
+        const page = Number(params.page || 1);
+        const perPage = Number(params.per_page || 20);
+        const from = (page - 1) * perPage;
+        const to = from + perPage - 1;
+
+        const { data: spins, count } = await supabaseAdmin
+          .from('prize_wheel_spins')
+          .select('*, profiles!inner(full_name, email)', { count: 'exact' })
+          .not('prize_label', 'is', null)
+          .order('used_at', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        // Also get admin-granted spins (unused ones granted by admin)
+        const { data: grantedSpins, count: grantedCount } = await supabaseAdmin
+          .from('system_logs')
+          .select('*', { count: 'exact' })
+          .eq('event_type', 'spin_granted')
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        return jsonResponse({
+          spins: spins || [],
+          granted_logs: grantedSpins || [],
+          total: count || 0,
+          granted_total: grantedCount || 0,
+        });
+      }
+
       // ==================== CUSTOM SHORTCUTS ====================
       case 'list_shortcuts': {
         const { data } = await supabaseAdmin.from('custom_shortcuts').select('*').order('sort_order', { ascending: true });
