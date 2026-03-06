@@ -1,11 +1,51 @@
 import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import logo from "@/assets/logo.jpg";
+
+const VideoLoop = ({ src }: { src: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const attemptPlay = async () => {
+      try {
+        await video.play();
+      } catch {
+        video.muted = true;
+        try { await video.play(); } catch {}
+      }
+    };
+
+    attemptPlay();
+
+    const handleEnded = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+    video.addEventListener("ended", handleEnded);
+    return () => video.removeEventListener("ended", handleEnded);
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      className="w-full h-auto"
+    />
+  );
+};
 
 const About = () => {
   const navigate = useNavigate();
@@ -100,14 +140,7 @@ const About = () => {
             Veja o Sistema em Ação
           </h2>
           <div className="max-w-md mx-auto rounded-2xl overflow-hidden shadow-2xl border border-border/50 bg-card">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto"
-              src="/videos/about-video.mp4"
-            />
+            <VideoLoop src="/videos/about-video.mp4" />
           </div>
         </section>
 
