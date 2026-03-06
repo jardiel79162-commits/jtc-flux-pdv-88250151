@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User } from "lucide-react";
+import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth";
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
@@ -574,6 +574,10 @@ const Auth = () => {
               <div className="text-center space-y-1">
                 <CardTitle className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</CardTitle>
                 <CardDescription className="text-base text-muted-foreground">Acesse sua conta ou crie uma nova</CardDescription>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-2 gap-1.5 text-muted-foreground hover:text-primary">
+                  <Info className="w-4 h-4" />
+                  Sobre o Sistema
+                </Button>
               </div>
             </div>
           </CardHeader>

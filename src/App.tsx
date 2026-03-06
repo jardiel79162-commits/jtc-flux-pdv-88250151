@@ -36,6 +36,7 @@ import AdminLogs from "./pages/admin/AdminLogs";
 import AdminMaintenance from "./pages/admin/AdminMaintenance";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/confirmar-email" element={<ConfirmEmail />} />
           <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
+          <Route path="/sobre" element={<About />} />
           
           {/* Admin routes */}
           <Route path="/admin" element={<AdminLayout />}>
