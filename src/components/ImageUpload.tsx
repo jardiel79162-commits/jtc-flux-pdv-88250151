@@ -38,7 +38,6 @@ export const ImageUpload = ({ bucket, currentImageUrl, onImageUploaded, label }:
     try {
       setUploading(true);
 
-      const fileExt = file.name.split('.').pop() || 'jpg';
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
