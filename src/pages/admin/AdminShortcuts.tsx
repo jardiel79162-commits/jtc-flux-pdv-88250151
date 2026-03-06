@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, Edit, Loader2, GripVertical, ExternalLink, Image } from "lucide-react";
+import { Plus, Trash2, Edit, Loader2, ExternalLink, Image, RefreshCw } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,11 +26,12 @@ export default function AdminShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const { toast } = useToast();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ label: "", url: "", sort_order: "0" });
+  const [form, setForm] = useState({ label: "", url: "" });
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -44,6 +45,17 @@ export default function AdminShortcuts() {
       setShortcuts(data.shortcuts || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const data = await adminApi("sync_default_shortcuts");
+      setShortcuts(data.shortcuts || []);
+      toast({ title: `Sincronizado! ${data.added} atalhos adicionados.` });
+    } catch (e: any) {
+      toast({ title: "Erro ao sincronizar", description: e.message, variant: "destructive" });
+    } finally { setSyncing(false); }
   };
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +76,7 @@ export default function AdminShortcuts() {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm({ label: "", url: "", sort_order: String(shortcuts.length) });
+    setForm({ label: "", url: "" });
     setIconFile(null);
     setIconPreview(null);
     setShowForm(true);
@@ -72,7 +84,7 @@ export default function AdminShortcuts() {
 
   const openEdit = (s: Shortcut) => {
     setEditingId(s.id);
-    setForm({ label: s.label, url: s.url, sort_order: String(s.sort_order) });
+    setForm({ label: s.label, url: s.url });
     setIconFile(null);
     setIconPreview(s.icon_url);
     setShowForm(true);
@@ -91,12 +103,12 @@ export default function AdminShortcuts() {
       if (editingId) {
         await adminApi("update_shortcut", {
           shortcut_id: editingId,
-          data: { label: form.label, url: form.url, icon_url, sort_order: Number(form.sort_order) },
+          data: { label: form.label, url: form.url, icon_url },
         });
         toast({ title: "Atalho atualizado!" });
       } else {
         await adminApi("create_shortcut", {
-          label: form.label, url: form.url, icon_url, sort_order: Number(form.sort_order),
+          label: form.label, url: form.url, icon_url, sort_order: shortcuts.length,
         });
         toast({ title: "Atalho criado!" });
       }
@@ -135,10 +147,16 @@ export default function AdminShortcuts() {
           <h1 className="text-2xl font-bold">Atalhos do Dashboard</h1>
           <p className="text-muted-foreground text-sm">Gerencie os ícones de atalho do dashboard</p>
         </div>
-        <Button onClick={openCreate} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Novo Atalho
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleSync} disabled={syncing} className="gap-2">
+            <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
+            Sincronizar Padrões
+          </Button>
+          <Button onClick={openCreate} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Novo Atalho
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -147,12 +165,17 @@ export default function AdminShortcuts() {
         </CardHeader>
         <CardContent>
           {shortcuts.length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-8">Nenhum atalho cadastrado.</p>
+            <div className="text-center py-8 space-y-3">
+              <p className="text-muted-foreground text-sm">Nenhum atalho cadastrado.</p>
+              <Button variant="outline" onClick={handleSync} disabled={syncing} className="gap-2">
+                <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
+                Sincronizar atalhos padrão
+              </Button>
+            </div>
           ) : (
             <div className="space-y-2">
               {shortcuts.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
-                  <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
                   {s.icon_url ? (
                     <img src={s.icon_url} alt={s.label} className="w-10 h-10 rounded-xl object-contain bg-card border border-border/50 p-1" />
                   ) : (
@@ -195,10 +218,6 @@ export default function AdminShortcuts() {
             <div>
               <Label>URL de Destino</Label>
               <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="Ex: /roleta ou https://..." />
-            </div>
-            <div>
-              <Label>Ordem de Exibição</Label>
-              <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
             </div>
             <div>
               <Label>Logo / Ícone</Label>
