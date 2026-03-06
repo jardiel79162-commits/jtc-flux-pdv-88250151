@@ -64,10 +64,12 @@ function generateGrid() {
 
 export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
   const [gridData, setGridData] = useState(() => generateGrid());
-  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+  const [selectionOrder, setSelectionOrder] = useState<number[]>([]);
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [attempts, setAttempts] = useState(0);
   const [cooldown, setCooldown] = useState(0);
+
+  const selectedIndices = useMemo(() => new Set(selectionOrder), [selectionOrder]);
 
   const correctIndices = useMemo(
     () => new Set(gridData.cells.filter(c => c.isCorrect).map(c => c.index)),
@@ -76,24 +78,28 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
 
   const refresh = useCallback(() => {
     setGridData(generateGrid());
-    setSelectedIndices(new Set());
+    setSelectionOrder([]);
     setStatus("idle");
     onVerified(false);
   }, [onVerified]);
 
+
+
+
   const handleCellClick = (index: number) => {
     if (status === "correct" || cooldown > 0) return;
 
-    setSelectedIndices(prev => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
+    setSelectionOrder(prev => {
+      if (prev.includes(index)) {
+        // Deselect
+        return prev.filter(i => i !== index);
+      } else if (prev.length >= 3) {
+        // Replace the oldest selection with the new one
+        return [...prev.slice(1), index];
       } else {
-        next.add(index);
+        return [...prev, index];
       }
-      return next;
     });
-    // Reset wrong status when user changes selection
     if (status === "wrong") setStatus("idle");
   };
 
@@ -195,7 +201,7 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
           </div>
 
           {/* 3x3 Grid */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 select-none" style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}>
             {gridData.cells.map((cell) => {
               const isSelected = selectedIndices.has(cell.index);
               return (
@@ -203,7 +209,8 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
                   key={cell.index}
                   type="button"
                   onClick={() => handleCellClick(cell.index)}
-                  className={`relative aspect-square rounded-lg border-2 transition-all duration-200 p-2 flex items-center justify-center ${
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                  className={`relative aspect-square rounded-lg border-2 transition-all duration-200 p-2 flex items-center justify-center select-none outline-none ${
                     isSelected
                       ? status === "wrong"
                         ? "border-red-500 bg-red-500/10"
