@@ -47,6 +47,7 @@ const ProductForm = () => {
     category_id: "",
     is_active: true,
     photo_url: "",
+    photo_image_code: "",
     hasSupplier: false,
     supplier_id: "",
     product_type: "unidade" as "peso" | "unidade" | "servico",
@@ -105,6 +106,7 @@ const ProductForm = () => {
         category_id: product.category_id || "",
         is_active: product.is_active,
         photo_url: product.photos?.[0] || "",
+        photo_image_code: "",
         hasSupplier: !!product.supplier_id,
         supplier_id: product.supplier_id || "",
         product_type: (product.product_type || "unidade") as "peso" | "unidade" | "servico",
@@ -147,6 +149,7 @@ const ProductForm = () => {
     };
 
     try {
+      let productId = id;
       if (isEditing) {
         const { error } = await supabase.from("products").update(productData).eq("id", id);
         if (error) {
@@ -155,13 +158,25 @@ const ProductForm = () => {
         }
         toast({ title: "Produto atualizado com sucesso" });
       } else {
-        const { error } = await supabase.from("products").insert([productData]);
-        if (error) {
+        const { data: inserted, error } = await supabase.from("products").insert([productData]).select("id").single();
+        if (error || !inserted) {
           toast({ title: "Erro ao criar produto", variant: "destructive" });
           return;
         }
+        productId = inserted.id;
         toast({ title: "Produto criado com sucesso" });
       }
+
+      // Save image to product_images if a new image was uploaded with a code
+      if (form.photo_image_code && form.photo_url && productId) {
+        await supabase.from("product_images").insert({
+          product_id: productId,
+          image_code: form.photo_image_code,
+          image_url: form.photo_url,
+          user_id: user.id,
+        });
+      }
+
       clearPersisted();
       navigate("/produtos");
     } finally {
@@ -296,7 +311,7 @@ const ProductForm = () => {
         <ImageUpload
           bucket="product-photos"
           currentImageUrl={form.photo_url}
-          onImageUploaded={(url) => setForm({ ...form, photo_url: url })}
+          onImageUploaded={(url, imageCode) => setForm({ ...form, photo_url: url, photo_image_code: imageCode || "" })}
           label="Foto do Produto (opcional)"
         />
 
