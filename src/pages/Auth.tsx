@@ -867,7 +867,7 @@ const Auth = () => {
                         "Entrar na Conta"
                       )}
                     </Button>
-                  </form>
+                  </motion.form>
                 )}
 
                 <div className="lg:hidden pt-6 border-t border-border/30 mt-6">
