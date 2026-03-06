@@ -18,6 +18,7 @@ import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth"
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fetchCEP, fetchEstados, fetchCidades, type Estado, type Cidade } from "@/lib/location";
+import JTCCaptcha from "@/components/JTCCaptcha";
 
 const Auth = () => {
   const navigate = useNavigate();
