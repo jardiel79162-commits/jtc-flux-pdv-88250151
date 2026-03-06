@@ -562,7 +562,7 @@ serve(async (req) => {
           .range(from, to);
 
         return jsonResponse({
-          spins: spins || [],
+          spins: enrichedSpins,
           granted_logs: grantedSpins || [],
           total: count || 0,
           granted_total: grantedCount || 0,
