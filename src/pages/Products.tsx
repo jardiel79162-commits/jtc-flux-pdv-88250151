@@ -59,22 +59,39 @@ const Products = () => {
     },
   });
 
-  const handleExportTxt = () => {
+  const escapeCsv = (val: string) => {
+    if (val.includes(",") || val.includes('"') || val.includes("\n")) {
+      return `"${val.replace(/"/g, '""')}"`;
+    }
+    return val;
+  };
+
+  const handleExportCsv = () => {
     if (!products || products.length === 0) {
       toast({ title: "Nenhum produto para exportar", variant: "destructive" });
       return;
     }
 
-    const header = "NOME|PRECO|PRECO_CUSTO|ESTOQUE|ESTOQUE_MIN|TIPO|BARCODE|DESCRICAO\n";
-    const rows = products.map(p => 
-      `${p.name}|${p.price}|${p.cost_price || 0}|${p.stock_quantity || 0}|${p.min_stock_quantity || 0}|${p.product_type || ''}|${p.barcode || ''}|${p.description || ''}`
+    const header = "name,price,stock_quantity,barcode,description,min_stock_quantity,cost_price,product_type\n";
+    const rows = products.map(p =>
+      [
+        escapeCsv(p.name),
+        p.price,
+        p.stock_quantity || 0,
+        escapeCsv(p.barcode || ""),
+        escapeCsv(p.description || ""),
+        p.min_stock_quantity || 0,
+        p.cost_price || 0,
+        escapeCsv(p.product_type || "unidade"),
+      ].join(",")
     ).join("\n");
 
-    const blob = new Blob([header + rows], { type: "text/plain" });
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + header + rows], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `produtos_fluxpdv_${new Date().toISOString().split('T')[0]}.txt`;
+    link.download = `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -83,12 +100,32 @@ const Products = () => {
     toast({ title: "Produtos exportados com sucesso!" });
   };
 
-  const handleImportTxt = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"' && line[i + 1] === '"') { current += '"'; i++; }
+        else if (ch === '"') { inQuotes = false; }
+        else { current += ch; }
+      } else {
+        if (ch === '"') { inQuotes = true; }
+        else if (ch === ",") { result.push(current.trim()); current = ""; }
+        else { current += ch; }
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const handleImportCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith(".txt")) {
-      toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo .txt", variant: "destructive" });
+    if (!file.name.endsWith(".csv")) {
+      toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo .csv", variant: "destructive" });
       return;
     }
 
@@ -97,99 +134,80 @@ const Products = () => {
 
     reader.onload = async (e) => {
       try {
-        const content = e.target?.result as string;
-        const lines = content.split("\n");
-        if (lines.length <= 1) {
-          throw new Error("Arquivo vazio ou sem dados válidos.");
-        }
+        const content = (e.target?.result as string).replace(/^\uFEFF/, "");
+        const lines = content.split(/\r?\n/);
+        if (lines.length <= 1) throw new Error("Arquivo vazio");
 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Usuário não autenticado");
 
+        // Parse header
+        const headerParts = parseCsvLine(lines[0]).map(h => h.toLowerCase().trim());
+        const colIndex = (keys: string[]) => {
+          for (const k of keys) {
+            const idx = headerParts.indexOf(k);
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        const iName = colIndex(["name", "nome"]);
+        const iPrice = colIndex(["price", "preco"]);
+        const iStock = colIndex(["stock_quantity", "stock", "estoque"]);
+        const iBarcode = colIndex(["barcode"]);
+        const iDesc = colIndex(["description", "descricao"]);
+        const iMinStock = colIndex(["min_stock_quantity", "min_stock", "estoque_min"]);
+        const iCost = colIndex(["cost_price", "preco_custo"]);
+        const iType = colIndex(["product_type", "tipo", "unit"]);
+
+        if (iName === -1) throw new Error("Coluna 'name' não encontrada no cabeçalho.");
+
         const productsToImport = [];
-        
-        // Detectar cabeçalho
-        const firstLine = lines[0].toUpperCase().trim();
-        const hasHeader = firstLine.includes("NOME") || firstLine.includes("PRECO") || firstLine.includes("ID");
-        const startLine = hasHeader ? 1 : 0;
 
-        // Mapear índices a partir do cabeçalho se existir
-        let headerMap: Record<string, number> = {};
-        if (hasHeader) {
-          const headerParts = lines[0].split("|").map(h => h.trim().toUpperCase());
-          headerParts.forEach((h, i) => { headerMap[h] = i; });
-        }
-
-        for (let i = startLine; i < lines.length; i++) {
+        for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          const parts = line.split("|");
-          if (parts.length < 2) continue;
+          const parts = parseCsvLine(line);
+          const name = parts[iName]?.trim();
+          if (!name) continue;
 
-          let productData: any;
+          const price = iPrice !== -1 ? parseFloat((parts[iPrice] || "0").replace(",", ".")) || 0 : 0;
 
-          if (hasHeader && Object.keys(headerMap).length > 0) {
-            // Mapeamento baseado no cabeçalho
-            const get = (keys: string[]) => {
-              for (const k of keys) {
-                if (headerMap[k] !== undefined && parts[headerMap[k]]) return parts[headerMap[k]].trim();
-              }
-              return null;
-            };
-            productData = {
-              user_id: user.id,
-              name: get(["NOME", "NAME"]) || "Produto sem nome",
-              price: parseFloat((get(["PRECO", "PRICE"]) || "0").replace(",", ".")) || 0,
-              cost_price: parseFloat((get(["PRECO_CUSTO", "COST_PRICE"]) || "0").replace(",", ".")) || 0,
-              stock_quantity: parseInt(get(["ESTOQUE", "STOCK", "STOCK_QUANTITY"]) || "0") || 0,
-              min_stock_quantity: parseInt(get(["ESTOQUE_MIN", "MIN_STOCK", "MIN_STOCK_QUANTITY"]) || "0") || 0,
-              product_type: get(["TIPO", "UNIT", "PRODUCT_TYPE"]) || "unidade",
-              barcode: get(["BARCODE"]) || null,
-              description: get(["DESCRICAO", "DESCRIPTION"]) || "",
-            };
-          } else {
-            // Mapeamento posicional: NOME|PRECO|PRECO_CUSTO|ESTOQUE|ESTOQUE_MIN|TIPO|BARCODE|DESCRICAO
-            productData = {
-              user_id: user.id,
-              name: parts[0]?.trim() || "Produto sem nome",
-              price: parseFloat((parts[1] || "0").replace(",", ".")) || 0,
-              cost_price: parseFloat((parts[2] || "0").replace(",", ".")) || 0,
-              stock_quantity: parseInt(parts[3] || "0") || 0,
-              min_stock_quantity: parseInt(parts[4] || "0") || 0,
-              product_type: parts[5]?.trim() || "unidade",
-              barcode: parts[6]?.trim() || null,
-              description: parts[7]?.trim() || "",
-            };
-          }
-
-          productsToImport.push(productData);
+          productsToImport.push({
+            user_id: user.id,
+            name,
+            price,
+            stock_quantity: iStock !== -1 ? parseInt(parts[iStock] || "0") || 0 : 0,
+            barcode: iBarcode !== -1 ? parts[iBarcode]?.trim() || null : null,
+            description: iDesc !== -1 ? parts[iDesc]?.trim() || "" : "",
+            min_stock_quantity: iMinStock !== -1 ? parseInt(parts[iMinStock] || "0") || 0 : 0,
+            cost_price: iCost !== -1 ? parseFloat((parts[iCost] || "0").replace(",", ".")) || 0 : 0,
+            product_type: iType !== -1 ? parts[iType]?.trim() || "unidade" : "unidade",
+          });
         }
 
         if (productsToImport.length === 0) {
-          toast({ title: "Nenhum produto válido encontrado", description: "Verifique a formatação do arquivo.", variant: "destructive" });
+          toast({ title: "Nenhum produto válido encontrado", description: "Verifique a formatação do arquivo CSV.", variant: "destructive" });
           setIsImporting(false);
           return;
         }
 
-        const { error } = await supabase
-          .from("products")
-          .insert(productsToImport);
-
+        const { error } = await supabase.from("products").insert(productsToImport);
         if (error) throw error;
 
         queryClient.invalidateQueries({ queryKey: ["products"] });
         toast({ title: `${productsToImport.length} produtos importados com sucesso!` });
       } catch (error: any) {
         console.error("Erro na importação:", error);
-        toast({ 
-          title: "Erro ao importar produtos", 
-          description: "Ocorreu um erro ao processar o arquivo. Verifique se os dados estão no formato correto.", 
-          variant: "destructive" 
+        toast({
+          title: "Erro ao importar produtos",
+          description: error.message || "Verifique se os dados estão no formato CSV correto.",
+          variant: "destructive"
         });
       } finally {
         setIsImporting(false);
-        event.target.value = ""; // Limpar input
+        event.target.value = "";
       }
     };
 
@@ -214,24 +232,24 @@ const Products = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={handleExportTxt} className="gap-2">
+            <Button variant="outline" onClick={handleExportCsv} className="gap-2">
               <Download className="h-4 w-4" />
-              Extrair (.TXT)
+              Extrair (.CSV)
             </Button>
             
             <div className="relative">
               <input
                 type="file"
-                accept=".txt"
+                accept=".csv"
                 className="hidden"
-                id="import-txt-input"
-                onChange={handleImportTxt}
+                id="import-csv-input"
+                onChange={handleImportCsv}
                 disabled={isImporting}
               />
               <Button variant="outline" asChild disabled={isImporting} className="gap-2">
-                <label htmlFor="import-txt-input" className="cursor-pointer">
+                <label htmlFor="import-csv-input" className="cursor-pointer">
                   {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  Enviar (.TXT)
+                  Enviar (.CSV)
                 </label>
               </Button>
             </div>
