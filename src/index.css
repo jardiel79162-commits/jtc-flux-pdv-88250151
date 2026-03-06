@@ -536,40 +536,6 @@
     box-shadow: 0 4px 12px -2px hsl(229 100% 65% / 0.35);
   }
 
-  /* Animated border shimmer for auth card */
-  .auth-card::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 1.5rem;
-    background: conic-gradient(from var(--auth-border-angle, 0deg), transparent 60%, hsl(229 100% 65% / 0.3) 80%, hsl(163 100% 44% / 0.3) 90%, transparent 100%);
-    z-index: -1;
-    animation: auth-border-spin 6s linear infinite;
-  }
-
-  @keyframes auth-border-spin {
-    to { --auth-border-angle: 360deg; }
-  }
-
-  @property --auth-border-angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-  }
-
-  /* Enhanced input focus glow in auth */
-  .auth-card input:focus {
-    box-shadow: 0 0 0 3px hsl(229 100% 65% / 0.15), 0 0 20px -5px hsl(229 100% 65% / 0.2) !important;
-    border-color: hsl(229 100% 65% / 0.4) !important;
-  }
-
-  /* Auth select trigger styling */
-  .auth-card [role="combobox"] {
-    background: rgba(255,255,255,0.06) !important;
-    border-color: rgba(255,255,255,0.12) !important;
-    color: #e8eeff !important;
-  }
-
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
