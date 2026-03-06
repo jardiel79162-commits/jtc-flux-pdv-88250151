@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, Play, ShieldAlert, RefreshCw, Eye, Check, X, Trophy, Loader2 } from "lucide-react";
+import { Gift, Play, ShieldAlert, Eye, Check, X, Trophy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,16 +8,18 @@ import { toast } from "@/hooks/use-toast";
 
 // ── Prize definitions ──
 const PRIZES = [
-  { label: "Não Foi Dessa Vez", emoji: "😥", color: "#6b7280", weight: 75, days: 0 },
-  { label: "1 Semana Grátis", emoji: "🎁", color: "#3b82f6", weight: 10, days: 7 },
-  { label: "1 Mês Grátis", emoji: "🎁", color: "#8b5cf6", weight: 6, days: 30 },
-  { label: "1 Ano Grátis", emoji: "🎉", color: "#f59e0b", weight: 4, days: 365 },
-  { label: "2 Anos Grátis", emoji: "🎉", color: "#ef4444", weight: 3, days: 730 },
-  { label: "3 Anos Grátis", emoji: "🎉", color: "#ec4899", weight: 1.5, days: 1095 },
-  { label: "Acesso Ilimitado", emoji: "🚀", color: "#10b981", weight: 0.5, days: 36500 },
+  { label: "Não Foi\nDessa Vez", emoji: "😥", color: "#4b5563", colorDark: "#374151", weight: 75, days: 0 },
+  { label: "1 Semana\nGrátis", emoji: "🎁", color: "#3b82f6", colorDark: "#2563eb", weight: 10, days: 7 },
+  { label: "1 Mês\nGrátis", emoji: "🎁", color: "#8b5cf6", colorDark: "#7c3aed", weight: 6, days: 30 },
+  { label: "1 Ano\nGrátis", emoji: "🎉", color: "#f59e0b", colorDark: "#d97706", weight: 4, days: 365 },
+  { label: "2 Anos\nGrátis", emoji: "🎉", color: "#ef4444", colorDark: "#dc2626", weight: 3, days: 730 },
+  { label: "3 Anos\nGrátis", emoji: "🎉", color: "#ec4899", colorDark: "#db2777", weight: 1.5, days: 1095 },
+  { label: "Acesso\nIlimitado", emoji: "🚀", color: "#10b981", colorDark: "#059669", weight: 0.5, days: 36500 },
 ];
 
 const REQUIRED_ADS = 5;
+const NUM_SLICES = PRIZES.length;
+const SLICE_ANGLE = 360 / NUM_SLICES;
 
 // ── Weighted random pick ──
 function pickPrize(): number {
@@ -33,8 +35,7 @@ function pickPrize(): number {
 // ── AdBlock detection ──
 async function detectAdBlock(): Promise<boolean> {
   try {
-    // Try fetching a known ad script path
-    const res = await fetch("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", {
+    await fetch("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", {
       method: "HEAD",
       mode: "no-cors",
     });
@@ -43,6 +44,207 @@ async function detectAdBlock(): Promise<boolean> {
     return true;
   }
 }
+
+// ── SVG helpers ──
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const rad = ((angleDeg - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
+}
+
+// ── Wheel SVG Component ──
+const WheelSVG = () => {
+  const size = 320;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size / 2 - 8;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-2xl">
+      {/* Outer decorative ring */}
+      <circle cx={cx} cy={cy} r={radius + 6} fill="none" stroke="url(#outerGrad)" strokeWidth="4" />
+      
+      {/* Tick marks around edge */}
+      {Array.from({ length: 28 }).map((_, i) => {
+        const angle = (i * 360) / 28;
+        const p1 = polarToCartesian(cx, cy, radius + 2, angle);
+        const p2 = polarToCartesian(cx, cy, radius - 4, angle);
+        return (
+          <line key={i} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" />
+        );
+      })}
+
+      {/* Slices */}
+      {PRIZES.map((prize, i) => {
+        const startAngle = i * SLICE_ANGLE;
+        const endAngle = startAngle + SLICE_ANGLE;
+        const midAngle = startAngle + SLICE_ANGLE / 2;
+        const textR = radius * 0.58;
+        const emojiR = radius * 0.78;
+        const textPos = polarToCartesian(cx, cy, textR, midAngle);
+        const emojiPos = polarToCartesian(cx, cy, emojiR, midAngle);
+
+        return (
+          <g key={i}>
+            {/* Gradient slice */}
+            <defs>
+              <linearGradient id={`sliceGrad${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={prize.color} />
+                <stop offset="100%" stopColor={prize.colorDark} />
+              </linearGradient>
+            </defs>
+            <path
+              d={describeArc(cx, cy, radius, startAngle, endAngle)}
+              fill={`url(#sliceGrad${i})`}
+              stroke="rgba(255,255,255,0.15)"
+              strokeWidth="1.5"
+            />
+
+            {/* Inner shadow line */}
+            <path
+              d={describeArc(cx, cy, radius - 2, startAngle + 0.5, endAngle - 0.5)}
+              fill="none"
+              stroke="rgba(0,0,0,0.1)"
+              strokeWidth="1"
+            />
+
+            {/* Emoji */}
+            <text
+              x={emojiPos.x}
+              y={emojiPos.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize="22"
+              transform={`rotate(${midAngle}, ${emojiPos.x}, ${emojiPos.y})`}
+            >
+              {prize.emoji}
+            </text>
+
+            {/* Label text */}
+            {prize.label.split("\n").map((line, li) => (
+              <text
+                key={li}
+                x={textPos.x}
+                y={textPos.y + (li - 0.5) * 12}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="9"
+                fontWeight="bold"
+                fill="#fff"
+                transform={`rotate(${midAngle}, ${textPos.x}, ${textPos.y + (li - 0.5) * 12})`}
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
+              >
+                {line}
+              </text>
+            ))}
+          </g>
+        );
+      })}
+
+      {/* Center hub */}
+      <circle cx={cx} cy={cy} r="30" fill="url(#centerGrad)" stroke="rgba(255,255,255,0.8)" strokeWidth="3" />
+      <circle cx={cx} cy={cy} r="22" fill="#1e293b" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
+      <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="central" fontSize="18">🎰</text>
+
+      {/* Defs */}
+      <defs>
+        <linearGradient id="outerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#facc15" />
+          <stop offset="33%" stopColor="#f59e0b" />
+          <stop offset="66%" stopColor="#ef4444" />
+          <stop offset="100%" stopColor="#ec4899" />
+        </linearGradient>
+        <radialGradient id="centerGrad">
+          <stop offset="0%" stopColor="#334155" />
+          <stop offset="100%" stopColor="#1e293b" />
+        </radialGradient>
+      </defs>
+    </svg>
+  );
+};
+
+// ── Pointer Component ──
+const Pointer = ({ isSpinning }: { isSpinning: boolean }) => (
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
+    <motion.div
+      animate={isSpinning ? { rotateZ: [0, -15, 15, -10, 10, -5, 5, 0] } : {}}
+      transition={{ duration: 0.6, repeat: isSpinning ? Infinity : 0, ease: "easeInOut" }}
+    >
+      <svg width="40" height="48" viewBox="0 0 40 48">
+        <defs>
+          <linearGradient id="pointerGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#facc15" />
+            <stop offset="100%" stopColor="#f59e0b" />
+          </linearGradient>
+          <filter id="pointerShadow">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="rgba(0,0,0,0.4)" />
+          </filter>
+        </defs>
+        <path
+          d="M20 46 L4 10 Q2 4 8 2 L20 0 L32 2 Q38 4 36 10 Z"
+          fill="url(#pointerGrad)"
+          stroke="#d97706"
+          strokeWidth="1.5"
+          filter="url(#pointerShadow)"
+        />
+        <circle cx="20" cy="12" r="4" fill="#fff" opacity="0.9" />
+      </svg>
+    </motion.div>
+  </div>
+);
+
+// ── LED lights around the wheel ──
+const LEDRing = ({ isSpinning }: { isSpinning: boolean }) => {
+  const count = 24;
+  const radius = 172;
+  const cx = 176;
+  const cy = 176;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none" style={{ width: 352, height: 352 }}>
+      {Array.from({ length: count }).map((_, i) => {
+        const angle = (i * 360) / count - 90;
+        const rad = (angle * Math.PI) / 180;
+        const x = cx + radius * Math.cos(rad);
+        const y = cy + radius * Math.sin(rad);
+        const colors = ["#facc15", "#ef4444", "#3b82f6", "#10b981"];
+        const color = colors[i % colors.length];
+
+        return (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: 8,
+              height: 8,
+              left: x - 4,
+              top: y - 4,
+              backgroundColor: color,
+              boxShadow: `0 0 8px 2px ${color}80`,
+            }}
+            animate={
+              isSpinning
+                ? { opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }
+                : { opacity: [0.5, 1, 0.5] }
+            }
+            transition={{
+              duration: isSpinning ? 0.3 : 1.5,
+              repeat: Infinity,
+              delay: i * (isSpinning ? 0.05 : 0.1),
+              ease: "easeInOut",
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
 
 const PrizeWheel = () => {
   const [adsWatched, setAdsWatched] = useState(0);
@@ -54,10 +256,8 @@ const PrizeWheel = () => {
   const [checkingAdBlock, setCheckingAdBlock] = useState(true);
   const [watchingAd, setWatchingAd] = useState(false);
   const [adTimer, setAdTimer] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wheelRef = useRef<HTMLDivElement>(null);
+  const spinCountRef = useRef(0);
 
-  // ── Check AdBlock on mount ──
   const checkAdBlock = useCallback(async () => {
     setCheckingAdBlock(true);
     const blocked = await detectAdBlock();
@@ -69,88 +269,23 @@ const PrizeWheel = () => {
     checkAdBlock();
   }, [checkAdBlock]);
 
-  // ── Draw wheel on canvas ──
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const size = 300;
-    canvas.width = size * 2;
-    canvas.height = size * 2;
-    ctx.scale(2, 2); // retina
-
-    const cx = size / 2;
-    const cy = size / 2;
-    const radius = size / 2 - 4;
-    const sliceAngle = (2 * Math.PI) / PRIZES.length;
-
-    PRIZES.forEach((prize, i) => {
-      const start = i * sliceAngle - Math.PI / 2;
-      const end = start + sliceAngle;
-
-      // Slice
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, radius, start, end);
-      ctx.closePath();
-      ctx.fillStyle = prize.color;
-      ctx.fill();
-
-      // Border
-      ctx.strokeStyle = "rgba(255,255,255,0.3)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Text
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(start + sliceAngle / 2);
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 11px sans-serif";
-      ctx.shadowColor = "rgba(0,0,0,0.5)";
-      ctx.shadowBlur = 3;
-      ctx.fillText(prize.emoji, radius * 0.6, 4);
-      ctx.font = "bold 8px sans-serif";
-      ctx.fillText(prize.label.length > 14 ? prize.label.slice(0, 14) + "…" : prize.label, radius * 0.38, 4);
-      ctx.restore();
-    });
-
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22, 0, 2 * Math.PI);
-    ctx.fillStyle = "#1e293b";
-    ctx.fill();
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Center text
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("🎰", cx, cy + 4);
-  }, []);
-
-  // ── Simulate watching an ad ──
   const watchAd = () => {
     if (adsWatched >= REQUIRED_ADS) return;
     setWatchingAd(true);
     setAdTimer(5);
 
-    // This is a placeholder for real Google Ads integration
-    // The ad container div will be where Google Ads renders
     const interval = setInterval(() => {
       setAdTimer((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
           setWatchingAd(false);
-          setAdsWatched((a) => a + 1);
-          toast({
-            title: `Anúncio ${adsWatched + 1}/${REQUIRED_ADS} assistido!`,
-            description: adsWatched + 1 >= REQUIRED_ADS ? "Você liberou a roleta! 🎉" : `Faltam ${REQUIRED_ADS - adsWatched - 1} anúncios.`,
+          setAdsWatched((a) => {
+            const next = a + 1;
+            toast({
+              title: `Anúncio ${next}/${REQUIRED_ADS} assistido!`,
+              description: next >= REQUIRED_ADS ? "Você liberou a roleta! 🎉" : `Faltam ${REQUIRED_ADS - next} anúncios.`,
+            });
+            return next;
           });
           return 0;
         }
@@ -159,24 +294,25 @@ const PrizeWheel = () => {
     }, 1000);
   };
 
-  // ── Spin the wheel ──
   const spin = () => {
     if (isSpinning || adsWatched < REQUIRED_ADS) return;
 
     setIsSpinning(true);
     setShowResult(false);
     setWonPrize(null);
+    spinCountRef.current += 1;
 
     const prizeIndex = pickPrize();
     const prize = PRIZES[prizeIndex];
 
-    // Calculate target rotation
-    const sliceAngle = 360 / PRIZES.length;
-    // The pointer is at the top. We need the winning slice to end under the pointer.
-    const targetSliceCenter = prizeIndex * sliceAngle;
-    // Spin at least 5 full rotations + offset to land on prize
-    const extraSpins = 5 * 360;
-    const targetRotation = extraSpins + (360 - targetSliceCenter);
+    // Calculate landing: pointer is at top (0°). Slice i starts at i*SLICE_ANGLE.
+    // We want the middle of the winning slice under the pointer.
+    const targetSliceCenter = prizeIndex * SLICE_ANGLE + SLICE_ANGLE / 2;
+    // Random offset within ±40% of slice to look natural
+    const jitter = (Math.random() - 0.5) * SLICE_ANGLE * 0.7;
+    const landAngle = 360 - targetSliceCenter + jitter;
+    const fullSpins = (6 + Math.floor(Math.random() * 3)) * 360;
+    const targetRotation = fullSpins + landAngle;
 
     setRotation((prev) => prev + targetRotation);
 
@@ -184,17 +320,14 @@ const PrizeWheel = () => {
       setIsSpinning(false);
       setWonPrize(prize);
       setShowResult(true);
-      // Reset ads for next spin
       setAdsWatched(0);
 
-      // Apply prize if it has days
       if (prize.days > 0) {
         applyPrize(prize.days);
       }
-    }, 4500);
+    }, 5500);
   };
 
-  // ── Apply prize to subscription ──
   const applyPrize = async (days: number) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -227,7 +360,7 @@ const PrizeWheel = () => {
     }
   };
 
-  // ── AdBlock blocked screen ──
+  // ── AdBlock screen ──
   if (checkingAdBlock) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -251,10 +384,7 @@ const PrizeWheel = () => {
             <p className="text-muted-foreground text-xs">
               Os anúncios nos ajudam a manter os prêmios disponíveis para todos os usuários.
             </p>
-            <Button
-              onClick={checkAdBlock}
-              className="gap-2 rounded-xl"
-            >
+            <Button onClick={checkAdBlock} className="gap-2 rounded-xl">
               <Check className="w-4 h-4" />
               Já Desativei
             </Button>
@@ -286,7 +416,6 @@ const PrizeWheel = () => {
             <span className="text-sm font-bold text-primary">{adsWatched}/{REQUIRED_ADS}</span>
           </div>
 
-          {/* Progress bar */}
           <div className="relative h-3 bg-muted rounded-full overflow-hidden">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full"
@@ -297,7 +426,6 @@ const PrizeWheel = () => {
             />
           </div>
 
-          {/* Progress dots */}
           <div className="flex justify-between">
             {Array.from({ length: REQUIRED_ADS }).map((_, i) => (
               <div
@@ -335,14 +463,18 @@ const PrizeWheel = () => {
           )}
 
           {adsWatched >= REQUIRED_ADS && (
-            <div className="text-center text-sm font-semibold text-primary animate-pulse">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-center text-sm font-semibold text-primary"
+            >
               ✅ Roleta Liberada! Gire agora!
-            </div>
+            </motion.div>
           )}
         </CardContent>
       </Card>
 
-      {/* Ad container placeholder for Google Ads */}
+      {/* Ad container */}
       <AnimatePresence>
         {watchingAd && (
           <motion.div
@@ -355,7 +487,6 @@ const PrizeWheel = () => {
                 <div className="text-center space-y-3">
                   <div className="text-4xl">📺</div>
                   <p className="text-sm text-muted-foreground font-medium">Anúncio em exibição...</p>
-                  {/* Google Ads will render here */}
                   <div
                     id="prize-wheel-ad-container"
                     className="min-h-[100px] bg-muted/50 rounded-lg flex items-center justify-center"
@@ -370,66 +501,64 @@ const PrizeWheel = () => {
         )}
       </AnimatePresence>
 
-      {/* Wheel */}
-      <div className="relative flex flex-col items-center">
-        {/* Pointer */}
-        <div className="relative z-10 -mb-2">
-          <div className="w-0 h-0 border-l-[14px] border-r-[14px] border-t-[24px] border-l-transparent border-r-transparent border-t-primary drop-shadow-lg" />
-        </div>
+      {/* ═══════════ THE WHEEL ═══════════ */}
+      <div className="flex flex-col items-center">
+        <div className="relative" style={{ width: 352, height: 376 }}>
+          {/* LED ring */}
+          <LEDRing isSpinning={isSpinning} />
 
-        {/* Wheel container */}
-        <div
-          ref={wheelRef}
-          className="relative select-none"
-          style={{
-            width: 300,
-            height: 300,
-          }}
-        >
-          {/* Outer glow */}
-          <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 blur-xl animate-pulse" />
+          {/* Pointer */}
+          <Pointer isSpinning={isSpinning} />
 
-          {/* Outer ring */}
-          <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary via-accent to-primary p-[3px]">
-            <div className="w-full h-full rounded-full bg-card" />
+          {/* Wheel */}
+          <div className="absolute" style={{ left: 16, top: 24, width: 320, height: 320 }}>
+            <motion.div
+              style={{ width: 320, height: 320 }}
+              animate={{ rotate: rotation }}
+              transition={{
+                duration: 5.5,
+                ease: [0.15, 0.85, 0.25, 1],
+              }}
+            >
+              <WheelSVG />
+            </motion.div>
           </div>
 
-          {/* Canvas wheel */}
-          <motion.div
-            className="absolute inset-0"
-            animate={{ rotate: rotation }}
-            transition={{
-              duration: 4.5,
-              ease: [0.2, 0.8, 0.3, 1],
-            }}
-          >
-            <canvas
-              ref={canvasRef}
-              className="w-full h-full rounded-full"
-              style={{ width: 300, height: 300 }}
-            />
-          </motion.div>
+          {/* Platform base shadow */}
+          <div
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[280px] h-4 rounded-[50%] bg-black/15 blur-md"
+          />
         </div>
 
         {/* Spin button */}
-        <Button
-          onClick={spin}
-          disabled={isSpinning || adsWatched < REQUIRED_ADS}
-          className="mt-6 gap-2 rounded-full h-14 px-10 text-lg font-bold shadow-lg disabled:opacity-40"
-          size="lg"
-        >
-          {isSpinning ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Girando...
-            </>
-          ) : (
-            <>
-              <Play className="w-5 h-5" />
-              Girar Roleta
-            </>
-          )}
-        </Button>
+        <motion.div whileTap={{ scale: 0.95 }}>
+          <Button
+            onClick={spin}
+            disabled={isSpinning || adsWatched < REQUIRED_ADS}
+            className="mt-2 gap-2 rounded-full h-14 px-10 text-lg font-bold shadow-xl disabled:opacity-40 relative overflow-hidden"
+            size="lg"
+          >
+            {/* Shimmer effect */}
+            {!isSpinning && adsWatched >= REQUIRED_ADS && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+            )}
+            {isSpinning ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Girando...
+              </>
+            ) : (
+              <>
+                <Play className="w-5 h-5" />
+                Girar Roleta
+              </>
+            )}
+          </Button>
+        </motion.div>
       </div>
 
       {/* Result modal */}
@@ -443,44 +572,78 @@ const PrizeWheel = () => {
             onClick={() => setShowResult(false)}
           >
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              className="bg-card rounded-2xl p-8 max-w-sm w-full text-center space-y-5 shadow-2xl border border-border"
+              initial={{ scale: 0.3, opacity: 0, rotateZ: -10 }}
+              animate={{ scale: 1, opacity: 1, rotateZ: 0 }}
+              exit={{ scale: 0.3, opacity: 0 }}
+              transition={{ type: "spring", damping: 18, stiffness: 200 }}
+              className="bg-card rounded-2xl p-8 max-w-sm w-full text-center space-y-5 shadow-2xl border border-border relative overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {wonPrize.days > 0 ? (
-                <>
-                  <div className="text-6xl">{wonPrize.emoji}</div>
-                  <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ backgroundColor: wonPrize.color + "22" }}>
-                    <Trophy className="w-8 h-8" style={{ color: wonPrize.color }} />
-                  </div>
-                  <h2 className="text-2xl font-bold text-foreground">Parabéns! 🎉</h2>
-                  <p className="text-lg font-semibold" style={{ color: wonPrize.color }}>
-                    {wonPrize.label}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    O prêmio foi adicionado à sua assinatura automaticamente!
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="text-6xl">{wonPrize.emoji}</div>
-                  <h2 className="text-xl font-bold text-foreground">{wonPrize.label}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Tente novamente! Assista mais {REQUIRED_ADS} anúncios para uma nova rodada.
-                  </p>
-                </>
-              )}
-              <Button
-                onClick={() => setShowResult(false)}
-                variant="outline"
-                className="rounded-xl gap-2"
-              >
-                <X className="w-4 h-4" />
-                Fechar
-              </Button>
+              {/* Background decoration */}
+              <div className="absolute inset-0 opacity-5">
+                {wonPrize.days > 0 && (
+                  <div className="absolute inset-0" style={{
+                    background: `radial-gradient(circle at 50% 50%, ${wonPrize.color}40, transparent 70%)`
+                  }} />
+                )}
+              </div>
+
+              <div className="relative z-10 space-y-4">
+                {wonPrize.days > 0 ? (
+                  <>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: "spring" }}
+                      className="text-7xl"
+                    >
+                      {wonPrize.emoji}
+                    </motion.div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.4, type: "spring" }}
+                    >
+                      <div
+                        className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
+                        style={{ backgroundColor: wonPrize.color + "22" }}
+                      >
+                        <Trophy className="w-8 h-8" style={{ color: wonPrize.color }} />
+                      </div>
+                    </motion.div>
+                    <h2 className="text-2xl font-bold text-foreground">Parabéns! 🎉</h2>
+                    <p className="text-lg font-semibold" style={{ color: wonPrize.color }}>
+                      {wonPrize.label.replace("\n", " ")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      O prêmio foi adicionado à sua assinatura automaticamente!
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: "spring" }}
+                      className="text-7xl"
+                    >
+                      {wonPrize.emoji}
+                    </motion.div>
+                    <h2 className="text-xl font-bold text-foreground">{wonPrize.label.replace("\n", " ")}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Tente novamente! Assista mais {REQUIRED_ADS} anúncios para uma nova rodada.
+                    </p>
+                  </>
+                )}
+                <Button
+                  onClick={() => setShowResult(false)}
+                  variant="outline"
+                  className="rounded-xl gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Fechar
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -497,15 +660,19 @@ const PrizeWheel = () => {
             {PRIZES.map((prize, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50"
+                className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-muted/50"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: prize.color }}
+                  />
                   <span className="text-lg">{prize.emoji}</span>
-                  <span className="text-sm font-medium text-foreground">{prize.label}</span>
+                  <span className="text-sm font-medium text-foreground">{prize.label.replace("\n", " ")}</span>
                 </div>
                 <span
-                  className="text-xs font-bold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: prize.color + "22", color: prize.color }}
+                  className="text-xs font-bold px-2.5 py-1 rounded-full"
+                  style={{ backgroundColor: prize.color + "18", color: prize.color }}
                 >
                   {prize.weight}%
                 </span>
