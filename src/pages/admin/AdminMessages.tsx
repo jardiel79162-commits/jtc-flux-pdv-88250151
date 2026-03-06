@@ -173,6 +173,28 @@ export default function AdminMessages() {
     setSelectedUserId(userId);
     setMsgLoading(true);
 
+    // Check if we already have this conversation info
+    let convInfo = conversations.find((c) => c.user_id === userId) || null;
+
+    // If not in conversations list, fetch user profile info
+    if (!convInfo) {
+      const [{ data: profile }, { data: store }] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, email").eq("user_id", userId).maybeSingle(),
+        supabase.from("store_settings").select("user_id, store_name, logo_url").eq("user_id", userId).maybeSingle(),
+      ]);
+      convInfo = {
+        user_id: userId,
+        full_name: profile?.full_name || null,
+        email: profile?.email || null,
+        store_name: store?.store_name || null,
+        store_logo: store?.logo_url || null,
+        unread_count: 0,
+        last_message: null,
+        last_message_at: null,
+      };
+    }
+    setSelectedUserInfo(convInfo);
+
     const { data } = await supabase
       .from("admin_messages")
       .select("*")
