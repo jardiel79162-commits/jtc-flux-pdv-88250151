@@ -608,6 +608,43 @@ serve(async (req) => {
         return jsonResponse({ success: true });
       }
 
+      case 'sync_default_shortcuts': {
+        const defaults = [
+          { label: 'Produtos', url: '/produtos', sort_order: 0 },
+          { label: 'Venda', url: '/pdv', sort_order: 1 },
+          { label: 'Clientes', url: '/clientes', sort_order: 2 },
+          { label: 'Fornecedores', url: '/fornecedores', sort_order: 3 },
+          { label: 'Histórico', url: '/historico', sort_order: 4 },
+          { label: 'Relatórios', url: '/relatorios', sort_order: 5 },
+          { label: 'Configurações', url: '/configuracoes', sort_order: 6 },
+          { label: 'Assinatura', url: '/assinatura', sort_order: 7 },
+          { label: 'Calculadora', url: '/calculadora', sort_order: 8 },
+          { label: 'Bônus', url: '/resgate-semanal', sort_order: 9 },
+        ];
+
+        // Get existing shortcuts URLs
+        const { data: existing } = await supabaseAdmin.from('custom_shortcuts').select('url');
+        const existingUrls = new Set((existing || []).map((s: any) => s.url));
+
+        // Only insert missing ones
+        const toInsert = defaults
+          .filter(d => !existingUrls.has(d.url))
+          .map(d => ({ ...d, created_by: user.id, is_active: true }));
+
+        if (toInsert.length > 0) {
+          const { error: insertErr } = await supabaseAdmin.from('custom_shortcuts').insert(toInsert);
+          if (insertErr) throw insertErr;
+        }
+
+        await supabaseAdmin.from('system_logs').insert({
+          user_id: user.id, event_type: 'shortcuts_synced',
+          description: `${toInsert.length} atalhos padrão sincronizados`,
+        });
+
+        const { data: allShortcuts } = await supabaseAdmin.from('custom_shortcuts').select('*').order('sort_order', { ascending: true });
+        return jsonResponse({ success: true, shortcuts: allShortcuts || [], added: toInsert.length });
+      }
+
       default:
         return jsonResponse({ error: 'Ação inválida' }, 400);
     }
