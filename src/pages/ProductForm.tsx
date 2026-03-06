@@ -47,6 +47,7 @@ const ProductForm = () => {
     category_id: "",
     is_active: true,
     photo_url: "",
+    photo_image_code: "",
     hasSupplier: false,
     supplier_id: "",
     product_type: "unidade" as "peso" | "unidade" | "servico",
