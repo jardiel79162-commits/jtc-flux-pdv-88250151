@@ -106,6 +106,7 @@ const ProductForm = () => {
         category_id: product.category_id || "",
         is_active: product.is_active,
         photo_url: product.photos?.[0] || "",
+        photo_image_code: "",
         hasSupplier: !!product.supplier_id,
         supplier_id: product.supplier_id || "",
         product_type: (product.product_type || "unidade") as "peso" | "unidade" | "servico",
