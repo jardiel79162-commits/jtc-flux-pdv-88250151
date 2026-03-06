@@ -166,94 +166,141 @@ const Products = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith(".csv")) {
-      toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo .csv", variant: "destructive" });
+    const isZip = file.name.endsWith(".zip");
+    const isCsv = file.name.endsWith(".csv");
+
+    if (!isZip && !isCsv) {
+      toast({ title: "Formato inválido", description: "Selecione um arquivo .csv ou .zip", variant: "destructive" });
       return;
     }
 
     setIsImporting(true);
-    const reader = new FileReader();
 
-    reader.onload = async (e) => {
-      try {
-        const content = (e.target?.result as string).replace(/^\uFEFF/, "");
-        const lines = content.split(/\r?\n/);
-        if (lines.length <= 1) throw new Error("Arquivo vazio");
+    try {
+      let csvContent = "";
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("Usuário não autenticado");
-
-        // Parse header
-        const headerParts = parseCsvLine(lines[0]).map(h => h.toLowerCase().trim());
-        const colIndex = (keys: string[]) => {
-          for (const k of keys) {
-            const idx = headerParts.indexOf(k);
-            if (idx !== -1) return idx;
-          }
-          return -1;
-        };
-
-        const iName = colIndex(["name", "nome"]);
-        const iPrice = colIndex(["price", "preco"]);
-        const iStock = colIndex(["stock_quantity", "stock", "estoque"]);
-        const iBarcode = colIndex(["barcode"]);
-        const iDesc = colIndex(["description", "descricao"]);
-        const iMinStock = colIndex(["min_stock_quantity", "min_stock", "estoque_min"]);
-        const iCost = colIndex(["cost_price", "preco_custo"]);
-        const iType = colIndex(["product_type", "tipo", "unit"]);
-
-        if (iName === -1) throw new Error("Coluna 'name' não encontrada no cabeçalho.");
-
-        const productsToImport = [];
-
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (!line) continue;
-
-          const parts = parseCsvLine(line);
-          const name = parts[iName]?.trim();
-          if (!name) continue;
-
-          const price = iPrice !== -1 ? parseFloat((parts[iPrice] || "0").replace(",", ".")) || 0 : 0;
-
-          productsToImport.push({
-            user_id: user.id,
-            name,
-            price,
-            stock_quantity: iStock !== -1 ? parseInt(parts[iStock] || "0") || 0 : 0,
-            barcode: iBarcode !== -1 ? parts[iBarcode]?.trim() || null : null,
-            description: iDesc !== -1 ? parts[iDesc]?.trim() || "" : "",
-            min_stock_quantity: iMinStock !== -1 ? parseInt(parts[iMinStock] || "0") || 0 : 0,
-            cost_price: iCost !== -1 ? parseFloat((parts[iCost] || "0").replace(",", ".")) || 0 : 0,
-            product_type: iType !== -1 ? parts[iType]?.trim() || "unidade" : "unidade",
-          });
-        }
-
-        if (productsToImport.length === 0) {
-          toast({ title: "Nenhum produto válido encontrado", description: "Verifique a formatação do arquivo CSV.", variant: "destructive" });
-          setIsImporting(false);
-          return;
-        }
-
-        const { error } = await supabase.from("products").insert(productsToImport);
-        if (error) throw error;
-
-        queryClient.invalidateQueries({ queryKey: ["products"] });
-        toast({ title: `${productsToImport.length} produtos importados com sucesso!` });
-      } catch (error: any) {
-        console.error("Erro na importação:", error);
-        toast({
-          title: "Erro ao importar produtos",
-          description: error.message || "Verifique se os dados estão no formato CSV correto.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsImporting(false);
-        event.target.value = "";
+      if (isZip) {
+        const zip = await JSZip.loadAsync(file);
+        // Find CSV file inside zip
+        const csvFile = Object.keys(zip.files).find(name => name.endsWith(".csv"));
+        if (!csvFile) throw new Error("Nenhum arquivo CSV encontrado dentro do ZIP.");
+        csvContent = await zip.files[csvFile].async("string");
+      } else {
+        csvContent = await file.text();
       }
-    };
 
-    reader.readAsText(file);
+      csvContent = csvContent.replace(/^\uFEFF/, "");
+      const lines = csvContent.split(/\r?\n/);
+      if (lines.length <= 1) throw new Error("Arquivo vazio");
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const headerParts = parseCsvLine(lines[0]).map(h => h.toLowerCase().trim());
+      const colIndex = (keys: string[]) => {
+        for (const k of keys) {
+          const idx = headerParts.indexOf(k);
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      };
+
+      const iName = colIndex(["name", "nome"]);
+      const iPrice = colIndex(["price", "preco"]);
+      const iStock = colIndex(["stock_quantity", "stock", "estoque"]);
+      const iBarcode = colIndex(["barcode"]);
+      const iDesc = colIndex(["description", "descricao"]);
+      const iMinStock = colIndex(["min_stock_quantity", "min_stock", "estoque_min"]);
+      const iCost = colIndex(["cost_price", "preco_custo"]);
+      const iType = colIndex(["product_type", "tipo", "unit"]);
+      const iImageCode = colIndex(["image_code"]);
+
+      if (iName === -1) throw new Error("Coluna 'name' não encontrada no cabeçalho.");
+
+      const productsToImport: any[] = [];
+      const imageCodes: string[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const parts = parseCsvLine(line);
+        const name = parts[iName]?.trim();
+        if (!name) continue;
+
+        const imageCode = iImageCode !== -1 ? parts[iImageCode]?.trim() || "" : "";
+
+        productsToImport.push({
+          user_id: user.id,
+          name,
+          price: iPrice !== -1 ? parseFloat((parts[iPrice] || "0").replace(",", ".")) || 0 : 0,
+          stock_quantity: iStock !== -1 ? parseInt(parts[iStock] || "0") || 0 : 0,
+          barcode: iBarcode !== -1 ? parts[iBarcode]?.trim() || null : null,
+          description: iDesc !== -1 ? parts[iDesc]?.trim() || "" : "",
+          min_stock_quantity: iMinStock !== -1 ? parseInt(parts[iMinStock] || "0") || 0 : 0,
+          cost_price: iCost !== -1 ? parseFloat((parts[iCost] || "0").replace(",", ".")) || 0 : 0,
+          product_type: iType !== -1 ? parts[iType]?.trim() || "unidade" : "unidade",
+          _image_code: imageCode, // temporary, not sent to DB
+        });
+        imageCodes.push(imageCode);
+      }
+
+      if (productsToImport.length === 0) {
+        toast({ title: "Nenhum produto válido encontrado", description: "Verifique a formatação do arquivo CSV.", variant: "destructive" });
+        setIsImporting(false);
+        return;
+      }
+
+      // Remove _image_code before inserting
+      const cleanProducts = productsToImport.map(({ _image_code, ...rest }) => rest);
+
+      const { data: inserted, error } = await supabase.from("products").insert(cleanProducts).select("id");
+      if (error) throw error;
+
+      // Link image_codes to inserted products
+      if (inserted && iImageCode !== -1) {
+        // Get existing image records for these codes
+        const validCodes = imageCodes.filter(c => c);
+        if (validCodes.length > 0) {
+          const { data: existingImages } = await supabase
+            .from("product_images")
+            .select("id, image_code, image_url")
+            .in("image_code", validCodes);
+
+          const imagesByCode = new Map(existingImages?.map(img => [img.image_code, img]) || []);
+
+          // For each inserted product, if it has an image_code that exists, update the product's photos
+          for (let i = 0; i < inserted.length; i++) {
+            const code = productsToImport[i]._image_code;
+            const img = imagesByCode.get(code);
+            if (img) {
+              // Update product photos array
+              await supabase.from("products").update({ photos: [img.image_url] }).eq("id", inserted[i].id);
+              // Create new product_images link
+              await supabase.from("product_images").insert({
+                product_id: inserted[i].id,
+                image_code: code + "_" + inserted[i].id.slice(0, 4), // unique code for new link
+                image_url: img.image_url,
+                user_id: user.id,
+              });
+            }
+          }
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({ title: `${inserted?.length || productsToImport.length} produtos importados com sucesso!` });
+    } catch (error: any) {
+      console.error("Erro na importação:", error);
+      toast({
+        title: "Erro ao importar produtos",
+        description: error.message || "Verifique se os dados estão no formato correto.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsImporting(false);
+      event.target.value = "";
+    }
   };
 
   const filteredProducts = products?.filter((product) =>
