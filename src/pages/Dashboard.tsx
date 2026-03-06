@@ -408,6 +408,36 @@ const Dashboard = () => {
                   </motion.div>
                 </Link>
               ))}
+              {/* Custom shortcuts from admin */}
+              {customShortcuts.map((shortcut) => {
+                const isExternal = shortcut.url.startsWith("http");
+                const content = (
+                  <motion.div
+                    whileHover={{ scale: 1.08, y: -3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                  >
+                    <div className="w-13 h-13 md:w-16 md:h-16 rounded-2xl bg-card border border-border/50 p-2 shadow-sm group-hover:shadow-lg group-hover:border-primary/30 transition-all duration-300">
+                      {shortcut.icon_url ? (
+                        <img src={shortcut.icon_url} alt={shortcut.label} className="w-full h-full object-contain pointer-events-auto" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <Sparkles className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[10px] md:text-xs font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
+                      {shortcut.label}
+                    </span>
+                  </motion.div>
+                );
+                return isExternal ? (
+                  <a key={shortcut.id} href={shortcut.url} target="_blank" rel="noopener noreferrer">{content}</a>
+                ) : (
+                  <Link key={shortcut.id} to={shortcut.url}>{content}</Link>
+                );
+              })}
             </div>
           </motion.div>
         )}
