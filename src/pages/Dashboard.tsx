@@ -86,7 +86,7 @@ const Dashboard = () => {
     hideTrialMessage: false,
   });
   const [loading, setLoading] = useState(true);
-  
+  const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
 
   // Filter quick actions by permissions
   const filteredQuickActions = quickActions.filter((action) => {
