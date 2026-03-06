@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, ArrowDown, ArrowUp, RotateCcw, ArrowLeft } from "lucide-react";
+import { Calculator, Percent, ArrowDown, ArrowUp, RotateCcw, ArrowLeft, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const PIX_FEE_RATE = 0.0049;
 
@@ -13,6 +14,30 @@ const CalculatorPage = () => {
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
   const [passToCustomer, setPassToCustomer] = useState<boolean | null>(null);
+  const [hasAutomaticPix, setHasAutomaticPix] = useState<boolean | null>(null);
+  const [loadingPix, setLoadingPix] = useState(true);
+
+  useEffect(() => {
+    const checkPixMode = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { setLoadingPix(false); return; }
+
+        const { data } = await supabase
+          .from("store_settings")
+          .select("pix_mode")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        setHasAutomaticPix(data?.pix_mode === "automatic");
+      } catch {
+        setHasAutomaticPix(false);
+      } finally {
+        setLoadingPix(false);
+      }
+    };
+    checkPixMode();
+  }, []);
 
   const numericAmount = parseFloat(amount.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
   const rawFee = numericAmount * PIX_FEE_RATE;
@@ -33,6 +58,57 @@ const CalculatorPage = () => {
     setAmount("");
     setPassToCustomer(null);
   };
+
+  if (loadingPix) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!hasAutomaticPix) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md mx-auto space-y-6"
+      >
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+              <Calculator className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Calculadora PIX</h1>
+              <p className="text-sm text-muted-foreground">Calcule taxas de pagamento PIX</p>
+            </div>
+          </div>
+        </div>
+
+        <Card className="border-border/50">
+          <CardContent className="pt-6 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+              <Lock className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h2 className="text-lg font-bold text-foreground">Recurso Exclusivo</h2>
+            <p className="text-sm text-muted-foreground">
+              A Calculadora PIX está disponível apenas para quem tem o <strong>Pix Automático</strong> configurado via Mercado Pago.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Vá em <strong>Configurações</strong> e ative o Pix Automático para desbloquear esta funcionalidade.
+            </p>
+            <Button onClick={() => navigate("/configuracoes")} className="bg-gradient-to-r from-primary to-accent text-white">
+              Ir para Configurações
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
