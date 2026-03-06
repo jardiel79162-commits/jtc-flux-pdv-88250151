@@ -411,6 +411,47 @@ export type Database = {
         }
         Relationships: []
       }
+      prize_wheel_spins: {
+        Row: {
+          created_at: string
+          id: string
+          is_used: boolean
+          prize_days: number | null
+          prize_label: string | null
+          referral_id: string | null
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_used?: boolean
+          prize_days?: number | null
+          prize_label?: string | null
+          referral_id?: string | null
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_used?: boolean
+          prize_days?: number | null
+          prize_label?: string | null
+          referral_id?: string | null
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prize_wheel_spins_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           barcode: string | null
