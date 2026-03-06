@@ -66,10 +66,17 @@ export default function AdminShortcuts() {
   };
 
   const uploadIcon = async (file: File): Promise<string> => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error("Sessão inválida. Faça login novamente.");
+    }
+
     const ext = file.name.split(".").pop() || "png";
-    const filename = `shortcut-${Date.now()}.${ext}`;
+    const filename = `${user.id}/shortcut-${Date.now()}.${ext}`;
+
     const { error } = await supabase.storage.from("store-logos").upload(filename, file, { upsert: true });
     if (error) throw error;
+
     const { data: urlData } = supabase.storage.from("store-logos").getPublicUrl(filename);
     return urlData.publicUrl;
   };
