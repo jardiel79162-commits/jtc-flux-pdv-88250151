@@ -1,4 +1,4 @@
-import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone, MessageCircle, Quote } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
