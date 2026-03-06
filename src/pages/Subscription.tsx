@@ -337,7 +337,7 @@ const Subscription = () => {
 
       {!paymentData ? (
         <>
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div id="plans-section" className="grid grid-cols-1 md:grid-cols-2 gap-6">
              {plans.map((plan) => {
                const img = plan.id === '1_year' ? planoAnualImg : planoTrimestralImg;
                return (
