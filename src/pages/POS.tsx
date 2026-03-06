@@ -1395,9 +1395,9 @@ ${paymentInfo}
     setSelectedCustomer(null);
     setCurrentStep("cart");
     setSaleData(null);
-    setPaymentMode(null);
     setPayments([]);
     setCurrentPaymentAmount("");
+    setCurrentPaymentMethod("");
     fetchProducts();
   };
 
