@@ -807,7 +807,7 @@ const Auth = () => {
                     >
                       Voltar para o Login
                     </Button>
-                  </div>
+                  </motion.div>
                 ) : (
                   <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-3">
