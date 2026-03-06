@@ -1892,8 +1892,6 @@ ${paymentInfo}
                         setPixManualConfirmed(true);
                         toast({ title: "Pagamento PIX confirmado!" });
                       }}
-                        toast({ title: "Pagamento PIX confirmado!" });
-                      }}
                     >
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Confirmar Pagamento
