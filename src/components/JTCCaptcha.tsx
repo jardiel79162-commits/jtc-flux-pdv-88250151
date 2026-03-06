@@ -64,7 +64,7 @@ function generateGrid() {
 
 export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
   const [gridData, setGridData] = useState(() => generateGrid());
-  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [attempts, setAttempts] = useState(0);
   const [cooldown, setCooldown] = useState(0);
@@ -81,19 +81,24 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
     onVerified(false);
   }, [onVerified]);
 
+  const [selectionOrder, setSelectionOrder] = useState<number[]>([]);
+
+  const selectedIndices = useMemo(() => new Set(selectionOrder), [selectionOrder]);
+
   const handleCellClick = (index: number) => {
     if (status === "correct" || cooldown > 0) return;
 
-    setSelectedIndices(prev => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
+    setSelectionOrder(prev => {
+      if (prev.includes(index)) {
+        // Deselect
+        return prev.filter(i => i !== index);
+      } else if (prev.length >= 3) {
+        // Replace the oldest selection with the new one
+        return [...prev.slice(1), index];
       } else {
-        next.add(index);
+        return [...prev, index];
       }
-      return next;
     });
-    // Reset wrong status when user changes selection
     if (status === "wrong") setStatus("idle");
   };
 
