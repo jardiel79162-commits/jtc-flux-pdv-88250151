@@ -101,6 +101,33 @@ export const useSubscription = () => {
 
   useEffect(() => {
     checkSubscription();
+
+    // Listen for realtime profile changes (extend subscription, etc.)
+    let channel: any;
+    const setupRealtime = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      channel = supabase
+        .channel('subscription-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          () => {
+            checkSubscription();
+          }
+        )
+        .subscribe();
+    };
+    setupRealtime();
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [checkSubscription]);
 
   return { ...status, loading, refresh: checkSubscription };
