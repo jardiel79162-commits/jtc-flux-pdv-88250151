@@ -269,7 +269,7 @@ export default function Inbox() {
       )}
 
       {/* Input */}
-      <div className="px-4 py-3 border-t border-border bg-card">
+      <div className="shrink-0 px-4 py-3 border-t border-border bg-card">
         <div className="flex items-center gap-2">
           <input
             ref={fileRef}
