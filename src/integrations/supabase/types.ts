@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_read: boolean
+          is_system: boolean
+          sender_type: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean
+          is_system?: boolean
+          sender_type: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean
+          is_system?: boolean
+          sender_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       auri_conversations: {
         Row: {
           created_at: string
