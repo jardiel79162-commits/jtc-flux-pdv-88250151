@@ -1828,7 +1828,7 @@ ${paymentInfo}
                       )
                     ) : (
                       <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(generatePixPayload(paymentMode === "multiple" ? parseFloat(currentPaymentAmount) || remainingToPay : total))}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(generatePixPayload(parseFloat(currentPaymentAmount) || remainingToPay))}`}
                         alt="QR Code PIX"
                         width={200}
                         height={200}
@@ -1839,7 +1839,7 @@ ${paymentInfo}
                     <p className="text-2xl font-bold text-accent">
                       R$ {(pixSettings?.pix_mode === 'automatic'
                         ? pixPaymentAmount
-                        : (paymentMode === "multiple" ? parseFloat(currentPaymentAmount) || remainingToPay : total)
+                        : (parseFloat(currentPaymentAmount) || remainingToPay)
                       ).toFixed(2)}
                     </p>
                     <p className="text-sm text-muted-foreground">Escaneie o QR Code para pagar</p>
@@ -1884,14 +1884,14 @@ ${paymentInfo}
                     <Button 
                       className="w-full bg-green-600 hover:bg-green-700"
                       onClick={() => {
-                        if (paymentMode === "multiple") {
-                          const amount = parseFloat(currentPaymentAmount) || remainingToPay;
-                          setPayments([...payments, { method: "pix", amount }]);
-                          setCurrentPaymentAmount("");
-                        }
+                        const amount = parseFloat(currentPaymentAmount) || remainingToPay;
+                        setPayments([...payments, { method: "pix", amount }]);
+                        setCurrentPaymentAmount("");
+                        setCurrentPaymentMethod("");
                         setShowPixQrCode(false);
-                        setPaymentMethod(paymentMode === "multiple" ? "" : "pix");
-                        setPixManualConfirmed(true); // Marcar PIX manual como confirmado
+                        setPixManualConfirmed(true);
+                        toast({ title: "Pagamento PIX confirmado!" });
+                      }}
                         toast({ title: "Pagamento PIX confirmado!" });
                       }}
                     >
@@ -1984,11 +1984,8 @@ ${paymentInfo}
               onClick={finalizeSale}
               disabled={
                 isProcessingSale || 
-                !paymentMode ||
-                (paymentMode === "single" && !paymentMethod) ||
-                (paymentMode === "single" && paymentMethod === "pix" && pixSettings?.pix_mode === 'automatic' && pixPaymentStatus !== 'approved') ||
-                (paymentMode === "single" && paymentMethod === "pix" && pixSettings?.pix_mode !== 'automatic' && !pixManualConfirmed) ||
-                (paymentMode === "multiple" && (payments.length === 0 || totalPaid < total))
+                payments.length === 0 || 
+                totalPaid < total
               }
             >
               <DollarSign className="mr-2 h-5 w-5" />
