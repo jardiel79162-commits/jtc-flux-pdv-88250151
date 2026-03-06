@@ -428,6 +428,84 @@ serve(async (req) => {
         return jsonResponse({ settings: data });
       }
 
+      // ==================== REFERRALS (ANTIFRAUDE) ====================
+      case 'list_referrals': {
+        const { status: refStatus, page = 1, per_page = 20 } = params;
+        let query = supabaseAdmin.from('referrals').select('*', { count: 'exact' });
+        if (refStatus && refStatus !== 'all') query = query.eq('status', refStatus);
+        const from = (page - 1) * per_page;
+        const { data, count } = await query.order('created_at', { ascending: false }).range(from, from + per_page - 1);
+
+        if (data && data.length > 0) {
+          const allUserIds = [...new Set([
+            ...data.map((r: any) => r.referrer_user_id),
+            ...data.filter((r: any) => r.referred_user_id).map((r: any) => r.referred_user_id),
+          ])];
+          const { data: profiles } = await supabaseAdmin.from('profiles').select('user_id, full_name, email').in('user_id', allUserIds);
+          const profileMap: Record<string, any> = {};
+          (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+          const enriched = data.map((r: any) => ({
+            ...r,
+            referrer_name: profileMap[r.referrer_user_id]?.full_name || 'N/A',
+            referrer_email: profileMap[r.referrer_user_id]?.email || 'N/A',
+            referred_name: r.referred_user_id ? (profileMap[r.referred_user_id]?.full_name || 'N/A') : 'N/A',
+            referred_email: r.referred_user_id ? (profileMap[r.referred_user_id]?.email || 'N/A') : 'N/A',
+          }));
+          return jsonResponse({ referrals: enriched, total: count });
+        }
+        return jsonResponse({ referrals: data || [], total: count || 0 });
+      }
+
+      case 'approve_referral': {
+        const { referral_id } = params;
+        const { data: referral } = await supabaseAdmin.from('referrals').select('*').eq('id', referral_id).single();
+        if (!referral) return jsonResponse({ error: 'Indicação não encontrada' }, 404);
+        if (referral.reward_applied) return jsonResponse({ error: 'Recompensa já aplicada' }, 400);
+
+        // Apply 30-day reward to both users
+        for (const uid of [referral.referrer_user_id, referral.referred_user_id].filter(Boolean)) {
+          const { data: profile } = await supabaseAdmin.from('profiles').select('subscription_ends_at, trial_ends_at').eq('user_id', uid).maybeSingle();
+          if (!profile) continue;
+          const now = new Date();
+          const subEnd = profile.subscription_ends_at ? new Date(profile.subscription_ends_at) : null;
+          const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+          const bases = [subEnd, trialEnd].filter((d): d is Date => !!d && d > now);
+          const base = bases.length > 0 ? new Date(Math.max(...bases.map(d => d.getTime()))) : now;
+          const newEnd = new Date(base.getTime() + 30 * 86400000);
+          await supabaseAdmin.from('profiles').update({ subscription_ends_at: newEnd.toISOString() }).eq('user_id', uid);
+          await supabaseAdmin.from('referral_rewards').insert({ referral_id, user_id: uid, reward_type: 'subscription_days', days_added: 30 });
+        }
+
+        await supabaseAdmin.from('referrals').update({ status: 'approved', reward_applied: true, reviewed_at: new Date().toISOString(), reviewed_by: user.id }).eq('id', referral_id);
+        await supabaseAdmin.from('system_logs').insert({ user_id: user.id, event_type: 'referral_approved', description: 'Indicação aprovada pelo admin', metadata: { referral_id } });
+        return jsonResponse({ success: true });
+      }
+
+      case 'reject_referral': {
+        const { referral_id } = params;
+        await supabaseAdmin.from('referrals').update({ status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: user.id }).eq('id', referral_id);
+        await supabaseAdmin.from('system_logs').insert({ user_id: user.id, event_type: 'referral_rejected_manual', description: 'Indicação rejeitada pelo admin', metadata: { referral_id } });
+        return jsonResponse({ success: true });
+      }
+
+      case 'get_referral_stats': {
+        const [pending, approved, rejected, underReview] = await Promise.all([
+          supabaseAdmin.from('referrals').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+          supabaseAdmin.from('referrals').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+          supabaseAdmin.from('referrals').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+          supabaseAdmin.from('referrals').select('id', { count: 'exact', head: true }).eq('status', 'under_review'),
+        ]);
+        return jsonResponse({
+          stats: {
+            pending: pending.count || 0,
+            approved: approved.count || 0,
+            rejected: rejected.count || 0,
+            under_review: underReview.count || 0,
+            total: (pending.count || 0) + (approved.count || 0) + (rejected.count || 0) + (underReview.count || 0),
+          }
+        });
+      }
+
       default:
         return jsonResponse({ error: 'Ação inválida' }, 400);
     }
