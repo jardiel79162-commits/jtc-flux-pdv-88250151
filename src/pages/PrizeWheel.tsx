@@ -128,6 +128,7 @@ const PrizeWheel = () => {
     setIsSpinning(true);
     setShowResult(false);
     setWonPrize(null);
+    startSpinSound(5500);
 
     const idx = pickPrize();
     const prize = PRIZES[idx];
@@ -145,9 +146,11 @@ const PrizeWheel = () => {
     setRotation((prev) => prev + fullSpins + delta);
 
     setTimeout(async () => {
+      stopSpinSound();
       setIsSpinning(false);
       setWonPrize(prize);
       setShowResult(true);
+      if (prize.days > 0) playWin();
 
       // Mark a spin as used
       try {
