@@ -152,7 +152,7 @@ const DashboardLayoutInner = () => {
         const [settingsRes, adminRes, profileRes] = await Promise.all([
           supabase.from('system_settings_global' as any).select('*').maybeSingle() as any,
           (supabase.rpc as any)('is_system_admin', { _user_id: session.user.id }),
-          supabase.from('profiles').select('is_blocked').eq('user_id', session.user.id).maybeSingle(),
+          supabase.from('profiles').select('is_blocked, subscription_ends_at, trial_ends_at').eq('user_id', session.user.id).maybeSingle(),
         ]);
         const isSysAdmin = !!adminRes.data;
         setIsSystemAdmin(isSysAdmin);
@@ -166,7 +166,8 @@ const DashboardLayoutInner = () => {
         // Check suspension
         if (profileRes.data?.is_blocked) {
           setIsSuspended(true);
-          return;
+        } else {
+          setIsSuspended(false);
         }
         
         const settings = settingsRes.data as any;
@@ -178,7 +179,37 @@ const DashboardLayoutInner = () => {
       } catch {}
     };
     check();
-  }, [session]);
+
+    // Realtime: listen for profile changes (suspend/unsuspend/extend/delete)
+    const channel = supabase
+      .channel('profile-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${session.user.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            // Account deleted by admin
+            supabase.auth.signOut().then(() => navigate('/auth'));
+            return;
+          }
+          const newData = payload.new as any;
+          if (newData) {
+            // Update suspension status instantly
+            setIsSuspended(!!newData.is_blocked);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session, navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
