@@ -770,50 +770,27 @@ const POS = () => {
   const finalizeSale = async () => {
     if (isProcessingSale) return;
     
-    // Validações para pagamento único
-    if (paymentMode === "single") {
-      if (!paymentMethod) {
-        toast({ title: "Selecione a forma de pagamento", variant: "destructive" });
-        return;
-      }
-      if (paymentMethod === "fiado" && !selectedCustomer) {
-        toast({ 
-          title: "Cliente não selecionado", 
-          description: "Por favor, selecione um cliente para venda a prazo",
-          variant: "destructive" 
-        });
-        return;
-      }
+    // Validações
+    if (payments.length === 0) {
+      toast({ title: "Adicione pelo menos uma forma de pagamento", variant: "destructive" });
+      return;
     }
-    
-    // Validações para pagamento múltiplo
-    if (paymentMode === "multiple") {
-      if (payments.length === 0) {
-        toast({ title: "Adicione pelo menos uma forma de pagamento", variant: "destructive" });
-        return;
-      }
-      if (totalPaid < total) {
-        toast({ 
-          title: "Valor insuficiente", 
-          description: `Faltam R$ ${remainingToPay.toFixed(2)} para completar o pagamento`,
-          variant: "destructive" 
-        });
-        return;
-      }
-      // Verificar se há pagamento fiado sem cliente selecionado
-      const hasFiado = payments.some(p => p.method === "fiado");
-      if (hasFiado && !selectedCustomer) {
-        toast({ 
-          title: "Cliente não selecionado", 
-          description: "Selecione um cliente para pagamento fiado",
-          variant: "destructive" 
-        });
-        return;
-      }
+    if (totalPaid < total) {
+      toast({ 
+        title: "Valor insuficiente", 
+        description: `Faltam R$ ${remainingToPay.toFixed(2)} para completar o pagamento`,
+        variant: "destructive" 
+      });
+      return;
     }
-
-    if (!paymentMode) {
-      toast({ title: "Selecione o tipo de pagamento", variant: "destructive" });
+    // Verificar se há pagamento fiado sem cliente selecionado
+    const hasFiado = payments.some(p => p.method === "fiado");
+    if (hasFiado && !selectedCustomer) {
+      toast({ 
+        title: "Cliente não selecionado", 
+        description: "Selecione um cliente para pagamento fiado",
+        variant: "destructive" 
+      });
       return;
     }
 
@@ -822,7 +799,6 @@ const POS = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Obter o número da última venda para gerar o ID
       const { count } = await supabase
         .from("sales")
         .select("*", { count: 'exact', head: true })
@@ -832,34 +808,13 @@ const POS = () => {
       const customSaleId = generateSaleId(saleNumber);
 
       // Determinar forma de pagamento final
-      let finalPaymentMethod = paymentMethod;
+      const uniqueMethods = [...new Set(payments.map(p => p.method))];
+      const finalPaymentMethod = uniqueMethods.length === 1 ? uniqueMethods[0] : "multiplo";
       let finalPaymentStatus = "paid";
-      let creditUsed = 0;
-      let calculatedChange = 0;
+      const calculatedChange = changeAmount;
       
-      if (paymentMode === "multiple") {
-        // Para pagamento múltiplo, usar "multiplo" como valor do banco
-        finalPaymentMethod = "multiplo";
-        calculatedChange = changeAmount;
-        // Se tiver fiado, é pending
-        if (payments.some(p => p.method === "fiado")) {
-          finalPaymentStatus = "pending";
-        }
-      } else {
-        // Pagamento único
-        if (paymentMethod === "fiado") {
-          finalPaymentStatus = "pending";
-        }
-        // Verificar se cliente tem crédito disponível
-        if (selectedCustomer && selectedCustomer.current_balance > 0) {
-          creditUsed = Math.min(selectedCustomer.current_balance, total);
-          const remainingAfterCredit = total - creditUsed;
-          
-          // Se o crédito cobriu tudo
-          if (remainingAfterCredit === 0) {
-            finalPaymentMethod = "credito";
-          }
-        }
+      if (payments.some(p => p.method === "fiado")) {
+        finalPaymentStatus = "pending";
       }
 
       // Criar venda
@@ -872,6 +827,7 @@ const POS = () => {
           payment_method: finalPaymentMethod,
           customer_id: selectedCustomer?.id || null,
           payment_status: finalPaymentStatus,
+          payments: payments as any,
         }])
         .select()
         .single();
@@ -920,90 +876,8 @@ const POS = () => {
         }
       }
 
-      // Calcular valor restante após crédito (para pagamento único)
-      const remainingAfterCredit = paymentMode === "single" ? total - creditUsed : total;
-
-      // Processar pagamento com crédito e/ou outras formas
-      if (selectedCustomer && paymentMode === "single") {
-        if (creditUsed > 0) {
-          // Descontar crédito do cliente
-          const newBalance = selectedCustomer.current_balance - creditUsed;
-          
-          const { error: balanceError } = await supabase
-            .from("customers")
-            .update({ current_balance: newBalance })
-            .eq("id", selectedCustomer.id);
-
-          if (balanceError) {
-            console.error("Erro ao atualizar saldo:", balanceError);
-            toast({ 
-              title: "Erro ao atualizar crédito do cliente", 
-              description: balanceError.message,
-              variant: "destructive" 
-            });
-            return;
-          }
-
-          // Registrar transação de uso de crédito
-          const { error: creditTransactionError } = await supabase
-            .from("customer_transactions")
-            .insert({
-              customer_id: selectedCustomer.id,
-              user_id: user.id,
-              type: "payment",
-              amount: creditUsed,
-              description: `Crédito usado - Venda ${customSaleId}`,
-            });
-
-          if (creditTransactionError) {
-            console.error("Erro ao criar transação de crédito:", creditTransactionError);
-          }
-        }
-
-        // Se ainda resta valor e é fiado, adicionar dívida
-        if (remainingAfterCredit > 0 && paymentMethod === "fiado") {
-          const currentBalance = selectedCustomer.current_balance - creditUsed;
-          const newBalance = currentBalance - remainingAfterCredit;
-          
-          const { error: balanceError } = await supabase
-            .from("customers")
-            .update({ current_balance: newBalance })
-            .eq("id", selectedCustomer.id);
-
-          if (balanceError) {
-            console.error("Erro ao atualizar saldo:", balanceError);
-            toast({ 
-              title: "Erro ao atualizar saldo do cliente", 
-              description: balanceError.message,
-              variant: "destructive" 
-            });
-            return;
-          }
-
-          const { error: transactionError } = await supabase
-            .from("customer_transactions")
-            .insert({
-              customer_id: selectedCustomer.id,
-              user_id: user.id,
-              type: "debt",
-              amount: remainingAfterCredit,
-              description: `Compra a prazo - Venda ${customSaleId}`,
-            });
-
-          if (transactionError) {
-            console.error("Erro ao criar transação:", transactionError);
-            toast({ 
-              title: "Erro ao registrar transação", 
-              description: transactionError.message,
-              variant: "destructive" 
-            });
-            return;
-          }
-        }
-      }
-
-      // Processar pagamento múltiplo com fiado
-      if (paymentMode === "multiple" && selectedCustomer) {
+      // Processar pagamento fiado
+      if (selectedCustomer) {
         const fiadoPayment = payments.find(p => p.method === "fiado");
         if (fiadoPayment) {
           const newBalance = selectedCustomer.current_balance - fiadoPayment.amount;
@@ -1033,11 +907,8 @@ const POS = () => {
         payment_method: finalPaymentMethod,
         created_at: sale.created_at,
         customer_name: selectedCustomer?.name,
-        credit_used: creditUsed > 0 ? creditUsed : undefined,
-        remaining_payment_method: paymentMode === "single" && creditUsed > 0 && remainingAfterCredit > 0 ? paymentMethod : undefined,
-        remaining_amount: paymentMode === "single" && creditUsed > 0 && remainingAfterCredit > 0 ? remainingAfterCredit : undefined,
         change_amount: calculatedChange > 0 ? calculatedChange : undefined,
-        payments: paymentMode === "multiple" ? payments : undefined,
+        payments: payments,
         items: cart.map(item => ({
           product_name: item.product.name,
           quantity: item.quantity,
