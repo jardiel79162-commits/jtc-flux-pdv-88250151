@@ -26,6 +26,7 @@ import {
   ShieldOff,
   Info,
   MessageCircle,
+  Trophy,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
