@@ -182,7 +182,7 @@ export default function Inbox() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] max-w-2xl mx-auto bg-background overflow-hidden">
+    <div className="flex flex-col max-w-2xl mx-auto bg-background overflow-hidden" style={{ height: "calc(100vh - 64px - 57px)" }}>
       {/* Header - fixo no topo */}
       <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
