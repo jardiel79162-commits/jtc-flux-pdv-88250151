@@ -1839,6 +1839,7 @@ ${paymentInfo}
                         } else {
                           setPaymentMethod(method.value);
                           if (method.value === "fiado") {
+                            sessionStorage.setItem("pos_cart", JSON.stringify(cart));
                             navigate("/pdv/clientes");
                           }
                         }
@@ -1860,7 +1861,7 @@ ${paymentInfo}
                             <p className="font-semibold">{selectedCustomer.name}</p>
                             <p className="text-xs text-muted-foreground">CPF: {selectedCustomer.cpf}</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => navigate("/pdv/clientes")}>
+                          <Button variant="outline" size="sm" onClick={() => { sessionStorage.setItem("pos_cart", JSON.stringify(cart)); navigate("/pdv/clientes"); }}>
                             Trocar
                           </Button>
                         </div>
@@ -1868,7 +1869,7 @@ ${paymentInfo}
                     ) : (
                       <div className="text-center space-y-2">
                         <p className="text-sm text-destructive font-medium">Por favor, selecione um cliente.</p>
-                        <Button variant="outline" size="sm" onClick={() => navigate("/pdv/clientes")}>
+                        <Button variant="outline" size="sm" onClick={() => { sessionStorage.setItem("pos_cart", JSON.stringify(cart)); navigate("/pdv/clientes"); }}>
                           Selecionar Cliente
                         </Button>
                       </div>
@@ -1949,6 +1950,7 @@ ${paymentInfo}
                           onClick={() => {
                             setPaymentMethod(method.value);
                             if (method.value === "fiado") {
+                              sessionStorage.setItem("pos_cart", JSON.stringify(cart));
                               navigate("/pdv/clientes");
                             }
                             // Mostrar QR code PIX automaticamente em múltiplos pagamentos
