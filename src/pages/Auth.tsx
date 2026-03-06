@@ -637,17 +637,33 @@ const Auth = () => {
           </motion.div>
         </motion.div>
 
-        {/* Form card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+        >
         <Card className="auth-card">
           <div className="auth-card-glow-tr" />
           <div className="auth-card-glow-bl" />
 
           <CardHeader className="text-center pb-4 pt-8 relative z-10">
             <div className="flex flex-col items-center gap-5 mb-2">
-              <div className="relative group">
+              <motion.div 
+                className="relative group"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <div className="auth-logo-glow" />
                 <img src={logo} alt="JTC FluxPDV" className="relative w-20 h-20 rounded-full object-cover shadow-xl ring-2 ring-white/10" />
-              </div>
+                <motion.div
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.8, type: "spring" }}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-white" />
+                </motion.div>
+              </motion.div>
               <div className="text-center space-y-1">
                 <CardTitle className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</CardTitle>
                 <CardDescription className="text-base text-muted-foreground">Acesse sua conta ou crie uma nova</CardDescription>
