@@ -1482,12 +1482,18 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 5 - Email Verification */}
                 {registerStep === 5 && (
-                  <div className="space-y-6 animate-fade-in">
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    key="step-5"
+                  >
                     <div className="text-center mb-6">
                       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
                         <Mail className="w-12 h-12 text-primary" />
