@@ -32,6 +32,15 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !user) return jsonResponse({ error: 'Não autenticado' }, 401);
 
+    const supabaseUser = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader } },
+        auth: { autoRefreshToken: false, persistSession: false }
+      }
+    );
+
     const { action, ...params } = await req.json();
 
     // Non-admin actions
@@ -571,19 +580,35 @@ serve(async (req) => {
 
       // ==================== CUSTOM SHORTCUTS ====================
       case 'list_shortcuts': {
-        const { data } = await supabaseAdmin.from('custom_shortcuts').select('*').order('sort_order', { ascending: true });
+        const { data, error } = await supabaseUser
+          .from('custom_shortcuts')
+          .select('*')
+          .order('sort_order', { ascending: true });
+
+        if (error) throw error;
         return jsonResponse({ shortcuts: data || [] });
       }
 
       case 'create_shortcut': {
         const { label, url, icon_url, sort_order = 0 } = params;
-        const { data, error: insertErr } = await supabaseAdmin.from('custom_shortcuts').insert({
-          label, url, icon_url, sort_order, created_by: user.id,
-        }).select().single();
+        const { data, error: insertErr } = await supabaseUser
+          .from('custom_shortcuts')
+          .insert({
+            label,
+            url,
+            icon_url,
+            sort_order,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+
         if (insertErr) throw insertErr;
         await supabaseAdmin.from('system_logs').insert({
-          user_id: user.id, event_type: 'shortcut_created',
-          description: `Atalho "${label}" criado`, metadata: { shortcut_id: data.id },
+          user_id: user.id,
+          event_type: 'shortcut_created',
+          description: `Atalho "${label}" criado`,
+          metadata: { shortcut_id: data.id },
         });
         return jsonResponse({ success: true, shortcut: data });
       }
@@ -592,18 +617,33 @@ serve(async (req) => {
         const { shortcut_id, data: shortcutData } = params;
         const allowedFields = ['label', 'url', 'icon_url', 'sort_order', 'is_active'];
         const sanitized: Record<string, any> = {};
-        for (const key of allowedFields) { if (shortcutData[key] !== undefined) sanitized[key] = shortcutData[key]; }
+        for (const key of allowedFields) {
+          if (shortcutData[key] !== undefined) sanitized[key] = shortcutData[key];
+        }
         sanitized.updated_at = new Date().toISOString();
-        await supabaseAdmin.from('custom_shortcuts').update(sanitized).eq('id', shortcut_id);
+
+        const { error } = await supabaseUser
+          .from('custom_shortcuts')
+          .update(sanitized)
+          .eq('id', shortcut_id);
+
+        if (error) throw error;
         return jsonResponse({ success: true });
       }
 
       case 'delete_shortcut': {
         const { shortcut_id } = params;
-        await supabaseAdmin.from('custom_shortcuts').delete().eq('id', shortcut_id);
+        const { error } = await supabaseUser
+          .from('custom_shortcuts')
+          .delete()
+          .eq('id', shortcut_id);
+
+        if (error) throw error;
         await supabaseAdmin.from('system_logs').insert({
-          user_id: user.id, event_type: 'shortcut_deleted',
-          description: 'Atalho deletado', metadata: { shortcut_id },
+          user_id: user.id,
+          event_type: 'shortcut_deleted',
+          description: 'Atalho deletado',
+          metadata: { shortcut_id },
         });
         return jsonResponse({ success: true });
       }
@@ -622,26 +662,36 @@ serve(async (req) => {
           { label: 'Bônus', url: '/resgate-semanal', sort_order: 9 },
         ];
 
-        // Get existing shortcuts URLs
-        const { data: existing } = await supabaseAdmin.from('custom_shortcuts').select('url');
-        const existingUrls = new Set((existing || []).map((s: any) => s.url));
+        const { data: existing, error: existingError } = await supabaseUser
+          .from('custom_shortcuts')
+          .select('url');
 
-        // Only insert missing ones
+        if (existingError) throw existingError;
+
+        const existingUrls = new Set((existing || []).map((s: any) => s.url));
         const toInsert = defaults
-          .filter(d => !existingUrls.has(d.url))
-          .map(d => ({ ...d, created_by: user.id, is_active: true }));
+          .filter((d) => !existingUrls.has(d.url))
+          .map((d) => ({ ...d, created_by: user.id, is_active: true }));
 
         if (toInsert.length > 0) {
-          const { error: insertErr } = await supabaseAdmin.from('custom_shortcuts').insert(toInsert);
+          const { error: insertErr } = await supabaseUser
+            .from('custom_shortcuts')
+            .insert(toInsert);
           if (insertErr) throw insertErr;
         }
 
         await supabaseAdmin.from('system_logs').insert({
-          user_id: user.id, event_type: 'shortcuts_synced',
+          user_id: user.id,
+          event_type: 'shortcuts_synced',
           description: `${toInsert.length} atalhos padrão sincronizados`,
         });
 
-        const { data: allShortcuts } = await supabaseAdmin.from('custom_shortcuts').select('*').order('sort_order', { ascending: true });
+        const { data: allShortcuts, error: allError } = await supabaseUser
+          .from('custom_shortcuts')
+          .select('*')
+          .order('sort_order', { ascending: true });
+
+        if (allError) throw allError;
         return jsonResponse({ success: true, shortcuts: allShortcuts || [], added: toInsert.length });
       }
 
