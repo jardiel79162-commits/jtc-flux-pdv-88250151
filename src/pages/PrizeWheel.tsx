@@ -9,6 +9,7 @@ import { WheelSVG, PRIZES, SLICE_DEG } from "@/components/prize-wheel/WheelSVG";
 import { CenterButton } from "@/components/prize-wheel/CenterButton";
 import { Pointer } from "@/components/prize-wheel/Pointer";
 import { LEDs } from "@/components/prize-wheel/LEDs";
+import { useWheelSound } from "@/hooks/useWheelSound";
 
 function pickPrize(): number {
   const total = PRIZES.reduce((s, p) => s + p.weight, 0);
