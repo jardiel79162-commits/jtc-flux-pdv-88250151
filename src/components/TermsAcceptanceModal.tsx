@@ -225,6 +225,14 @@ export default function TermsAcceptanceModal({ onAccepted }: TermsAcceptanceModa
   const [accepting, setAccepting] = useState(false);
   const [readingModal, setReadingModal] = useState<"terms" | "privacy" | null>(null);
 
+  // Lock body scroll when modal is visible
+  useEffect(() => {
+    if (visible) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [visible]);
+
   useEffect(() => {
     checkTermsStatus();
   }, []);
