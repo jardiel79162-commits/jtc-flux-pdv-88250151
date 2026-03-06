@@ -535,6 +535,29 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
+        {/* Floating particles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 rounded-full"
+            style={{
+              background: i % 2 === 0 ? 'hsl(229 100% 65% / 0.4)' : 'hsl(163 100% 44% / 0.4)',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.2, 0.8, 0.2],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-20 items-center relative z-10">
