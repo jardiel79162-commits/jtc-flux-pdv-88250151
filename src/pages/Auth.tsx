@@ -508,22 +508,40 @@ const Auth = () => {
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
-    <div className="flex flex-col items-center gap-1.5">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
-        registerStep === step
-          ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 scale-110"
-          : registerStep > step
-            ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/20"
-            : "bg-muted/50 text-muted-foreground border border-border/50"
-      }`}>
-        {registerStep > step ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-      </div>
+    <motion.div 
+      className="flex flex-col items-center gap-1.5"
+      initial={false}
+      animate={registerStep === step ? { scale: 1.1 } : { scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+    >
+      <motion.div 
+        className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
+          registerStep === step
+            ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
+            : registerStep > step
+              ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/20"
+              : "bg-white/5 text-muted-foreground border border-white/10"
+        }`}
+        layout
+      >
+        <AnimatePresence mode="wait">
+          {registerStep > step ? (
+            <motion.div key="check" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
+              <Check className="w-5 h-5" />
+            </motion.div>
+          ) : (
+            <motion.div key="icon" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
+              <Icon className="w-5 h-5" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
       <span className={`text-xs font-semibold transition-colors duration-300 ${
-        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-muted-foreground"
+        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-muted-foreground/60"
       }`}>
         {label}
       </span>
-    </div>
+    </motion.div>
   );
 
   return (
