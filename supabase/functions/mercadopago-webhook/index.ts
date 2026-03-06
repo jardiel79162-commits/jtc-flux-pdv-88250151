@@ -181,6 +181,40 @@ serve(async (req) => {
 
     console.log('Subscription activated successfully for user:', ourPayment.user_id);
 
+    // === PRIZE WHEEL: Check if this user was referred by someone ===
+    // If so, grant the referrer a free spin on the prize wheel
+    try {
+      const { data: referral } = await supabaseAdmin
+        .from('referrals')
+        .select('id, referrer_user_id')
+        .eq('referred_user_id', ourPayment.user_id)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      if (referral) {
+        // Check if spin was already granted for this referral
+        const { data: existingSpin } = await supabaseAdmin
+          .from('prize_wheel_spins')
+          .select('id')
+          .eq('referral_id', referral.id)
+          .maybeSingle();
+
+        if (!existingSpin) {
+          await supabaseAdmin
+            .from('prize_wheel_spins')
+            .insert({
+              user_id: referral.referrer_user_id,
+              referral_id: referral.id,
+              is_used: false,
+            });
+          console.log('Prize wheel spin granted to referrer:', referral.referrer_user_id);
+        }
+      }
+    } catch (spinError) {
+      console.error('Error granting prize wheel spin:', spinError);
+      // Don't fail the webhook for this
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Subscription activated',
