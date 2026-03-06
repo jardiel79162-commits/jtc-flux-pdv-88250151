@@ -209,7 +209,8 @@ export default function JTCCaptcha({ onVerified }: JTCCaptchaProps) {
                   key={cell.index}
                   type="button"
                   onClick={() => handleCellClick(cell.index)}
-                  className={`relative aspect-square rounded-lg border-2 transition-all duration-200 p-2 flex items-center justify-center ${
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                  className={`relative aspect-square rounded-lg border-2 transition-all duration-200 p-2 flex items-center justify-center select-none outline-none ${
                     isSelected
                       ? status === "wrong"
                         ? "border-red-500 bg-red-500/10"
