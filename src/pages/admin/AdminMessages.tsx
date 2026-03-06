@@ -37,6 +37,7 @@ export default function AdminMessages() {
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserInfo, setSelectedUserInfo] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
@@ -171,6 +172,28 @@ export default function AdminMessages() {
   const openChat = async (userId: string) => {
     setSelectedUserId(userId);
     setMsgLoading(true);
+
+    // Check if we already have this conversation info
+    let convInfo = conversations.find((c) => c.user_id === userId) || null;
+
+    // If not in conversations list, fetch user profile info
+    if (!convInfo) {
+      const [{ data: profile }, { data: store }] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, email").eq("user_id", userId).maybeSingle(),
+        supabase.from("store_settings").select("user_id, store_name, logo_url").eq("user_id", userId).maybeSingle(),
+      ]);
+      convInfo = {
+        user_id: userId,
+        full_name: profile?.full_name || null,
+        email: profile?.email || null,
+        store_name: store?.store_name || null,
+        store_logo: store?.logo_url || null,
+        unread_count: 0,
+        last_message: null,
+        last_message_at: null,
+      };
+    }
+    setSelectedUserInfo(convInfo);
 
     const { data } = await supabase
       .from("admin_messages")
@@ -323,12 +346,12 @@ export default function AdminMessages() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm truncate">{conv.store_name || conv.full_name || "Sem nome"}</p>
+                      <p className="font-semibold text-sm truncate">{conv.full_name || conv.store_name || "Sem nome"}</p>
                       {conv.unread_count > 0 && (
                         <Badge className="text-[10px] px-1.5 h-5">{conv.unread_count}</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">{conv.last_message || "..."}</p>
+                    <p className="text-xs text-muted-foreground truncate">{conv.store_name && conv.full_name ? conv.store_name + " • " : ""}{conv.last_message || "..."}</p>
                   </div>
                   {conv.last_message_at && (
                     <span className="text-[10px] text-muted-foreground shrink-0">
@@ -355,8 +378,8 @@ export default function AdminMessages() {
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            {selectedConv?.store_logo ? (
-              <img src={selectedConv.store_logo} alt="" className="w-8 h-8 rounded-full object-cover" />
+            {selectedUserInfo?.store_logo ? (
+              <img src={selectedUserInfo.store_logo} alt="" className="w-8 h-8 rounded-full object-cover" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                 <Store className="w-4 h-4 text-muted-foreground" />
@@ -364,9 +387,11 @@ export default function AdminMessages() {
             )}
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">
-                {selectedConv?.store_name || selectedConv?.full_name || "Usuário"}
+                {selectedUserInfo?.full_name || selectedUserInfo?.store_name || "Sem nome"}
               </p>
-              <p className="text-xs text-muted-foreground truncate">{selectedConv?.email}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {selectedUserInfo?.store_name && selectedUserInfo?.full_name ? selectedUserInfo.store_name + " • " : ""}{selectedUserInfo?.email}
+              </p>
             </div>
           </div>
 
