@@ -65,6 +65,7 @@ const App = () => (
             <Route path="assinaturas" element={<AdminSubscriptions />} />
             <Route path="logs" element={<AdminLogs />} />
             <Route path="manutencao" element={<AdminMaintenance />} />
+            <Route path="mensagens" element={<AdminMessages />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 
@@ -90,6 +91,7 @@ const App = () => (
             <Route path="/calculadora" element={<Calculator />} />
             <Route path="/auri" element={<Auri />} />
             <Route path="/manuais" element={<Manuals />} />
+            <Route path="/caixa-de-mensagem" element={<Inbox />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
