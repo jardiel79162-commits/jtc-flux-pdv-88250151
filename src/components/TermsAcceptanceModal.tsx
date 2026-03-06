@@ -182,8 +182,8 @@ function ReadingModal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg max-h-[90vh] bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onTouchMove={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg max-h-[90vh] bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col" style={{ overscrollBehavior: "contain" }}>
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border/30 shrink-0">
           <div className="flex items-center gap-3">
