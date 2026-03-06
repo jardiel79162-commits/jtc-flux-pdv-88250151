@@ -93,7 +93,16 @@ serve(async (req) => {
       // ==================== EMPRESAS ====================
       case 'list_users': {
         const { search, page = 1, per_page = 20 } = params;
+        // Get system admin user_ids to exclude them
+        const { data: sysAdmins } = await supabaseAdmin.from('system_admins').select('user_id');
+        const sysAdminIds = (sysAdmins || []).map((a: any) => a.user_id);
+        
         let query = supabaseAdmin.from('profiles').select('*', { count: 'exact' });
+        if (sysAdminIds.length > 0) {
+          for (const adminId of sysAdminIds) {
+            query = query.neq('user_id', adminId);
+          }
+        }
         if (search) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,cpf.ilike.%${search}%,phone.ilike.%${search}%`);
         const from = (page - 1) * per_page;
         const { data, count } = await query.order('created_at', { ascending: false }).range(from, from + per_page - 1);
@@ -271,7 +280,16 @@ serve(async (req) => {
       // ==================== SUBSCRIPTIONS ====================
       case 'list_subscriptions': {
         const { filter, page = 1, per_page = 20 } = params;
+        // Exclude system admins from subscription list
+        const { data: sysAdminsSub } = await supabaseAdmin.from('system_admins').select('user_id');
+        const sysAdminSubIds = (sysAdminsSub || []).map((a: any) => a.user_id);
+        
         let query = supabaseAdmin.from('profiles').select('user_id, full_name, email, cpf, subscription_ends_at, trial_ends_at, is_blocked, created_at', { count: 'exact' });
+        if (sysAdminSubIds.length > 0) {
+          for (const adminId of sysAdminSubIds) {
+            query = query.neq('user_id', adminId);
+          }
+        }
         const now = new Date().toISOString();
         if (filter === 'active') query = query.gt('subscription_ends_at', now);
         else if (filter === 'expired') query = query.lt('subscription_ends_at', now).not('subscription_ends_at', 'is', null);
