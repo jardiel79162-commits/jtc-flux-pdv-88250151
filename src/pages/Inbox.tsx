@@ -31,30 +31,57 @@ export default function Inbox() {
   };
 
   useEffect(() => {
-    loadMessages();
-    markAsRead();
+    let userId: string | null = null;
+    let pollTimer: ReturnType<typeof setInterval>;
 
-    const channel = supabase
-      .channel("inbox-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "admin_messages" },
-        (payload) => {
-          const msg = payload.new as Message;
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === msg.id)) return prev;
-            return [...prev, msg];
-          });
-          scrollToBottom();
-          // Mark as read if from admin
-          if (msg.sender_type === "admin") {
-            supabase.from("admin_messages").update({ is_read: true }).eq("id", msg.id).then(() => {});
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      userId = session.user.id;
+
+      await loadMessages();
+      markAsRead();
+
+      // Realtime subscription with user_id filter
+      const channel = supabase
+        .channel(`inbox-${userId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "admin_messages",
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            const msg = payload.new as Message;
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === msg.id)) return prev;
+              return [...prev, msg];
+            });
+            scrollToBottom();
+            if (msg.sender_type === "admin") {
+              supabase.from("admin_messages").update({ is_read: true }).eq("id", msg.id).then(() => {});
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+      // Fallback polling every 3s
+      pollTimer = setInterval(() => {
+        loadMessages();
+      }, 3000);
+
+      return channel;
+    };
+
+    let channel: any;
+    init().then((ch) => { channel = ch; });
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+      if (pollTimer) clearInterval(pollTimer);
+    };
   }, []);
 
   const loadMessages = async () => {

@@ -63,7 +63,7 @@ export default function AdminMessages() {
     }
   }, [searchParams]);
 
-  // Load conversations
+  // Load conversations + realtime + polling
   useEffect(() => {
     loadConversations();
 
@@ -74,16 +74,13 @@ export default function AdminMessages() {
         { event: "INSERT", schema: "public", table: "admin_messages" },
         (payload) => {
           const msg = payload.new as Message;
-          // Update conversations
           loadConversations();
-          // If viewing this user's chat, add message
           if (msg.user_id === selectedUserId) {
             setMessages((prev) => {
               if (prev.some((m) => m.id === msg.id)) return prev;
               return [...prev, msg];
             });
             scrollToBottom();
-            // Mark as read
             if (msg.sender_type === "user") {
               supabase.from("admin_messages").update({ is_read: true }).eq("id", msg.id).then(() => {});
             }
@@ -92,7 +89,36 @@ export default function AdminMessages() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Fallback polling every 3s
+    const pollTimer = setInterval(() => {
+      loadConversations();
+      if (selectedUserId) {
+        supabase
+          .from("admin_messages")
+          .select("*")
+          .eq("user_id", selectedUserId)
+          .order("created_at", { ascending: true })
+          .then(({ data }) => {
+            if (data) {
+              setMessages((prev) => {
+                const newMsgs = (data as Message[]).filter(
+                  (m) => !prev.some((p) => p.id === m.id)
+                );
+                if (newMsgs.length > 0) {
+                  scrollToBottom();
+                  return [...prev, ...newMsgs];
+                }
+                return prev;
+              });
+            }
+          });
+      }
+    }, 3000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(pollTimer);
+    };
   }, [selectedUserId]);
 
   const loadConversations = async () => {
