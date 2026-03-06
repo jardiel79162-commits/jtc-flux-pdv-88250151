@@ -37,6 +37,14 @@ interface DashboardData {
   hideTrialMessage: boolean;
 }
 
+interface CustomShortcut {
+  id: string;
+  label: string;
+  url: string;
+  icon_url: string | null;
+  sort_order: number;
+}
+
 const quickActions = [
   { label: "Produtos", path: "/produtos", image: quickActionProdutos },
   { label: "Venda", path: "/pdv", image: quickActionVenda },
@@ -78,7 +86,7 @@ const Dashboard = () => {
     hideTrialMessage: false,
   });
   const [loading, setLoading] = useState(true);
-  
+  const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
 
   // Filter quick actions by permissions
   const filteredQuickActions = quickActions.filter((action) => {
@@ -101,7 +109,7 @@ const Dashboard = () => {
       const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
       // Run ALL queries in parallel
-      const [profileRes, storeSettingsRes, salesTodayRes, salesMonthRes, productsRes, recentSalesRes] = await Promise.all([
+      const [profileRes, storeSettingsRes, salesTodayRes, salesMonthRes, productsRes, recentSalesRes, shortcutsRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("created_at, subscription_ends_at, trial_ends_at")
@@ -112,7 +120,13 @@ const Dashboard = () => {
         supabase.from("sales").select("total_amount").eq("user_id", effectiveUserId).gte("created_at", firstDayOfMonth.toISOString()),
         supabase.from("products").select("id, stock_quantity, min_stock_quantity").eq("user_id", effectiveUserId),
         supabase.from("sales").select("id").eq("user_id", effectiveUserId).order("created_at", { ascending: false }).limit(5),
+        supabase.from("custom_shortcuts" as any).select("id, label, url, icon_url, sort_order").eq("is_active", true).order("sort_order", { ascending: true }),
       ]);
+
+      // Set custom shortcuts
+      if (shortcutsRes.data) {
+        setCustomShortcuts(shortcutsRes.data as any[]);
+      }
 
       let quickActionsEnabled = true;
       let hideTrialMessage = false;
@@ -394,6 +408,36 @@ const Dashboard = () => {
                   </motion.div>
                 </Link>
               ))}
+              {/* Custom shortcuts from admin */}
+              {customShortcuts.map((shortcut) => {
+                const isExternal = shortcut.url.startsWith("http");
+                const content = (
+                  <motion.div
+                    whileHover={{ scale: 1.08, y: -3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                  >
+                    <div className="w-13 h-13 md:w-16 md:h-16 rounded-2xl bg-card border border-border/50 p-2 shadow-sm group-hover:shadow-lg group-hover:border-primary/30 transition-all duration-300">
+                      {shortcut.icon_url ? (
+                        <img src={shortcut.icon_url} alt={shortcut.label} className="w-full h-full object-contain pointer-events-auto" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <Sparkles className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[10px] md:text-xs font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
+                      {shortcut.label}
+                    </span>
+                  </motion.div>
+                );
+                return isExternal ? (
+                  <a key={shortcut.id} href={shortcut.url} target="_blank" rel="noopener noreferrer">{content}</a>
+                ) : (
+                  <Link key={shortcut.id} to={shortcut.url}>{content}</Link>
+                );
+              })}
             </div>
           </motion.div>
         )}
