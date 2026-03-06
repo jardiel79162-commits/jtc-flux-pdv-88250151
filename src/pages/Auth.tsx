@@ -1345,12 +1345,18 @@ const Auth = () => {
                         Próximo<ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 3 */}
                 {registerStep === 3 && (
-                  <div className="space-y-6 animate-fade-in">
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-3"
+                  >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Código de Convite</h3>
                       <p className="text-sm text-muted-foreground mt-1">Você tem um código de convite de um amigo?</p>
