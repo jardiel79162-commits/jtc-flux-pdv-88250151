@@ -1,6 +1,6 @@
 import { ArrowLeft, ShoppingCart, Package, TrendingUp, Users, BarChart3, Settings, Gift, Shield, Zap, Star, Clock, Code, Heart, Award, Smartphone } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -100,14 +100,7 @@ const About = () => {
             Veja o Sistema em Ação
           </h2>
           <div className="max-w-md mx-auto rounded-2xl overflow-hidden shadow-2xl border border-border/50 bg-card">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto"
-              src="/videos/about-video.mp4"
-            />
+            <VideoLoop src="/videos/about-video.mp4" />
           </div>
         </section>
 
