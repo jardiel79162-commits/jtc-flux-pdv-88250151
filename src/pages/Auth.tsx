@@ -1594,7 +1594,7 @@ const Auth = () => {
                         ? "🎉 Após confirmar, você terá 1 mês + 3 dias grátis!"
                         : "Após confirmar, você terá 3 dias de teste grátis!"}
                     </p>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Manual */}
