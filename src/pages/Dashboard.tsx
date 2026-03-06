@@ -109,7 +109,7 @@ const Dashboard = () => {
       const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
       // Run ALL queries in parallel
-      const [profileRes, storeSettingsRes, salesTodayRes, salesMonthRes, productsRes, recentSalesRes] = await Promise.all([
+      const [profileRes, storeSettingsRes, salesTodayRes, salesMonthRes, productsRes, recentSalesRes, shortcutsRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("created_at, subscription_ends_at, trial_ends_at")
@@ -120,7 +120,13 @@ const Dashboard = () => {
         supabase.from("sales").select("total_amount").eq("user_id", effectiveUserId).gte("created_at", firstDayOfMonth.toISOString()),
         supabase.from("products").select("id, stock_quantity, min_stock_quantity").eq("user_id", effectiveUserId),
         supabase.from("sales").select("id").eq("user_id", effectiveUserId).order("created_at", { ascending: false }).limit(5),
+        supabase.from("custom_shortcuts" as any).select("id, label, url, icon_url, sort_order").eq("is_active", true).order("sort_order", { ascending: true }),
       ]);
+
+      // Set custom shortcuts
+      if (shortcutsRes.data) {
+        setCustomShortcuts(shortcutsRes.data as any[]);
+      }
 
       let quickActionsEnabled = true;
       let hideTrialMessage = false;
