@@ -562,10 +562,20 @@ const Auth = () => {
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-20 items-center relative z-10">
         {/* Branding section */}
-        <div className="hidden lg:flex flex-col justify-center space-y-8 p-8">
+        <motion.div 
+          className="hidden lg:flex flex-col justify-center space-y-8 p-8"
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <div className="space-y-8">
             <div className="flex items-center gap-7">
-              <div className="relative group">
+              <motion.div 
+                className="relative group"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+              >
                 <div className="absolute -inset-3 bg-gradient-to-r from-primary via-accent to-primary rounded-full blur-lg opacity-50 group-hover:opacity-70 transition-all duration-700 animate-[pulse_3s_ease-in-out_infinite]" />
                 <div className="relative">
                   <img src={logo} alt="JTC FluxPDV" className="relative w-32 h-32 rounded-full object-cover shadow-2xl ring-2 ring-white/20" />
@@ -573,7 +583,7 @@ const Auth = () => {
                     <CheckCircle2 className="w-6 h-6 text-white" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
               <div className="space-y-3">
                 <h1 className="text-5xl xl:text-6xl font-black tracking-tight">
                   <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</span>
@@ -591,10 +601,12 @@ const Auth = () => {
               { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", gradient: "from-accent to-accent/70", shadow: "shadow-accent/20" },
               { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", gradient: "from-success to-success/70", shadow: "shadow-success/20" },
             ].map((item, i) => (
-              <div
+              <motion.div
                 key={i}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
                 className="flex items-center gap-5 p-5 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] hover:shadow-xl group cursor-pointer"
-                style={{ animationDelay: `${i * 100}ms` }}
               >
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg ${item.shadow} group-hover:scale-110 transition-transform duration-300`}>
                   <item.icon className="w-7 h-7 text-white" />
@@ -603,11 +615,16 @@ const Auth = () => {
                   <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
                   <p className="text-muted-foreground text-sm">{item.desc}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          <div className="flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/30 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5 }}
+            className="flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/30 backdrop-blur-sm"
+          >
             <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
               <Gift className="w-6 h-6 text-accent" />
             </div>
@@ -617,8 +634,8 @@ const Auth = () => {
                 Convide amigos e ganhe <span className="text-accent font-bold">1 mês grátis</span>!
               </p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Form card */}
         <Card className="auth-card">
