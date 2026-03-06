@@ -12,7 +12,7 @@ import jtcPartnership from "@/assets/jtc-partnership.jpg";
 import feedbackWoman from "@/assets/feedback-woman.jpg";
 import feedbackMan from "@/assets/feedback-man.jpg";
 
-import { MessageCircle } from "lucide-react";
+
 
 const VideoLoop = ({ src }: { src: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
