@@ -1524,6 +1524,7 @@ const Auth = () => {
             </Tabs>
           </CardContent>
         </Card>
+        </motion.div>
       </div>
 
       {/* Modal de erro */}
