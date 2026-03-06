@@ -31,6 +31,7 @@ const PrizeWheel = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [referralStats, setReferralStats] = useState({ total: 0, activated: 0 });
+  const { startSpinSound, stopSpinSound, playWin } = useWheelSound();
 
   const loadData = useCallback(async () => {
     setLoading(true);
