@@ -18,7 +18,7 @@ const menuItems = [
   { path: "/admin/mensagens", label: "Mensagens", icon: MessageCircle, end: false },
   { path: "/admin/indicacoes", label: "Antifraude", icon: ShieldAlert, end: false },
   { path: "/admin/atalhos", label: "Atalhos", icon: Zap, end: false },
-  { path: "/admin/roleta", label: "Roleta", icon: Menu, end: false },
+  { path: "/admin/roleta", label: "Roleta", icon: Ticket, end: false },
 ];
 
 export default function AdminLayout() {
