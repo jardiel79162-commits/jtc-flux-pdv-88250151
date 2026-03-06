@@ -261,7 +261,7 @@ const POS = () => {
   // Load cart from sessionStorage (when returning from product select page)
   const location = useLocation();
   useEffect(() => {
-    if ((location.state as any)?.fromProductSelect) {
+    if ((location.state as any)?.fromProductSelect || (location.state as any)?.fromCustomerSelect) {
       const savedCart = sessionStorage.getItem("pos_cart");
       if (savedCart) {
         try {
