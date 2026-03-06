@@ -508,22 +508,40 @@ const Auth = () => {
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
-    <div className="flex flex-col items-center gap-1.5">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
-        registerStep === step
-          ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 scale-110"
-          : registerStep > step
-            ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/20"
-            : "bg-muted/50 text-muted-foreground border border-border/50"
-      }`}>
-        {registerStep > step ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-      </div>
+    <motion.div 
+      className="flex flex-col items-center gap-1.5"
+      initial={false}
+      animate={registerStep === step ? { scale: 1.1 } : { scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+    >
+      <motion.div 
+        className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
+          registerStep === step
+            ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
+            : registerStep > step
+              ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/20"
+              : "bg-white/5 text-muted-foreground border border-white/10"
+        }`}
+        layout
+      >
+        <AnimatePresence mode="wait">
+          {registerStep > step ? (
+            <motion.div key="check" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
+              <Check className="w-5 h-5" />
+            </motion.div>
+          ) : (
+            <motion.div key="icon" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
+              <Icon className="w-5 h-5" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
       <span className={`text-xs font-semibold transition-colors duration-300 ${
-        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-muted-foreground"
+        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-muted-foreground/60"
       }`}>
         {label}
       </span>
-    </div>
+    </motion.div>
   );
 
   return (
@@ -535,26 +553,62 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
-        {/* Floating particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
+        {/* Floating particles — varied sizes & shapes */}
+        {Array.from({ length: 30 }).map((_, i) => {
+          const size = 1 + Math.random() * 3;
+          const isCircle = i % 3 !== 0;
+          return (
+            <motion.div
+              key={i}
+              className="absolute"
+              style={{
+                width: size,
+                height: size,
+                borderRadius: isCircle ? '9999px' : '2px',
+                background: i % 3 === 0 
+                  ? 'hsl(229 100% 70% / 0.5)' 
+                  : i % 3 === 1 
+                  ? 'hsl(163 100% 50% / 0.4)' 
+                  : 'hsl(260 80% 70% / 0.3)',
+                left: `${5 + Math.random() * 90}%`,
+                top: `${5 + Math.random() * 90}%`,
+                rotate: isCircle ? 0 : 45,
+              }}
+              animate={{
+                y: [0, -(20 + Math.random() * 40), 0],
+                x: [0, (Math.random() - 0.5) * 20, 0],
+                opacity: [0.1, 0.7, 0.1],
+                scale: [0.8, 1.3, 0.8],
+              }}
+              transition={{
+                duration: 4 + Math.random() * 6,
+                repeat: Infinity,
+                delay: Math.random() * 5,
+                ease: "easeInOut",
+              }}
+            />
+          );
+        })}
+        {/* Shooting stars */}
+        {Array.from({ length: 3 }).map((_, i) => (
           <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full"
+            key={`star-${i}`}
+            className="absolute h-px"
             style={{
-              background: i % 2 === 0 ? 'hsl(229 100% 65% / 0.4)' : 'hsl(163 100% 44% / 0.4)',
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              width: 60 + Math.random() * 80,
+              background: 'linear-gradient(90deg, transparent, hsl(229 100% 70% / 0.6), transparent)',
+              top: `${15 + i * 25}%`,
+              left: '-100px',
             }}
             animate={{
-              y: [0, -30, 0],
-              opacity: [0.2, 0.8, 0.2],
-              scale: [1, 1.5, 1],
+              x: ['0vw', '120vw'],
+              opacity: [0, 1, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 4,
+              duration: 2 + Math.random() * 2,
               repeat: Infinity,
-              delay: Math.random() * 3,
-              ease: "easeInOut",
+              delay: 3 + i * 5 + Math.random() * 3,
+              ease: "easeIn",
             }}
           />
         ))}
@@ -799,12 +853,30 @@ const Auth = () => {
                 ) : (
                   <motion.form
                     onSubmit={handleLogin}
-                    className="space-y-6"
-                    initial={{ opacity: 0, y: 10 }}
+                    className="space-y-5"
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <div className="space-y-3">
+                    {/* Welcome text */}
+                    <div className="text-center pb-2">
+                      <motion.p 
+                        className="text-lg font-semibold text-foreground"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        Bem-vindo de volta 👋
+                      </motion.p>
+                      <p className="text-sm text-muted-foreground mt-1">Entre com suas credenciais</p>
+                    </div>
+
+                    <motion.div 
+                      className="space-y-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.15 }}
+                    >
                       <Label htmlFor="identifier" className="text-sm font-semibold text-foreground/90">E-mail ou CPF</Label>
                       <Input
                         id="identifier"
@@ -814,9 +886,14 @@ const Auth = () => {
                         disabled={isLoading}
                         className="h-14 text-base bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-5 placeholder:text-muted-foreground/50 transition-all duration-300"
                       />
-                    </div>
+                    </motion.div>
 
-                    <div className="space-y-3">
+                    <motion.div 
+                      className="space-y-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
                       <div className="relative group">
                         <Input
                           id="password"
@@ -835,49 +912,101 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* Errors shown via modal */}
 
-                    <Button
-                      type="submit"
-                      className="w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
-                      disabled={isLoading}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35 }}
                     >
-                      {isLoading ? (
-                        <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
-                      ) : (
-                        "Entrar na Conta"
-                      )}
-                    </Button>
+                      <Button
+                        type="submit"
+                        className="auth-btn-primary w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
+                        ) : (
+                          "Entrar na Conta"
+                        )}
+                      </Button>
+                    </motion.div>
                   </motion.form>
                 )}
 
-                <div className="lg:hidden pt-6 border-t border-border/30 mt-6">
-                  <div className="flex items-center justify-center gap-4 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
-                    <Gift className="w-6 h-6 text-accent" />
+                <motion.div 
+                  className="lg:hidden pt-6 border-t border-white/5 mt-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <div className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 backdrop-blur-sm">
+                    <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }}>
+                      <Gift className="w-6 h-6 text-accent" />
+                    </motion.div>
                     <span className="text-sm text-muted-foreground">Convide amigos e ganhe <strong className="text-accent font-bold">1 mês grátis</strong>!</span>
                   </div>
-                </div>
+                </motion.div>
               </TabsContent>
 
               {/* REGISTER TAB */}
               <TabsContent value="register" className="space-y-5">
                 <div className="flex justify-center items-center gap-2 mb-8 py-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 1 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 1 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={2} label="Endereço" icon={MapPin} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 2 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 2 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={3} label="Código" icon={Ticket} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 3 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 3 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={4} label="Captcha" icon={Shield} />
-                  <div className={`flex-1 h-1 rounded-full max-w-8 transition-all duration-500 ${registerStep > 4 ? 'bg-gradient-to-r from-accent to-accent/70' : 'bg-muted/50'}`} />
+                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 4 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
                   <StepIndicator step={5} label="E-mail" icon={Mail} />
                 </div>
 
                 {/* Step 1 */}
                 {registerStep === 1 && (
-                  <div className="space-y-5 animate-fade-in">
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-1"
+                  >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Dados Pessoais</h3>
                       <p className="text-sm text-muted-foreground mt-1">Preencha suas informações básicas</p>
@@ -1092,12 +1221,18 @@ const Auth = () => {
                       Próximo
                       <ChevronRight className="ml-2 h-5 w-5" />
                     </Button>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 2 */}
                 {registerStep === 2 && (
-                  <div className="space-y-5 animate-fade-in">
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-2"
+                  >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Endereço</h3>
                       <p className="text-sm text-muted-foreground mt-1">Digite o CEP para preenchimento automático</p>
@@ -1210,12 +1345,18 @@ const Auth = () => {
                         Próximo<ChevronRight className="ml-2 h-5 w-5" />
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 3 */}
                 {registerStep === 3 && (
-                  <div className="space-y-6 animate-fade-in">
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-3"
+                  >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Código de Convite</h3>
                       <p className="text-sm text-muted-foreground mt-1">Você tem um código de convite de um amigo?</p>
@@ -1305,12 +1446,18 @@ const Auth = () => {
                         ? "Você ganhará 1 mês + 3 dias de teste grátis! 🎉"
                         : "Você ganhará 3 dias de teste grátis"}
                     </p>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 4 - CAPTCHA */}
                 {registerStep === 4 && (
-                  <div className="space-y-6 animate-fade-in">
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-4"
+                  >
                     <div className="text-center mb-4">
                       <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
                       <p className="text-sm text-muted-foreground mt-1">Complete o desafio para continuar</p>
@@ -1335,12 +1482,18 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Step 5 - Email Verification */}
                 {registerStep === 5 && (
-                  <div className="space-y-6 animate-fade-in">
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    key="step-5"
+                  >
                     <div className="text-center mb-6">
                       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
                         <Mail className="w-12 h-12 text-primary" />
@@ -1441,7 +1594,7 @@ const Auth = () => {
                         ? "🎉 Após confirmar, você terá 1 mês + 3 dias grátis!"
                         : "Após confirmar, você terá 3 dias de teste grátis!"}
                     </p>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Manual */}
