@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ImagePlus, Shield, Loader2, X } from "lucide-react";
+import { Send, ImagePlus, Shield, Loader2, X, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -42,7 +42,6 @@ export default function Inbox() {
       await loadMessages();
       markAsRead();
 
-      // Realtime subscription with user_id filter
       const channel = supabase
         .channel(`inbox-${userId}`)
         .on(
@@ -67,7 +66,6 @@ export default function Inbox() {
         )
         .subscribe();
 
-      // Fallback polling every 3s
       pollTimer = setInterval(() => {
         loadMessages();
       }, 3000);
@@ -184,29 +182,35 @@ export default function Inbox() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] max-w-2xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-64px)] max-w-2xl mx-auto bg-background">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
           <Shield className="w-5 h-5 text-primary" />
         </div>
-        <div>
-          <p className="font-bold text-sm text-foreground">Administrador</p>
-          <p className="text-xs text-muted-foreground">Suporte JTC FluxPDV</p>
+        <div className="flex-1">
+          <p className="font-bold text-sm text-foreground">Suporte JTC FluxPDV</p>
+          <p className="text-xs text-muted-foreground">Administrador • Online</p>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-2"
+        style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, hsl(var(--muted)) 1px, transparent 0)",
+          backgroundSize: "24px 24px",
+        }}
+      >
         {loading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground text-sm">
-            <Shield className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40" />
-            <p>Nenhuma mensagem ainda.</p>
-            <p className="text-xs mt-1">Envie uma mensagem para o administrador.</p>
+          <div className="text-center py-10">
+            <MessageCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
+            <p className="text-muted-foreground text-sm font-medium">Nenhuma mensagem ainda</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Envie uma mensagem para o suporte</p>
           </div>
         ) : (
           messages.map((msg) => (
@@ -215,23 +219,23 @@ export default function Inbox() {
               className={`flex ${msg.sender_type === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                className={`max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm ${
                   msg.is_system
-                    ? "bg-accent/20 border border-accent/30 text-foreground text-center w-full max-w-full"
+                    ? "bg-accent/20 border border-accent/30 text-foreground text-center w-full max-w-full rounded-lg"
                     : msg.sender_type === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-muted text-foreground rounded-bl-md"
+                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                    : "bg-card border border-border text-foreground rounded-bl-sm"
                 }`}
               >
                 {msg.is_system && (
                   <p className="text-[10px] font-semibold text-accent mb-1">🎁 Sistema</p>
                 )}
-                {msg.content && <p className="text-sm whitespace-pre-wrap">{msg.content}</p>}
+                {msg.content && <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>}
                 {msg.image_url && (
                   <img
                     src={msg.image_url}
                     alt="Imagem"
-                    className="max-w-full rounded-lg mt-1 cursor-pointer"
+                    className="max-w-full rounded-lg mt-1 cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => setPreviewImage(msg.image_url)}
                   />
                 )}
@@ -265,7 +269,7 @@ export default function Inbox() {
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-border">
+      <div className="px-4 py-3 border-t border-border bg-card">
         <div className="flex items-center gap-2">
           <input
             ref={fileRef}
@@ -277,24 +281,24 @@ export default function Inbox() {
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0"
+            className="shrink-0 h-9 w-9"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
           >
-            {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
+            {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5 text-muted-foreground" />}
           </Button>
           <Input
             placeholder="Digite sua mensagem..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-            className="flex-1"
+            className="flex-1 h-10"
           />
           <Button
             size="icon"
             onClick={sendMessage}
             disabled={!text.trim() || sending}
-            className="shrink-0"
+            className="shrink-0 h-10 w-10"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
