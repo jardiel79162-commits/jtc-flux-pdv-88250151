@@ -48,6 +48,7 @@ interface UserProfile {
 }
 
 export default function AdminEmpresas() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -287,6 +288,9 @@ export default function AdminEmpresas() {
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => setDeleteUser(selectedUser)} disabled={selectedUser.is_system_admin}>
                     <Trash2 className="w-3 h-3 mr-1" />Deletar
+                  </Button>
+                  <Button size="sm" variant="outline" className="text-blue-600 border-blue-600/30" onClick={() => navigate(`/admin/mensagens?user=${selectedUser.user_id}`)}>
+                    <MessageCircle className="w-3 h-3 mr-1" />Conversar
                   </Button>
                 </div>
               </CardHeader>
