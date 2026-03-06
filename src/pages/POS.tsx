@@ -113,10 +113,10 @@ const POS = () => {
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [emailToSend, setEmailToSend] = useState("");
   
-  // Estados para pagamento múltiplo
-  const [paymentMode, setPaymentMode] = useState<"single" | "multiple" | null>(null);
+  // Estados para pagamento unificado
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
   const [currentPaymentAmount, setCurrentPaymentAmount] = useState("");
+  const [currentPaymentMethod, setCurrentPaymentMethod] = useState<string>("");
   const [printerWidth, setPrinterWidth] = useState<"80mm" | "58mm">("80mm");
   
   // Estados para taxa PIX
@@ -377,17 +377,15 @@ const POS = () => {
         playNotificationSound();
         
         // Adicionar pagamento automaticamente
-        if (paymentMode === "multiple") {
-          setPayments(prev => [...prev, { method: "pix", amount: pixPaymentAmount }]);
-          setCurrentPaymentAmount("");
-        }
+        setPayments(prev => [...prev, { method: "pix", amount: pixPaymentAmount }]);
+        setCurrentPaymentAmount("");
+        setCurrentPaymentMethod("");
         
         toast({ title: "Pagamento PIX confirmado!" });
         
         // Fechar diálogo após 2 segundos
         setTimeout(() => {
           setShowPixQrCode(false);
-          setPaymentMethod(paymentMode === "multiple" ? "" : "pix");
         }, 2000);
       }
     } catch (error) {
