@@ -7,13 +7,8 @@ const corsHeaders = {
 };
 
 interface CreatePaymentRequest {
-  planType: '3_months' | '1_year';
+  planType: string;
 }
-
-const PLANS = {
-  '3_months': { price: 29.99, days: 90, name: 'Plano 3 Meses' },
-  '1_year': { price: 69.99, days: 365, name: 'Plano 1 Ano' },
-};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
