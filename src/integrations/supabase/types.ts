@@ -1115,6 +1115,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          badge: string | null
+          created_at: string
+          days: number
+          features: string[]
+          id: string
+          is_active: boolean
+          name: string
+          plan_key: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string
+          days?: number
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          name: string
+          plan_key: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string
+          days?: number
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          name?: string
+          plan_key?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           address: string | null
