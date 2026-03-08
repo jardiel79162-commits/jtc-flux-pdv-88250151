@@ -3,6 +3,7 @@ import { useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import mascotImg from "@/assets/404-mascot.png";
 
 /* ── floating particles ── */
 const Particles = () => {
@@ -59,6 +60,22 @@ const NotFound = () => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
+  // Robust autoplay for iOS Safari
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const attemptPlay = async () => {
+      try { await video.play(); } catch {
+        video.muted = true;
+        try { await video.play(); } catch {}
+      }
+    };
+    attemptPlay();
+    const handleEnded = () => { video.currentTime = 0; video.play().catch(() => {}); };
+    video.addEventListener("ended", handleEnded);
+    return () => video.removeEventListener("ended", handleEnded);
+  }, []);
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#040d21]">
       {/* grid overlay */}
@@ -83,7 +100,7 @@ const NotFound = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        {/* mascot video with image fallback */}
+        {/* mascot video with poster for instant display */}
         <div className="relative mx-auto w-full max-w-md">
           <video
             ref={videoRef}
@@ -92,8 +109,9 @@ const NotFound = () => {
             loop
             muted
             playsInline
+            preload="auto"
+            poster={mascotImg}
             className="w-full rounded-2xl"
-            poster=""
           />
         </div>
 
