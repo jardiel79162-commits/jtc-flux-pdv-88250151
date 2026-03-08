@@ -53,6 +53,7 @@ const SalesHistory = () => {
   const [userEmail, setUserEmail] = useState("");
   const { toast } = useToast();
   const { isActive, isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
