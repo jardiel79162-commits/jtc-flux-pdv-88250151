@@ -908,6 +908,8 @@ export type Database = {
           customer_id: string | null
           customer_name: string | null
           discount: number | null
+          employee_id: string | null
+          employee_name: string | null
           id: string
           payment_method: string
           payment_status: string | null
@@ -924,6 +926,8 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string | null
           discount?: number | null
+          employee_id?: string | null
+          employee_name?: string | null
           id?: string
           payment_method?: string
           payment_status?: string | null
@@ -940,6 +944,8 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string | null
           discount?: number | null
+          employee_id?: string | null
+          employee_name?: string | null
           id?: string
           payment_method?: string
           payment_status?: string | null
@@ -955,6 +961,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]

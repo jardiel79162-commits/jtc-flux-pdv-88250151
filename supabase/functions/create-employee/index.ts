@@ -32,9 +32,41 @@ serve(async (req) => {
       .eq('role', 'admin')
       .maybeSingle();
 
-    if (!userRole) throw new Error('Apenas administradores podem criar funcionários');
+    if (!userRole) throw new Error('Apenas administradores podem gerenciar funcionários');
 
-    const { full_name, email, cpf, password, cargo, description, permissions } = await req.json();
+    const body = await req.json();
+    const { action } = body;
+
+    // Handle password change
+    if (action === 'change_password') {
+      const { user_id: targetUserId, password: newPassword } = body;
+      if (!targetUserId || !newPassword || newPassword.length < 6) {
+        throw new Error('user_id e senha (mín. 6 caracteres) são obrigatórios');
+      }
+
+      // Verify the target user is an employee of this admin
+      const { data: empCheck } = await supabaseAdmin
+        .from('employees')
+        .select('id')
+        .eq('admin_id', user.id)
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+
+      if (!empCheck) throw new Error('Funcionário não encontrado');
+
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+        password: newPassword,
+      });
+
+      if (updateError) throw updateError;
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
+    const { full_name, email, cpf, password, permissions } = body;
 
     if (!full_name || !cpf || !password || !email) {
       throw new Error('Nome, e-mail, CPF e senha são obrigatórios');

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SubscriptionStatus {
   isActive: boolean;
@@ -21,6 +22,8 @@ export const useSubscription = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  const { isEmployee, adminId } = usePermissions();
+
   const checkSubscription = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -30,10 +33,13 @@ export const useSubscription = () => {
         return;
       }
 
+      // Employees use their admin's subscription
+      const targetUserId = isEmployee && adminId ? adminId : user.id;
+
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("created_at, subscription_ends_at, trial_ends_at")
-        .eq("user_id", user.id)
+        .eq("user_id", targetUserId)
         .maybeSingle();
 
       if (error) {
@@ -97,7 +103,7 @@ export const useSubscription = () => {
       console.error("Erro ao verificar assinatura:", error);
       setLoading(false);
     }
-  }, []);
+  }, [isEmployee, adminId]);
 
   useEffect(() => {
     checkSubscription();
@@ -107,6 +113,7 @@ export const useSubscription = () => {
     const setupRealtime = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
+      const targetId = isEmployee && adminId ? adminId : session.user.id;
       channel = supabase
         .channel('subscription-realtime')
         .on(
@@ -115,7 +122,7 @@ export const useSubscription = () => {
             event: 'UPDATE',
             schema: 'public',
             table: 'profiles',
-            filter: `user_id=eq.${session.user.id}`,
+            filter: `user_id=eq.${targetId}`,
           },
           () => {
             checkSubscription();

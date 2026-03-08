@@ -35,6 +35,7 @@ interface Sale {
   payment_status: string;
   customer_id: string | null;
   customer_name?: string;
+  employee_name?: string | null;
   items: SaleItem[];
 }
 
@@ -69,7 +70,7 @@ const SalesHistory = () => {
     // Fetch store info and sales in parallel
     const [storeRes, salesRes] = await Promise.all([
       supabase.from("store_settings").select("store_name").eq("user_id", user.id).maybeSingle(),
-      supabase.from("sales").select(`*, customers (name)`).eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("sales").select(`*, customers (name)`).eq("user_id", user.id).order("created_at", { ascending: false }) as any,
     ]);
 
     if (!storeRes.error && storeRes.data?.store_name) {
@@ -97,6 +98,7 @@ const SalesHistory = () => {
           return {
             ...sale,
             customer_name: sale.customers?.name,
+            employee_name: (sale as any).employee_name || null,
             items: items?.map(item => ({
               product_id: item.product_id,
               quantity: item.quantity,
@@ -615,6 +617,12 @@ const SalesHistory = () => {
                     {calculateSaleMargin(selectedSale).toFixed(1)}%
                   </p>
                 </div>
+                {selectedSale.employee_name && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Vendedor</p>
+                    <p className="font-medium text-sm">{selectedSale.employee_name}</p>
+                  </div>
+                )}
               </div>
 
               <div>
