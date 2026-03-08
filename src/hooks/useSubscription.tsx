@@ -102,7 +102,7 @@ export const useSubscription = () => {
       console.error("Erro ao verificar assinatura:", error);
       setLoading(false);
     }
-  }, []);
+  }, [isEmployee, adminId]);
 
   useEffect(() => {
     checkSubscription();
