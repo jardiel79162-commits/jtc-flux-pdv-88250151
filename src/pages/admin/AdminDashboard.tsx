@@ -41,9 +41,9 @@ export default function AdminDashboard() {
     { title: "Suspensos", value: stats.blocked, icon: UserX, color: "text-red-500", link: "/admin/empresas" },
     { title: "Assinaturas Ativas", value: stats.activeSubscriptions, icon: UserCheck, color: "text-emerald-500", link: "/admin/assinaturas" },
     { title: "Lojas", value: stats.totalStores, icon: Store, color: "text-purple-500", link: "/admin/empresas" },
-    { title: "Produtos", value: stats.totalProducts, icon: Package, color: "text-orange-500", link: "/admin/produtos" },
-    { title: "Vendas", value: stats.totalSales, icon: ShoppingCart, color: "text-cyan-500", link: "/admin/vendas" },
-    { title: "Receita Vendas", value: `R$ ${stats.salesRevenue.toFixed(2)}`, icon: DollarSign, color: "text-green-500", link: "/admin/vendas" },
+    { title: "Produtos", value: stats.totalProducts, icon: Package, color: "text-orange-500" },
+    { title: "Vendas", value: stats.totalSales, icon: ShoppingCart, color: "text-cyan-500" },
+    { title: "Receita Vendas", value: `R$ ${stats.salesRevenue.toFixed(2)}`, icon: DollarSign, color: "text-green-500" },
     { title: "Receita Assinaturas", value: `R$ ${stats.revenue.toFixed(2)}`, icon: CreditCard, color: "text-amber-500", link: "/admin/pagamentos" },
   ];
 
