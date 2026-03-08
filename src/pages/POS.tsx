@@ -195,7 +195,8 @@ const POS = () => {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
     if (!user) { setProductsLoading(false); return; }
-    const { data, error } = await supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true);
+    const effectiveId = getEffectiveUserId() || user.id;
+    const { data, error } = await supabase.from("products").select("*").eq("user_id", effectiveId).eq("is_active", true);
     if (error) {
       if (!isMissingTableError(error)) toast({ title: "Erro ao carregar produtos", variant: "destructive" });
     } else {
