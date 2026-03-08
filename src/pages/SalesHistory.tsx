@@ -69,10 +69,12 @@ const SalesHistory = () => {
 
     setUserEmail(user.email || "");
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     // Fetch store info and sales in parallel
     const [storeRes, salesRes] = await Promise.all([
-      supabase.from("store_settings").select("store_name").eq("user_id", user.id).maybeSingle(),
-      supabase.from("sales").select(`*, customers (name)`).eq("user_id", user.id).order("created_at", { ascending: false }) as any,
+      supabase.from("store_settings").select("store_name").eq("user_id", effectiveId).maybeSingle(),
+      supabase.from("sales").select(`*, customers (name)`).eq("user_id", effectiveId).order("created_at", { ascending: false }) as any,
     ]);
 
     if (!storeRes.error && storeRes.data?.store_name) {
