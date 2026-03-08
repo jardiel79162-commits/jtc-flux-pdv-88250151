@@ -67,10 +67,23 @@ const Products = () => {
       return;
     }
 
+    // Buscar todas as imagens vinculadas aos produtos
+    const productIds = products.map(p => p.id);
+    const { data: allImages } = await supabase
+      .from("product_images")
+      .select("product_id, image_code, image_url")
+      .in("product_id", productIds);
+
+    const imagesByProduct = (allImages || []).reduce((acc: Record<string, Array<{ image_code: string; image_url: string }>>, img) => {
+      if (!acc[img.product_id]) acc[img.product_id] = [];
+      acc[img.product_id].push({ image_code: img.image_code, image_url: img.image_url });
+      return acc;
+    }, {});
+
     const jtcData = {
       system: "JTC FLUX PDV",
       format: "JTC PRODUCT DATA",
-      version: "1.0",
+      version: "1.1",
       export_date: new Date().toISOString(),
       products: products.map(p => ({
         id: p.id,
@@ -84,6 +97,8 @@ const Products = () => {
         description: p.description || "",
         status: p.is_active ? "ativo" : "inativo",
         product_type: p.product_type || "unidade",
+        photos: p.photos || [],
+        images: imagesByProduct[p.id] || [],
       })),
     };
 
