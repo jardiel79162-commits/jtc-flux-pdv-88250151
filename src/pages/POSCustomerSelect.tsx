@@ -18,6 +18,7 @@ interface Customer {
 const POSCustomerSelect = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getEffectiveUserId } = usePermissions();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
