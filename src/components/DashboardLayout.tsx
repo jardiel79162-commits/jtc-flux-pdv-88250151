@@ -251,9 +251,7 @@ const DashboardLayoutInner = () => {
   useEffect(() => {
     if (!session) return;
     const loadSetting = async () => {
-      // For employees, check admin's setting
-      const { isEmployee: isEmp, adminId: empAdminId } = permissionsCtx;
-      const targetUserId = isEmp && empAdminId ? empAdminId : session.user.id;
+      const targetUserId = isEmployee && adminId ? adminId : session.user.id;
       
       const { data } = await supabase
         .from("store_settings")
@@ -264,13 +262,10 @@ const DashboardLayoutInner = () => {
     };
     loadSetting();
 
-    // Listen for setting changes
     const handler = () => loadSetting();
     window.addEventListener('store-settings-updated', handler);
     return () => window.removeEventListener('store-settings-updated', handler);
-  }, [session]);
-
-  const permissionsCtx = usePermissions();
+  }, [session, isEmployee, adminId]);
 
   const allMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
