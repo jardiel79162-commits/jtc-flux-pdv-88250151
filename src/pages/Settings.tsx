@@ -414,7 +414,26 @@ const Settings = () => {
           </Collapsible>
         </Card>
 
-        {/* Configuração PIX */}
+        {/* Catálogo Digital */}
+        <Card className="overflow-hidden">
+          <Collapsible open={openSection === 'catalog'}>
+            <CardHeader className="cursor-pointer" onClick={() => toggleSection('catalog')}>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Share2 className="w-5 h-5 text-primary" />
+                Catálogo Digital
+              </CardTitle>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Compartilhe seu catálogo de produtos com seus clientes via link público ou WhatsApp.
+                </p>
+                <CatalogShareSection />
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
         <Card className="overflow-hidden">
           <Collapsible open={openSection === 'pixConfig'}>
             <CardHeader className="cursor-pointer" onClick={() => toggleSection('pixConfig')}>
