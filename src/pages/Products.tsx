@@ -180,24 +180,24 @@ const Products = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={handleExportCsv} className="gap-2">
+            <Button variant="outline" onClick={handleExportJtc} className="gap-2">
               <Download className="h-4 w-4" />
-              Extrair (.CSV)
+              Extrair (.JTC)
             </Button>
             
             <div className="relative">
               <input
                 type="file"
-                accept=".csv,.zip"
+                accept=".jtc"
                 className="hidden"
-                id="import-csv-input"
-                onChange={handleImportCsv}
+                id="import-jtc-input"
+                onChange={handleImportJtc}
                 disabled={isImporting}
               />
               <Button variant="outline" asChild disabled={isImporting} className="gap-2">
-                <label htmlFor="import-csv-input" className="cursor-pointer">
+                <label htmlFor="import-jtc-input" className="cursor-pointer">
                   {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  Enviar (.CSV)
+                  Enviar (.JTC)
                 </label>
               </Button>
             </div>
