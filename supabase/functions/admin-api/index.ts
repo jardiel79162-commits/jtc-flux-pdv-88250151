@@ -591,7 +591,7 @@ serve(async (req) => {
 
       case 'create_shortcut': {
         const { label, url, icon_url, sort_order = 0 } = params;
-        const { data, error: insertErr } = await supabaseUser
+        const { data, error: insertErr } = await supabaseAdmin
           .from('custom_shortcuts')
           .insert({
             label,
