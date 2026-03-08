@@ -27,6 +27,7 @@ import {
   Info,
   MessageCircle,
   Trophy,
+  UsersRound,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
