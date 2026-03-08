@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { store_id } = await req.json();
-    if (!store_id) {
-      return new Response(JSON.stringify({ error: "store_id é obrigatório" }), {
+    const { store_id, store_slug } = await req.json();
+    if (!store_id && !store_slug) {
+      return new Response(JSON.stringify({ error: "store_id ou store_slug é obrigatório" }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -25,12 +25,18 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Find store settings by user_id (store_id = user_id)
-    const { data: store, error: storeError } = await supabaseAdmin
+    // Find store settings by slug or user_id
+    let query = supabaseAdmin
       .from('store_settings')
-      .select('store_name, logo_url, commercial_phone, store_address, primary_color, category, user_id')
-      .eq('user_id', store_id)
-      .maybeSingle();
+      .select('store_name, logo_url, commercial_phone, store_address, primary_color, category, user_id, store_slug');
+
+    if (store_slug) {
+      query = query.eq('store_slug', store_slug);
+    } else {
+      query = query.eq('user_id', store_id);
+    }
+
+    const { data: store, error: storeError } = await query.maybeSingle();
 
     if (storeError || !store) {
       return new Response(JSON.stringify({ error: "Loja não encontrada" }), {
@@ -43,7 +49,7 @@ serve(async (req) => {
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('is_blocked')
-      .eq('user_id', store_id)
+      .eq('user_id', store.user_id)
       .maybeSingle();
 
     if (profile?.is_blocked) {
@@ -57,7 +63,7 @@ serve(async (req) => {
     const { data: products } = await supabaseAdmin
       .from('products')
       .select('id, name, price, promotional_price, description, photos, stock_quantity, product_type, is_active')
-      .eq('user_id', store_id)
+      .eq('user_id', store.user_id)
       .eq('is_active', true)
       .order('name');
 
@@ -69,6 +75,7 @@ serve(async (req) => {
         store_address: store.store_address,
         primary_color: store.primary_color,
         category: store.category,
+        store_slug: store.store_slug,
       },
       products: products || [],
     }), {

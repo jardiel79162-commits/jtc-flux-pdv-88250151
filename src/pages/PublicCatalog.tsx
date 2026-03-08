@@ -43,7 +43,7 @@ function getProductPrice(product: Product) {
 }
 
 export default function PublicCatalog() {
-  const { storeId } = useParams<{ storeId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,15 +52,18 @@ export default function PublicCatalog() {
   const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
-    if (storeId) loadCatalog();
-  }, [storeId]);
+    if (slug) loadCatalog();
+  }, [slug]);
 
   const loadCatalog = async () => {
     setLoading(true);
     setError(null);
     try {
+      // Try slug first; if it looks like a UUID, use store_id for backward compat
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug || "");
+      const body = isUUID ? { store_id: slug } : { store_slug: slug };
       const { data, error: fnError } = await supabase.functions.invoke("public-catalog", {
-        body: { store_id: storeId },
+        body,
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
