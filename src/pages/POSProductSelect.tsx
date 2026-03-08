@@ -28,6 +28,7 @@ interface CartItem {
 const POSProductSelect = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getEffectiveUserId } = usePermissions();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
