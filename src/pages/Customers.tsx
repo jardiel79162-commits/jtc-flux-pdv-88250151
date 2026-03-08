@@ -14,7 +14,6 @@ import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionBlocker from "@/components/SubscriptionBlocker";
 import { CustomersSkeleton } from "@/components/skeletons";
 import { usePermissions } from "@/hooks/usePermissions";
-import { CustomersSkeleton } from "@/components/skeletons";
 
 interface Customer {
   id: string;
