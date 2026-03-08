@@ -37,6 +37,8 @@ export const PERMISSION_KEYS = {
   // Weekly Redemption
   access_redemption: "access_redemption",
 
+  // Employees
+  manage_employees: "manage_employees",
 
 } as const;
 
