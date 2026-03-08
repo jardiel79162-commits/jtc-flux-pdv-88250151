@@ -2,3 +2,6 @@ project_id = "zkkhwgrnsfcfamiofhng"
 
 [functions.auri-chat]
 verify_jwt = false
+
+[functions.public-catalog]
+verify_jwt = false
