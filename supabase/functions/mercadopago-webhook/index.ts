@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -114,8 +114,8 @@ serve(async (req) => {
     // Buscar dados atuais do perfil do usuário
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('trial_ends_at, subscription_ends_at, subscription_plan')
-      .eq('id', ourPayment.user_id)
+      .select('trial_ends_at, subscription_ends_at')
+      .eq('user_id', ourPayment.user_id)
       .single();
 
     if (profileError) {
@@ -152,11 +152,10 @@ serve(async (req) => {
     const { error: updateProfileError } = await supabaseAdmin
       .from('profiles')
       .update({
-        subscription_plan: ourPayment.plan_type,
         subscription_ends_at: newEndDate.toISOString(),
         trial_ends_at: null,
       })
-      .eq('id', ourPayment.user_id);
+      .eq('user_id', ourPayment.user_id);
 
     if (updateProfileError) {
       console.error('Error updating profile:', updateProfileError);

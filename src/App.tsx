@@ -86,7 +86,6 @@ const App = () => {
               <Route path="roleta" element={<AdminSpins />} />
               <Route path="termos" element={<AdminLegalDocs />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
             <Route element={<DashboardLayout />}>
