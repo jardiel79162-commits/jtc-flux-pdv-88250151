@@ -152,6 +152,8 @@ const Customers = () => {
       });
       return;
     }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
     const effectiveId = getEffectiveUserId() || user.id;
 

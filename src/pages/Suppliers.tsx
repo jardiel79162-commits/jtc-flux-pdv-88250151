@@ -99,7 +99,7 @@ const Suppliers = () => {
       address: form.address || null,
       contact_person: form.contact_person || null,
       notes: form.notes || null,
-      user_id: user.id,
+      user_id: getEffectiveUserId() || user.id,
     };
 
     try {
