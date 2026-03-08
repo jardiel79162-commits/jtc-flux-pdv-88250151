@@ -64,6 +64,7 @@ const Customers = () => {
   });
   const { toast } = useToast();
   const { isActive, isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   useEffect(() => {
     loadCustomers();
