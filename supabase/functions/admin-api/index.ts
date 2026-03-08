@@ -633,7 +633,7 @@ serve(async (req) => {
 
       case 'delete_shortcut': {
         const { shortcut_id } = params;
-        const { error } = await supabaseUser
+        const { error } = await supabaseAdmin
           .from('custom_shortcuts')
           .delete()
           .eq('id', shortcut_id);
