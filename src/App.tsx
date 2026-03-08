@@ -87,6 +87,7 @@ const App = () => {
               <Route path="atalhos" element={<AdminShortcuts />} />
               <Route path="roleta" element={<AdminSpins />} />
               <Route path="termos" element={<AdminLegalDocs />} />
+              <Route path="planos" element={<AdminPlans />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
