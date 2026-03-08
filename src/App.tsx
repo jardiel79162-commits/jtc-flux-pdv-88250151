@@ -117,7 +117,7 @@ const App = () => {
               <Route path="/caixa-de-mensagem" element={<Inbox />} />
             </Route>
 
-            <Route path="/catalogo/:storeId" element={<PublicCatalog />} />
+            <Route path="/catalogo/:slug" element={<PublicCatalog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -17,16 +17,27 @@ import { useNavigate } from "react-router-dom";
 import { generateInviteCode } from "@/lib/inviteCode";
 
 const CatalogShareSection = () => {
-  const [userId, setUserId] = useState<string | null>(null);
+  const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id);
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('store_settings')
+        .select('store_slug')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data?.store_slug) {
+        setStoreSlug(data.store_slug);
+      } else {
+        // Fallback to user id if slug not generated yet
+        setStoreSlug(user.id);
+      }
     });
   }, []);
 
-  const catalogUrl = userId ? `${window.location.origin}/catalogo/${userId}` : "";
+  const catalogUrl = storeSlug ? `${window.location.origin}/catalogo/${storeSlug}` : "";
 
   const handleCopy = async () => {
     if (!catalogUrl) return;

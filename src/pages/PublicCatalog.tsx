@@ -59,8 +59,11 @@ export default function PublicCatalog() {
     setLoading(true);
     setError(null);
     try {
+      // Try slug first; if it looks like a UUID, use store_id for backward compat
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug || "");
+      const body = isUUID ? { store_id: slug } : { store_slug: slug };
       const { data, error: fnError } = await supabase.functions.invoke("public-catalog", {
-        body: { store_id: storeId },
+        body,
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
