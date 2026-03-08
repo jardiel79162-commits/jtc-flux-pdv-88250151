@@ -112,11 +112,7 @@ serve(async (req) => {
     const qrCodeBase64 = mpData.point_of_interaction?.transaction_data?.qr_code_base64;
     const pixCopyPaste = mpData.point_of_interaction?.transaction_data?.qr_code;
 
-    // Salvar pagamento no banco usando service role para bypass RLS
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Reutiliza supabaseAdmin já criado acima
 
     const { data: payment, error: insertError } = await supabaseAdmin
       .from('subscription_payments')
