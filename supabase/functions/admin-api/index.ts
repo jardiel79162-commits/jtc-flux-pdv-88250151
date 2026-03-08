@@ -580,7 +580,7 @@ serve(async (req) => {
 
       // ==================== CUSTOM SHORTCUTS ====================
       case 'list_shortcuts': {
-        const { data, error } = await supabaseUser
+        const { data, error } = await supabaseAdmin
           .from('custom_shortcuts')
           .select('*')
           .order('sort_order', { ascending: true });
@@ -591,7 +591,7 @@ serve(async (req) => {
 
       case 'create_shortcut': {
         const { label, url, icon_url, sort_order = 0 } = params;
-        const { data, error: insertErr } = await supabaseUser
+        const { data, error: insertErr } = await supabaseAdmin
           .from('custom_shortcuts')
           .insert({
             label,
@@ -622,7 +622,7 @@ serve(async (req) => {
         }
         sanitized.updated_at = new Date().toISOString();
 
-        const { error } = await supabaseUser
+        const { error } = await supabaseAdmin
           .from('custom_shortcuts')
           .update(sanitized)
           .eq('id', shortcut_id);
@@ -633,7 +633,7 @@ serve(async (req) => {
 
       case 'delete_shortcut': {
         const { shortcut_id } = params;
-        const { error } = await supabaseUser
+        const { error } = await supabaseAdmin
           .from('custom_shortcuts')
           .delete()
           .eq('id', shortcut_id);
@@ -662,7 +662,7 @@ serve(async (req) => {
           { label: 'Bônus', url: '/resgate-semanal', sort_order: 9 },
         ];
 
-        const { data: existing, error: existingError } = await supabaseUser
+        const { data: existing, error: existingError } = await supabaseAdmin
           .from('custom_shortcuts')
           .select('url');
 
@@ -674,7 +674,7 @@ serve(async (req) => {
           .map((d) => ({ ...d, created_by: user.id, is_active: true }));
 
         if (toInsert.length > 0) {
-          const { error: insertErr } = await supabaseUser
+          const { error: insertErr } = await supabaseAdmin
             .from('custom_shortcuts')
             .insert(toInsert);
           if (insertErr) throw insertErr;
@@ -686,7 +686,7 @@ serve(async (req) => {
           description: `${toInsert.length} atalhos padrão sincronizados`,
         });
 
-        const { data: allShortcuts, error: allError } = await supabaseUser
+        const { data: allShortcuts, error: allError } = await supabaseAdmin
           .from('custom_shortcuts')
           .select('*')
           .order('sort_order', { ascending: true });
