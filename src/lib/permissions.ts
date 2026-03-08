@@ -110,6 +110,12 @@ export const PERMISSION_GROUPS = [
       { key: PERMISSION_KEYS.access_redemption, label: "Acessar Resgate Semanal" },
     ],
   },
+  {
+    label: "Funcionários",
+    permissions: [
+      { key: PERMISSION_KEYS.manage_employees, label: "Gerenciar Funcionários" },
+    ],
+  },
 ];
 
 // Map routes to required permissions
