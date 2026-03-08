@@ -686,7 +686,7 @@ serve(async (req) => {
           description: `${toInsert.length} atalhos padrão sincronizados`,
         });
 
-        const { data: allShortcuts, error: allError } = await supabaseUser
+        const { data: allShortcuts, error: allError } = await supabaseAdmin
           .from('custom_shortcuts')
           .select('*')
           .order('sort_order', { ascending: true });
