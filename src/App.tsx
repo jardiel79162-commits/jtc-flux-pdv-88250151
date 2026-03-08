@@ -110,6 +110,7 @@ const App = () => {
               <Route path="/fornecedores" element={<Suppliers />} />
               <Route path="/fornecedores/novo" element={<SupplierForm />} />
               <Route path="/fornecedores/editar/:id" element={<SupplierForm />} />
+              <Route path="/funcionarios" element={<Employees />} />
               <Route path="/resgate-semanal" element={<WeeklyRedemption />} />
               <Route path="/calculadora" element={<Calculator />} />
               <Route path="/auri" element={<Auri />} />

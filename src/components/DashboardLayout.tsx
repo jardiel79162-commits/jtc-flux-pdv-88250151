@@ -247,6 +247,31 @@ const DashboardLayoutInner = () => {
     navigate("/auth");
   };
 
+  // Load multi_employees_enabled setting
+  useEffect(() => {
+    if (!session) return;
+    const loadSetting = async () => {
+      // For employees, check admin's setting
+      const { isEmployee: isEmp, adminId: empAdminId } = permissionsCtx;
+      const targetUserId = isEmp && empAdminId ? empAdminId : session.user.id;
+      
+      const { data } = await supabase
+        .from("store_settings")
+        .select("multi_employees_enabled")
+        .eq("user_id", targetUserId)
+        .maybeSingle();
+      setMultiEmployeesEnabled(!!(data as any)?.multi_employees_enabled);
+    };
+    loadSetting();
+
+    // Listen for setting changes
+    const handler = () => loadSetting();
+    window.addEventListener('store-settings-updated', handler);
+    return () => window.removeEventListener('store-settings-updated', handler);
+  }, [session]);
+
+  const permissionsCtx = usePermissions();
+
   const allMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Package, label: "Produtos", path: "/produtos" },
@@ -255,6 +280,7 @@ const DashboardLayoutInner = () => {
     { icon: Truck, label: "Fornecedores", path: "/fornecedores" },
     { icon: History, label: "Histórico", path: "/historico" },
     { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
+    ...(multiEmployeesEnabled ? [{ icon: UsersRound, label: "Funcionários", path: "/funcionarios" }] : []),
     { icon: Settings, label: "Configurações", path: "/configuracoes" },
     { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
     { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
