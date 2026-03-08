@@ -662,7 +662,7 @@ serve(async (req) => {
           { label: 'Bônus', url: '/resgate-semanal', sort_order: 9 },
         ];
 
-        const { data: existing, error: existingError } = await supabaseUser
+        const { data: existing, error: existingError } = await supabaseAdmin
           .from('custom_shortcuts')
           .select('url');
 
