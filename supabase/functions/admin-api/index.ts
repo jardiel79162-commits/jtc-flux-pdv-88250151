@@ -674,7 +674,7 @@ serve(async (req) => {
           .map((d) => ({ ...d, created_by: user.id, is_active: true }));
 
         if (toInsert.length > 0) {
-          const { error: insertErr } = await supabaseUser
+          const { error: insertErr } = await supabaseAdmin
             .from('custom_shortcuts')
             .insert(toInsert);
           if (insertErr) throw insertErr;
