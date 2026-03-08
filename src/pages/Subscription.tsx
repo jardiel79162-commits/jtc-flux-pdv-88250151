@@ -150,7 +150,7 @@ const Subscription = () => {
     }
   }, [paymentData, paymentStatus]);
 
-  const handleBuyPlan = async (planType: "3_months" | "1_year") => {
+  const handleBuyPlan = async (planType: string) => {
     setIsGenerating(true);
     setPaymentData(null);
     setPaymentStatus('pending');
