@@ -16,7 +16,54 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useNavigate } from "react-router-dom";
 import { generateInviteCode } from "@/lib/inviteCode";
 
-const Settings = () => {
+const CatalogShareSection = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
+
+  const catalogUrl = userId ? `${window.location.origin}/catalogo/${userId}` : "";
+
+  const handleCopy = async () => {
+    if (!catalogUrl) return;
+    await navigator.clipboard.writeText(catalogUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsApp = () => {
+    if (!catalogUrl) return;
+    const text = `Confira nosso catálogo de produtos! ${catalogUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  if (!userId) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <Input value={catalogUrl} readOnly className="text-xs" />
+        <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1 flex-shrink-0">
+          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+          {copied ? "Copiado!" : "Copiar"}
+        </Button>
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={handleWhatsApp} className="gap-1">
+          <Share2 className="w-3 h-3" /> Compartilhar via WhatsApp
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => window.open(catalogUrl, "_blank")} className="gap-1">
+          <Eye className="w-3 h-3" /> Ver Catálogo
+        </Button>
+      </div>
+    </div>
+  );
+};
+
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
