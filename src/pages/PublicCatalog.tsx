@@ -52,8 +52,8 @@ export default function PublicCatalog() {
   const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
-    if (storeId) loadCatalog();
-  }, [storeId]);
+    if (slug) loadCatalog();
+  }, [slug]);
 
   const loadCatalog = async () => {
     setLoading(true);
