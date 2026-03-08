@@ -21,6 +21,7 @@ const menuItems = [
   { path: "/admin/roleta", label: "Roleta", icon: Ticket, end: false },
   { path: "/admin/termos", label: "Termos & Privacidade", icon: Scale, end: false },
 ];
+// Rotas removidas do admin: produtos, vendas, clientes, fornecedores (dados dos usuários)
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
