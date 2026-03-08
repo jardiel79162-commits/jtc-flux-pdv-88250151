@@ -152,11 +152,10 @@ serve(async (req) => {
     const { error: updateProfileError } = await supabaseAdmin
       .from('profiles')
       .update({
-        subscription_plan: ourPayment.plan_type,
         subscription_ends_at: newEndDate.toISOString(),
         trial_ends_at: null,
       })
-      .eq('id', ourPayment.user_id);
+      .eq('user_id', ourPayment.user_id);
 
     if (updateProfileError) {
       console.error('Error updating profile:', updateProfileError);

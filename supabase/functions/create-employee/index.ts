@@ -74,12 +74,6 @@ serve(async (req) => {
       .insert({
         user_id: newUser.user.id,
         admin_id: user.id,
-        full_name,
-        email,
-        cpf: cleanCpf,
-        role: 'user',
-        cargo: cargo || 'caixa',
-        description: description || null,
       })
       .select('id')
       .single();
