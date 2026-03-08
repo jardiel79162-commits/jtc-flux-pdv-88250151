@@ -51,10 +51,12 @@ const Suppliers = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const { data, error } = await supabase
       .from("suppliers")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveId)
       .order("name");
 
     if (error) {
