@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import JSZip from "jszip";
+
 import { saveAs } from "file-saver";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,240 +61,99 @@ const Products = () => {
     },
   });
 
-  const escapeCsv = (val: string) => {
-    if (val.includes(",") || val.includes('"') || val.includes("\n")) {
-      return `"${val.replace(/"/g, '""')}"`;
-    }
-    return val;
-  };
-
-  const handleExportCsv = async () => {
+  const handleExportJtc = async () => {
     if (!products || products.length === 0) {
       toast({ title: "Nenhum produto para exportar", variant: "destructive" });
       return;
     }
 
-    // Fetch image codes for all products
-    const productIds = products.map(p => p.id);
-    const { data: productImages } = await supabase
-      .from("product_images")
-      .select("product_id, image_code, image_url")
-      .in("product_id", productIds);
+    const jtcData = {
+      system: "JTC FLUX PDV",
+      format: "JTC PRODUCT DATA",
+      version: "1.0",
+      export_date: new Date().toISOString(),
+      products: products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        cost_price: p.cost_price || 0,
+        stock_quantity: p.stock_quantity || 0,
+        min_stock_quantity: p.min_stock_quantity || 0,
+        barcode: p.barcode || null,
+        category: p.categories?.name || null,
+        description: p.description || "",
+        status: p.is_active ? "ativo" : "inativo",
+        product_type: p.product_type || "unidade",
+      })),
+    };
 
-    const imageMap = new Map<string, { code: string; url: string }>();
-    productImages?.forEach(img => {
-      if (!imageMap.has(img.product_id)) {
-        imageMap.set(img.product_id, { code: img.image_code, url: img.image_url });
-      }
-    });
-
-    const header = "name,price,stock_quantity,barcode,description,min_stock_quantity,cost_price,product_type,image_code\n";
-    const rows = products.map(p => {
-      const img = imageMap.get(p.id);
-      return [
-        escapeCsv(p.name),
-        p.price,
-        p.stock_quantity || 0,
-        escapeCsv(p.barcode || ""),
-        escapeCsv(p.description || ""),
-        p.min_stock_quantity || 0,
-        p.cost_price || 0,
-        escapeCsv(p.product_type || "unidade"),
-        img?.code || "",
-      ].join(",");
-    }).join("\n");
-
-    const bom = "\uFEFF";
-    const csvContent = bom + header + rows;
-
-    // Check if there are images to include
-    const hasImages = Array.from(imageMap.values()).some(v => v.url);
-
-    if (hasImages) {
-      toast({ title: "Preparando exportação com imagens..." });
-      const zip = new JSZip();
-      zip.file("products.csv", csvContent);
-      const imagesFolder = zip.folder("images");
-
-      // Download and add images
-      for (const [, img] of imageMap) {
-        if (img.url) {
-          try {
-            const response = await fetch(img.url);
-            if (response.ok) {
-              const blob = await response.blob();
-              const ext = img.url.split(".").pop()?.split("?")[0] || "jpg";
-              imagesFolder?.file(`${img.code}.${ext}`, blob);
-            }
-          } catch {
-            // Skip failed image downloads
-          }
-        }
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      saveAs(zipBlob, `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.zip`);
-    } else {
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      saveAs(blob, `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.csv`);
-    }
-
+    const blob = new Blob([JSON.stringify(jtcData, null, 2)], { type: "application/octet-stream" });
+    saveAs(blob, `produtos_fluxpdv_${new Date().toISOString().split("T")[0]}.jtc`);
     toast({ title: "Produtos exportados com sucesso!" });
   };
 
-  const parseCsvLine = (line: string): string[] => {
-    const result: string[] = [];
-    let current = "";
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (inQuotes) {
-        if (ch === '"' && line[i + 1] === '"') { current += '"'; i++; }
-        else if (ch === '"') { inQuotes = false; }
-        else { current += ch; }
-      } else {
-        if (ch === '"') { inQuotes = true; }
-        else if (ch === ",") { result.push(current.trim()); current = ""; }
-        else { current += ch; }
-      }
-    }
-    result.push(current.trim());
-    return result;
-  };
-
-  const handleImportCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportJtc = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const isZip = file.name.endsWith(".zip");
-    const isCsv = file.name.endsWith(".csv");
-
-    if (!isZip && !isCsv) {
-      toast({ title: "Formato inválido", description: "Selecione um arquivo .csv ou .zip", variant: "destructive" });
+    if (!file.name.endsWith(".jtc")) {
+      toast({ title: "Formato inválido", description: "Apenas arquivos .jtc são aceitos pelo JTC FLUX PDV.", variant: "destructive" });
+      event.target.value = "";
       return;
     }
 
     setIsImporting(true);
 
     try {
-      let csvContent = "";
+      const content = await file.text();
+      let jtcData: any;
 
-      if (isZip) {
-        const zip = await JSZip.loadAsync(file);
-        // Find CSV file inside zip
-        const csvFile = Object.keys(zip.files).find(name => name.endsWith(".csv"));
-        if (!csvFile) throw new Error("Nenhum arquivo CSV encontrado dentro do ZIP.");
-        csvContent = await zip.files[csvFile].async("string");
-      } else {
-        csvContent = await file.text();
+      try {
+        jtcData = JSON.parse(content);
+      } catch {
+        throw new Error("Arquivo .jtc corrompido ou inválido.");
       }
 
-      csvContent = csvContent.replace(/^\uFEFF/, "");
-      const lines = csvContent.split(/\r?\n/);
-      if (lines.length <= 1) throw new Error("Arquivo vazio");
+      // Validate metadata
+      if (
+        jtcData.system !== "JTC FLUX PDV" ||
+        jtcData.format !== "JTC PRODUCT DATA" ||
+        !jtcData.version ||
+        !Array.isArray(jtcData.products)
+      ) {
+        throw new Error("Arquivo .jtc não corresponde ao padrão do JTC FLUX PDV.");
+      }
+
+      if (jtcData.products.length === 0) {
+        throw new Error("Nenhum produto encontrado no arquivo.");
+      }
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const headerParts = parseCsvLine(lines[0]).map(h => h.toLowerCase().trim());
-      const colIndex = (keys: string[]) => {
-        for (const k of keys) {
-          const idx = headerParts.indexOf(k);
-          if (idx !== -1) return idx;
-        }
-        return -1;
-      };
+      const productsToInsert = jtcData.products.map((p: any) => ({
+        user_id: user.id,
+        name: p.name,
+        price: Number(p.price) || 0,
+        cost_price: Number(p.cost_price) || 0,
+        stock_quantity: Number(p.stock_quantity) || 0,
+        min_stock_quantity: Number(p.min_stock_quantity) || 0,
+        barcode: p.barcode || null,
+        description: p.description || "",
+        product_type: p.product_type || "unidade",
+        is_active: p.status === "ativo",
+      }));
 
-      const iName = colIndex(["name", "nome"]);
-      const iPrice = colIndex(["price", "preco"]);
-      const iStock = colIndex(["stock_quantity", "stock", "estoque"]);
-      const iBarcode = colIndex(["barcode"]);
-      const iDesc = colIndex(["description", "descricao"]);
-      const iMinStock = colIndex(["min_stock_quantity", "min_stock", "estoque_min"]);
-      const iCost = colIndex(["cost_price", "preco_custo"]);
-      const iType = colIndex(["product_type", "tipo", "unit"]);
-      const iImageCode = colIndex(["image_code"]);
-
-      if (iName === -1) throw new Error("Coluna 'name' não encontrada no cabeçalho.");
-
-      const productsToImport: any[] = [];
-      const imageCodes: string[] = [];
-
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        const parts = parseCsvLine(line);
-        const name = parts[iName]?.trim();
-        if (!name) continue;
-
-        const imageCode = iImageCode !== -1 ? parts[iImageCode]?.trim() || "" : "";
-
-        productsToImport.push({
-          user_id: user.id,
-          name,
-          price: iPrice !== -1 ? parseFloat((parts[iPrice] || "0").replace(",", ".")) || 0 : 0,
-          stock_quantity: iStock !== -1 ? parseInt(parts[iStock] || "0") || 0 : 0,
-          barcode: iBarcode !== -1 ? parts[iBarcode]?.trim() || null : null,
-          description: iDesc !== -1 ? parts[iDesc]?.trim() || "" : "",
-          min_stock_quantity: iMinStock !== -1 ? parseInt(parts[iMinStock] || "0") || 0 : 0,
-          cost_price: iCost !== -1 ? parseFloat((parts[iCost] || "0").replace(",", ".")) || 0 : 0,
-          product_type: iType !== -1 ? parts[iType]?.trim() || "unidade" : "unidade",
-          _image_code: imageCode, // temporary, not sent to DB
-        });
-        imageCodes.push(imageCode);
-      }
-
-      if (productsToImport.length === 0) {
-        toast({ title: "Nenhum produto válido encontrado", description: "Verifique a formatação do arquivo CSV.", variant: "destructive" });
-        setIsImporting(false);
-        return;
-      }
-
-      // Remove _image_code before inserting
-      const cleanProducts = productsToImport.map(({ _image_code, ...rest }) => rest);
-
-      const { data: inserted, error } = await supabase.from("products").insert(cleanProducts).select("id");
+      const { data: inserted, error } = await supabase.from("products").insert(productsToInsert).select("id");
       if (error) throw error;
 
-      // Link image_codes to inserted products
-      if (inserted && iImageCode !== -1) {
-        // Get existing image records for these codes
-        const validCodes = imageCodes.filter(c => c);
-        if (validCodes.length > 0) {
-          const { data: existingImages } = await supabase
-            .from("product_images")
-            .select("id, image_code, image_url")
-            .in("image_code", validCodes);
-
-          const imagesByCode = new Map(existingImages?.map(img => [img.image_code, img]) || []);
-
-          // For each inserted product, if it has an image_code that exists, update the product's photos
-          for (let i = 0; i < inserted.length; i++) {
-            const code = productsToImport[i]._image_code;
-            const img = imagesByCode.get(code);
-            if (img) {
-              // Update product photos array
-              await supabase.from("products").update({ photos: [img.image_url] }).eq("id", inserted[i].id);
-              // Create new product_images link
-              await supabase.from("product_images").insert({
-                product_id: inserted[i].id,
-                image_code: code + "_" + inserted[i].id.slice(0, 4), // unique code for new link
-                image_url: img.image_url,
-                user_id: user.id,
-              });
-            }
-          }
-        }
-      }
-
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast({ title: `${inserted?.length || productsToImport.length} produtos importados com sucesso!` });
+      toast({ title: `${inserted?.length || productsToInsert.length} produtos importados com sucesso!` });
     } catch (error: any) {
       console.error("Erro na importação:", error);
       toast({
         title: "Erro ao importar produtos",
-        description: error.message || "Verifique se os dados estão no formato correto.",
+        description: error.message || "Arquivo inválido.",
         variant: "destructive"
       });
     } finally {
@@ -321,24 +180,24 @@ const Products = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={handleExportCsv} className="gap-2">
+            <Button variant="outline" onClick={handleExportJtc} className="gap-2">
               <Download className="h-4 w-4" />
-              Extrair (.CSV)
+              Extrair (.JTC)
             </Button>
             
             <div className="relative">
               <input
                 type="file"
-                accept=".csv,.zip"
+                accept=".jtc"
                 className="hidden"
-                id="import-csv-input"
-                onChange={handleImportCsv}
+                id="import-jtc-input"
+                onChange={handleImportJtc}
                 disabled={isImporting}
               />
               <Button variant="outline" asChild disabled={isImporting} className="gap-2">
-                <label htmlFor="import-csv-input" className="cursor-pointer">
+                <label htmlFor="import-jtc-input" className="cursor-pointer">
                   {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  Enviar (.CSV)
+                  Enviar (.JTC)
                 </label>
               </Button>
             </div>
