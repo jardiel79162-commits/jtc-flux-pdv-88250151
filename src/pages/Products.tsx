@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import JSZip from "jszip";
+
 import { saveAs } from "file-saver";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
