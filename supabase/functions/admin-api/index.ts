@@ -622,7 +622,7 @@ serve(async (req) => {
         }
         sanitized.updated_at = new Date().toISOString();
 
-        const { error } = await supabaseUser
+        const { error } = await supabaseAdmin
           .from('custom_shortcuts')
           .update(sanitized)
           .eq('id', shortcut_id);
