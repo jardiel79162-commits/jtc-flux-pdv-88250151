@@ -114,8 +114,8 @@ serve(async (req) => {
     // Buscar dados atuais do perfil do usuário
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('trial_ends_at, subscription_ends_at, subscription_plan')
-      .eq('id', ourPayment.user_id)
+      .select('trial_ends_at, subscription_ends_at')
+      .eq('user_id', ourPayment.user_id)
       .single();
 
     if (profileError) {
