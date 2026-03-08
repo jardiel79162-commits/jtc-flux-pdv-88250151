@@ -31,6 +31,7 @@ const Suppliers = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   const [form, setForm] = useState({
     name: "",
