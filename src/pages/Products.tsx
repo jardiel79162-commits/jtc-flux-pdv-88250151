@@ -162,6 +162,35 @@ const Products = () => {
       const { data: inserted, error } = await supabase.from("products").insert(productsToInsert).select("id");
       if (error) throw error;
 
+      // Restaurar imagens vinculadas (product_images) se existirem no arquivo
+      const imagesToInsert: Array<{ user_id: string; product_id: string; image_code: string; image_url: string }> = [];
+      jtcData.products.forEach((p: any, index: number) => {
+        if (inserted?.[index] && Array.isArray(p.images)) {
+          p.images.forEach((img: any) => {
+            if (img.image_code && img.image_url) {
+              imagesToInsert.push({
+                user_id: user.id,
+                product_id: inserted[index].id,
+                image_code: img.image_code,
+                image_url: img.image_url,
+              });
+            }
+          });
+        }
+      });
+
+      if (imagesToInsert.length > 0) {
+        await supabase.from("product_images").insert(imagesToInsert);
+      }
+
+      // Restaurar array de photos no produto se existir
+      for (let i = 0; i < jtcData.products.length; i++) {
+        const p = jtcData.products[i];
+        if (inserted?.[i] && Array.isArray(p.photos) && p.photos.length > 0) {
+          await supabase.from("products").update({ photos: p.photos }).eq("id", inserted[i].id);
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({ title: `${inserted?.length || productsToInsert.length} produtos importados com sucesso!` });
     } catch (error: any) {
