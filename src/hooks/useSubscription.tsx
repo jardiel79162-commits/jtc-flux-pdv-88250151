@@ -112,6 +112,7 @@ export const useSubscription = () => {
     const setupRealtime = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
+      const targetId = isEmployee && adminId ? adminId : session.user.id;
       channel = supabase
         .channel('subscription-realtime')
         .on(
@@ -120,7 +121,7 @@ export const useSubscription = () => {
             event: 'UPDATE',
             schema: 'public',
             table: 'profiles',
-            filter: `user_id=eq.${session.user.id}`,
+            filter: `user_id=eq.${targetId}`,
           },
           () => {
             checkSubscription();

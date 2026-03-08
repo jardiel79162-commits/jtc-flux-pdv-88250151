@@ -820,6 +820,25 @@ const POS = () => {
         finalPaymentStatus = "pending";
       }
 
+      // Check if current user is an employee to track who made the sale
+      let employeeId: string | null = null;
+      let employeeName: string | null = null;
+      const { data: empData } = await supabase
+        .from("employees" as any)
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (empData) {
+        employeeId = (empData as any).id;
+        const { data: empProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        employeeName = empProfile?.full_name || null;
+      }
+
       // Criar venda
       const { data: sale, error: saleError } = await supabase
         .from("sales")
@@ -831,7 +850,8 @@ const POS = () => {
           customer_id: selectedCustomer?.id || null,
           payment_status: finalPaymentStatus,
           payments: payments as any,
-        }])
+          ...(employeeId ? { employee_id: employeeId, employee_name: employeeName } : {}),
+        } as any])
         .select()
         .single();
 
