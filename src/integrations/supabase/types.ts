@@ -1008,6 +1008,7 @@ export type Database = {
           quick_actions_enabled: boolean | null
           store_address: string | null
           store_name: string | null
+          store_slug: string | null
           updated_at: string
           user_id: string
         }
@@ -1029,6 +1030,7 @@ export type Database = {
           quick_actions_enabled?: boolean | null
           store_address?: string | null
           store_name?: string | null
+          store_slug?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1050,6 +1052,7 @@ export type Database = {
           quick_actions_enabled?: boolean | null
           store_address?: string | null
           store_name?: string | null
+          store_slug?: string | null
           updated_at?: string
           user_id?: string
         }
