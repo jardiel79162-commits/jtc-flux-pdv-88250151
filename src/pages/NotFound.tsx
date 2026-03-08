@@ -84,7 +84,7 @@ const NotFound = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        {/* mascot video with image fallback */}
+        {/* mascot video with poster for instant display */}
         <div className="relative mx-auto w-full max-w-md">
           <video
             ref={videoRef}
@@ -93,8 +93,9 @@ const NotFound = () => {
             loop
             muted
             playsInline
+            preload="auto"
+            poster={mascotImg}
             className="w-full rounded-2xl"
-            poster=""
           />
         </div>
 
