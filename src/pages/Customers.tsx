@@ -154,11 +154,10 @@ const Customers = () => {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const effectiveId = getEffectiveUserId() || user.id;
 
     const { error } = await supabase.from("customers").insert({
-      user_id: user.id,
+      user_id: effectiveId,
       name: formData.name,
       cpf: formData.cpf,
       birth_date: formData.birth_date || null,
