@@ -52,7 +52,7 @@ const CatalogShareSection = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  if (!userId) return null;
+  if (!storeSlug) return null;
 
   return (
     <div className="space-y-3">
