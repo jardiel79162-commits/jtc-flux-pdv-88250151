@@ -43,7 +43,7 @@ function getProductPrice(product: Product) {
 }
 
 export default function PublicCatalog() {
-  const { storeId } = useParams<{ storeId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
