@@ -146,10 +146,12 @@ const POS = () => {
       return;
     }
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const [productsRes, customersRes, storeRes] = await Promise.all([
-      supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true),
-      supabase.from("customers").select("*").eq("user_id", user.id).order("name"),
-      supabase.from("store_settings").select("store_name, pix_key_type, pix_key, pix_receiver_name, logo_url, pix_mode, mercado_pago_cpf, mercado_pago_name").eq("user_id", user.id).maybeSingle(),
+      supabase.from("products").select("*").eq("user_id", effectiveId).eq("is_active", true),
+      supabase.from("customers").select("*").eq("user_id", effectiveId).order("name"),
+      supabase.from("store_settings").select("store_name, pix_key_type, pix_key, pix_receiver_name, logo_url, pix_mode, mercado_pago_cpf, mercado_pago_name").eq("user_id", effectiveId).maybeSingle(),
     ]);
 
     // Products
