@@ -3,6 +3,7 @@ import { useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import mascotImg from "@/assets/404-mascot.png";
 
 /* ── floating particles ── */
 const Particles = () => {
