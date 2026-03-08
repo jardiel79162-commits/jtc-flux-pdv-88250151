@@ -90,6 +90,7 @@ const Settings = () => {
     category: "",
     quick_actions_enabled: false,
     hide_trial_message: false,
+    multi_employees_enabled: false,
     pix_key_type: "",
     pix_key: "",
     pix_receiver_name: "",
