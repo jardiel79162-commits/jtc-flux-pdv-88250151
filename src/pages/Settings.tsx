@@ -763,6 +763,23 @@ const Settings = () => {
                     className="shrink-0"
                   />
                 </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <Label className="text-sm flex items-center gap-2">
+                      <UsersRound className="h-4 w-4 text-primary" />
+                      Multifuncionários
+                    </Label>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Permite adicionar funcionários com permissões controladas
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.multi_employees_enabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, multi_employees_enabled: checked })}
+                    className="shrink-0"
+                  />
+                </div>
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
