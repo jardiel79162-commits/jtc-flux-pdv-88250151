@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserX, CreditCard, DollarSign, Loader2, Package, ShoppingCart, Store, UserCheck } from "lucide-react";
+import { Users, UserX, CreditCard, Loader2, Store, UserCheck } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
