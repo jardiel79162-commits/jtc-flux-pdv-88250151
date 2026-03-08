@@ -617,6 +617,12 @@ const SalesHistory = () => {
                     {calculateSaleMargin(selectedSale).toFixed(1)}%
                   </p>
                 </div>
+                {selectedSale.employee_name && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Vendedor</p>
+                    <p className="font-medium text-sm">{selectedSale.employee_name}</p>
+                  </div>
+                )}
               </div>
 
               <div>
