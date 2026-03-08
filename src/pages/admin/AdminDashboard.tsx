@@ -40,8 +40,6 @@ export default function AdminDashboard() {
     { title: "Empresas", value: stats.users, icon: Users, color: "text-blue-500", link: "/admin/empresas" },
     { title: "Suspensos", value: stats.blocked, icon: UserX, color: "text-red-500", link: "/admin/empresas" },
     { title: "Assinaturas Ativas", value: stats.activeSubscriptions, icon: UserCheck, color: "text-emerald-500", link: "/admin/assinaturas" },
-    { title: "Lojas", value: stats.totalStores, icon: Store, color: "text-purple-500", link: "/admin/empresas" },
-    { title: "Receita Assinaturas", value: `R$ ${stats.revenue.toFixed(2)}`, icon: CreditCard, color: "text-amber-500", link: "/admin/pagamentos" },
   ];
 
   const eventLabels: Record<string, string> = {
