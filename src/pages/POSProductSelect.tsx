@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, Plus, Minus, ShoppingCart, ArrowLeft, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Product {
   id: string;

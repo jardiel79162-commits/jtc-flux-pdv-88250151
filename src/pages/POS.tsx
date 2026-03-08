@@ -850,7 +850,7 @@ const POS = () => {
       const { data: sale, error: saleError } = await supabase
         .from("sales")
         .insert([{
-          user_id: user.id,
+          user_id: effectiveId,
           total_amount: total,
           discount: discount,
           payment_method: finalPaymentMethod,
