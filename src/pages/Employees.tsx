@@ -802,6 +802,24 @@ const Employees = () => {
               </DialogDescription>
             </DialogHeader>
 
+            {/* Toggle all permissions */}
+            <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div>
+                <p className="text-sm font-semibold">Permissão Total (igual Admin)</p>
+                <p className="text-xs text-muted-foreground">Ativar ou desativar todas as permissões</p>
+              </div>
+              <Switch
+                checked={Object.values(permState).every(Boolean)}
+                onCheckedChange={(checked) => {
+                  const newState: Record<string, boolean> = {};
+                  Object.values(PERMISSION_KEYS).forEach((key) => {
+                    newState[key] = checked;
+                  });
+                  setPermState(newState);
+                }}
+              />
+            </div>
+
             <div className="space-y-6">
               {PERMISSION_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-2">
@@ -819,8 +837,8 @@ const Employees = () => {
                           }
                         />
                       </div>
-                    ))}
-                  </div>
+              ))}
+            </div>
                 </div>
               ))}
             </div>
