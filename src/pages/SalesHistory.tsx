@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionBlocker from "@/components/SubscriptionBlocker";
 import jsPDF from "jspdf";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SaleItem {
   product_id: string;
@@ -52,6 +53,7 @@ const SalesHistory = () => {
   const [userEmail, setUserEmail] = useState("");
   const { toast } = useToast();
   const { isActive, isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
@@ -67,10 +69,12 @@ const SalesHistory = () => {
 
     setUserEmail(user.email || "");
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     // Fetch store info and sales in parallel
     const [storeRes, salesRes] = await Promise.all([
-      supabase.from("store_settings").select("store_name").eq("user_id", user.id).maybeSingle(),
-      supabase.from("sales").select(`*, customers (name)`).eq("user_id", user.id).order("created_at", { ascending: false }) as any,
+      supabase.from("store_settings").select("store_name").eq("user_id", effectiveId).maybeSingle(),
+      supabase.from("sales").select(`*, customers (name)`).eq("user_id", effectiveId).order("created_at", { ascending: false }) as any,
     ]);
 
     if (!storeRes.error && storeRes.data?.store_name) {

@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, Plus, Minus, ShoppingCart, ArrowLeft, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Product {
   id: string;
@@ -27,6 +28,7 @@ interface CartItem {
 const POSProductSelect = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getEffectiveUserId } = usePermissions();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,10 +62,12 @@ const POSProductSelect = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveId)
       .eq("is_active", true);
 
     if (!error) setProducts(data || []);

@@ -1369,6 +1369,7 @@ export type Database = {
         Returns: boolean
       }
       is_cpf_blocked: { Args: { check_cpf: string }; Returns: boolean }
+      is_owner_or_employee: { Args: { _owner_id: string }; Returns: boolean }
       is_system_admin: { Args: { _user_id: string }; Returns: boolean }
       redeem_weekly_code: {
         Args: { p_code: string; p_user_id: string }

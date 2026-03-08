@@ -13,6 +13,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionBlocker from "@/components/SubscriptionBlocker";
 import { CustomersSkeleton } from "@/components/skeletons";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Customer {
   id: string;
@@ -62,6 +63,7 @@ const Customers = () => {
   });
   const { toast } = useToast();
   const { isActive, isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   useEffect(() => {
     loadCustomers();
@@ -75,10 +77,12 @@ const Customers = () => {
     const user = session?.user;
     if (!user) return;
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const { data, error } = await supabase
       .from("customers")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveId)
       .order("name");
 
     if (error) {
@@ -148,12 +152,13 @@ const Customers = () => {
       });
       return;
     }
-
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const { error } = await supabase.from("customers").insert({
-      user_id: user.id,
+      user_id: effectiveId,
       name: formData.name,
       cpf: formData.cpf,
       birth_date: formData.birth_date || null,

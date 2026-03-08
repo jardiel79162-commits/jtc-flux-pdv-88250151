@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search, Truck } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionBlocker from "@/components/SubscriptionBlocker";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Supplier {
   id: string;
@@ -30,6 +31,7 @@ const Suppliers = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   const [form, setForm] = useState({
     name: "",
@@ -49,10 +51,12 @@ const Suppliers = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const { data, error } = await supabase
       .from("suppliers")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveId)
       .order("name");
 
     if (error) {
@@ -95,7 +99,7 @@ const Suppliers = () => {
       address: form.address || null,
       contact_person: form.contact_person || null,
       notes: form.notes || null,
-      user_id: user.id,
+      user_id: getEffectiveUserId() || user.id,
     };
 
     try {

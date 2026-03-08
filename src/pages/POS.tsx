@@ -25,6 +25,7 @@ import jsPDF from "jspdf";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import PageLoader from "@/components/PageLoader";
 import { POSSkeleton } from "@/components/skeletons";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Product {
   id: string;
@@ -132,6 +133,7 @@ const POS = () => {
   
   const { toast } = useToast();
   const { isActive, isExpired, isTrial, loading } = useSubscription();
+  const { getEffectiveUserId } = usePermissions();
 
   const isMissingTableError = (error: any) =>
     error?.code === "PGRST205" || error?.code === "42P01";
@@ -144,10 +146,12 @@ const POS = () => {
       return;
     }
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const [productsRes, customersRes, storeRes] = await Promise.all([
-      supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true),
-      supabase.from("customers").select("*").eq("user_id", user.id).order("name"),
-      supabase.from("store_settings").select("store_name, pix_key_type, pix_key, pix_receiver_name, logo_url, pix_mode, mercado_pago_cpf, mercado_pago_name").eq("user_id", user.id).maybeSingle(),
+      supabase.from("products").select("*").eq("user_id", effectiveId).eq("is_active", true),
+      supabase.from("customers").select("*").eq("user_id", effectiveId).order("name"),
+      supabase.from("store_settings").select("store_name, pix_key_type, pix_key, pix_receiver_name, logo_url, pix_mode, mercado_pago_cpf, mercado_pago_name").eq("user_id", effectiveId).maybeSingle(),
     ]);
 
     // Products
@@ -191,7 +195,8 @@ const POS = () => {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
     if (!user) { setProductsLoading(false); return; }
-    const { data, error } = await supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true);
+    const effectiveId = getEffectiveUserId() || user.id;
+    const { data, error } = await supabase.from("products").select("*").eq("user_id", effectiveId).eq("is_active", true);
     if (error) {
       if (!isMissingTableError(error)) toast({ title: "Erro ao carregar produtos", variant: "destructive" });
     } else {
@@ -802,10 +807,12 @@ const POS = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const effectiveId = getEffectiveUserId() || user.id;
+
       const { count } = await supabase
         .from("sales")
         .select("*", { count: 'exact', head: true })
-        .eq("user_id", user.id);
+        .eq("user_id", effectiveId);
 
       const saleNumber = (count || 0) + 1;
       const customSaleId = generateSaleId(saleNumber);
@@ -843,7 +850,7 @@ const POS = () => {
       const { data: sale, error: saleError } = await supabase
         .from("sales")
         .insert([{
-          user_id: user.id,
+          user_id: effectiveId,
           total_amount: total,
           discount: discount,
           payment_method: finalPaymentMethod,
