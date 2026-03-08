@@ -21,6 +21,8 @@ export const useSubscription = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  const { isEmployee, adminId } = usePermissions();
+
   const checkSubscription = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -29,6 +31,9 @@ export const useSubscription = () => {
         setLoading(false);
         return;
       }
+
+      // Employees use their admin's subscription
+      const targetUserId = isEmployee && adminId ? adminId : user.id;
 
       const { data: profile, error } = await supabase
         .from("profiles")
