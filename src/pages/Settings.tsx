@@ -158,6 +158,7 @@ const Settings = () => {
           category: data.category || "",
           quick_actions_enabled: data.quick_actions_enabled || false,
           hide_trial_message: data.hide_trial_message || false,
+          multi_employees_enabled: (data as any).multi_employees_enabled || false,
           pix_key_type: data.pix_key_type || "",
           pix_key: data.pix_key || "",
           pix_receiver_name: data.pix_receiver_name || "",
