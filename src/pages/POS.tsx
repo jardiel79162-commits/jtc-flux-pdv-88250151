@@ -25,6 +25,7 @@ import jsPDF from "jspdf";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import PageLoader from "@/components/PageLoader";
 import { POSSkeleton } from "@/components/skeletons";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Product {
   id: string;
