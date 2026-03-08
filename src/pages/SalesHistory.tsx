@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionBlocker from "@/components/SubscriptionBlocker";
 import jsPDF from "jspdf";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SaleItem {
   product_id: string;

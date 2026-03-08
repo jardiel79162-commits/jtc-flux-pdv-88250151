@@ -62,10 +62,12 @@ const POSProductSelect = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
 
+    const effectiveId = getEffectiveUserId() || user.id;
+
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveId)
       .eq("is_active", true);
 
     if (!error) setProducts(data || []);
