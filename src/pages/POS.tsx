@@ -807,10 +807,12 @@ const POS = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const effectiveId = getEffectiveUserId() || user.id;
+
       const { count } = await supabase
         .from("sales")
         .select("*", { count: 'exact', head: true })
-        .eq("user_id", user.id);
+        .eq("user_id", effectiveId);
 
       const saleNumber = (count || 0) + 1;
       const customSaleId = generateSaleId(saleNumber);
