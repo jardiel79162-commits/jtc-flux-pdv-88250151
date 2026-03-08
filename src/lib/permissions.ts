@@ -37,6 +37,8 @@ export const PERMISSION_KEYS = {
   // Weekly Redemption
   access_redemption: "access_redemption",
 
+  // Employees
+  manage_employees: "manage_employees",
 
 } as const;
 
@@ -108,6 +110,12 @@ export const PERMISSION_GROUPS = [
       { key: PERMISSION_KEYS.access_redemption, label: "Acessar Resgate Semanal" },
     ],
   },
+  {
+    label: "Funcionários",
+    permissions: [
+      { key: PERMISSION_KEYS.manage_employees, label: "Gerenciar Funcionários" },
+    ],
+  },
 ];
 
 // Map routes to required permissions
@@ -129,6 +137,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
   "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/funcionarios": PERMISSION_KEYS.manage_employees,
 };
 
 // Map quick action paths to required permissions
@@ -142,6 +151,7 @@ export const QUICK_ACTION_PERMISSIONS: Record<string, PermissionKey> = {
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
   "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/funcionarios": PERMISSION_KEYS.manage_employees,
 };
 
 // Map menu items to required permissions
@@ -156,4 +166,5 @@ export const MENU_PERMISSIONS: Record<string, PermissionKey> = {
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
   "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/funcionarios": PERMISSION_KEYS.manage_employees,
 };

@@ -999,6 +999,7 @@ export type Database = {
           logo_url: string | null
           mercado_pago_cpf: string | null
           mercado_pago_name: string | null
+          multi_employees_enabled: boolean | null
           operation_type: string | null
           pix_key: string | null
           pix_key_type: string | null
@@ -1021,6 +1022,7 @@ export type Database = {
           logo_url?: string | null
           mercado_pago_cpf?: string | null
           mercado_pago_name?: string | null
+          multi_employees_enabled?: boolean | null
           operation_type?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
@@ -1043,6 +1045,7 @@ export type Database = {
           logo_url?: string | null
           mercado_pago_cpf?: string | null
           mercado_pago_name?: string | null
+          multi_employees_enabled?: boolean | null
           operation_type?: string | null
           pix_key?: string | null
           pix_key_type?: string | null

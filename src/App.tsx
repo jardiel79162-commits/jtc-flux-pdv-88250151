@@ -25,6 +25,7 @@ import SalesHistory from "./pages/SalesHistory";
 import Suppliers from "./pages/Suppliers";
 import SupplierForm from "./pages/SupplierForm";
 import WeeklyRedemption from "./pages/WeeklyRedemption";
+import Employees from "./pages/Employees";
 import Calculator from "./pages/Calculator";
 import Manuals from "./pages/Manuals";
 import PrizeWheel from "./pages/PrizeWheel";
@@ -109,6 +110,7 @@ const App = () => {
               <Route path="/fornecedores" element={<Suppliers />} />
               <Route path="/fornecedores/novo" element={<SupplierForm />} />
               <Route path="/fornecedores/editar/:id" element={<SupplierForm />} />
+              <Route path="/funcionarios" element={<Employees />} />
               <Route path="/resgate-semanal" element={<WeeklyRedemption />} />
               <Route path="/calculadora" element={<Calculator />} />
               <Route path="/auri" element={<Auri />} />

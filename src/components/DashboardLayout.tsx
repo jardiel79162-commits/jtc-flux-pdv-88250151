@@ -27,6 +27,7 @@ import {
   Info,
   MessageCircle,
   Trophy,
+  UsersRound,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -53,9 +54,10 @@ const DashboardLayoutInner = () => {
   const [maintenanceImageUrl, setMaintenanceImageUrl] = useState<string | null>(null);
   const [isSystemAdmin, setIsSystemAdmin] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [multiEmployeesEnabled, setMultiEmployeesEnabled] = useState(false);
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
-  const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
+  const { isAdmin, isEmployee, adminId, hasPermission, loading: permLoading } = usePermissions();
   useSystemColor();
 
   // Bloquear scroll global quando o menu está aberto (inclui iOS overscroll)
@@ -245,6 +247,26 @@ const DashboardLayoutInner = () => {
     navigate("/auth");
   };
 
+  // Load multi_employees_enabled setting
+  useEffect(() => {
+    if (!session) return;
+    const loadSetting = async () => {
+      const targetUserId = isEmployee && adminId ? adminId : session.user.id;
+      
+      const { data } = await supabase
+        .from("store_settings")
+        .select("multi_employees_enabled")
+        .eq("user_id", targetUserId)
+        .maybeSingle();
+      setMultiEmployeesEnabled(!!(data as any)?.multi_employees_enabled);
+    };
+    loadSetting();
+
+    const handler = () => loadSetting();
+    window.addEventListener('store-settings-updated', handler);
+    return () => window.removeEventListener('store-settings-updated', handler);
+  }, [session, isEmployee, adminId]);
+
   const allMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Package, label: "Produtos", path: "/produtos" },
@@ -253,6 +275,7 @@ const DashboardLayoutInner = () => {
     { icon: Truck, label: "Fornecedores", path: "/fornecedores" },
     { icon: History, label: "Histórico", path: "/historico" },
     { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
+    ...(multiEmployeesEnabled ? [{ icon: UsersRound, label: "Funcionários", path: "/funcionarios" }] : []),
     { icon: Settings, label: "Configurações", path: "/configuracoes" },
     { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
     { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
