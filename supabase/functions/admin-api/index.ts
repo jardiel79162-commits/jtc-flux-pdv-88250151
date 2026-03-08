@@ -580,7 +580,7 @@ serve(async (req) => {
 
       // ==================== CUSTOM SHORTCUTS ====================
       case 'list_shortcuts': {
-        const { data, error } = await supabaseUser
+        const { data, error } = await supabaseAdmin
           .from('custom_shortcuts')
           .select('*')
           .order('sort_order', { ascending: true });
