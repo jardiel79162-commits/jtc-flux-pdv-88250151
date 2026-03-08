@@ -57,7 +57,7 @@ const DashboardLayoutInner = () => {
   const [multiEmployeesEnabled, setMultiEmployeesEnabled] = useState(false);
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
-  const { isAdmin, hasPermission, loading: permLoading } = usePermissions();
+  const { isAdmin, isEmployee, adminId, hasPermission, loading: permLoading } = usePermissions();
   useSystemColor();
 
   // Bloquear scroll global quando o menu está aberto (inclui iOS overscroll)
