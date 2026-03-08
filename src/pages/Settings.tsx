@@ -64,6 +64,7 @@ const CatalogShareSection = () => {
   );
 };
 
+const Settings = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
