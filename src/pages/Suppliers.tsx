@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search, Truck } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionBlocker from "@/components/SubscriptionBlocker";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Supplier {
   id: string;
