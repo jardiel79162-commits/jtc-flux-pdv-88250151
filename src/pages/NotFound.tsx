@@ -60,6 +60,22 @@ const NotFound = () => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
+  // Robust autoplay for iOS Safari
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const attemptPlay = async () => {
+      try { await video.play(); } catch {
+        video.muted = true;
+        try { await video.play(); } catch {}
+      }
+    };
+    attemptPlay();
+    const handleEnded = () => { video.currentTime = 0; video.play().catch(() => {}); };
+    video.addEventListener("ended", handleEnded);
+    return () => video.removeEventListener("ended", handleEnded);
+  }, []);
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#040d21]">
       {/* grid overlay */}
