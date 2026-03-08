@@ -35,6 +35,7 @@ interface Sale {
   payment_status: string;
   customer_id: string | null;
   customer_name?: string;
+  employee_name?: string | null;
   items: SaleItem[];
 }
 
