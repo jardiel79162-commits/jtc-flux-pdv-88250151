@@ -31,34 +31,30 @@ const Subscription = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const plans = [
-    {
-      id: "3_months" as const,
-      name: "Plano 3 Meses",
-      price: 29.99,
-      duration: "90 dias",
-      features: [
-        "Acesso completo ao PDV",
-        "Gestão de produtos e estoque",
-        "Relatórios detalhados",
-        "Suporte por WhatsApp",
-      ],
-    },
-    {
-      id: "1_year" as const,
-      name: "Plano 1 Ano",
-      price: 69.99,
-      duration: "365 dias",
-      badge: "Mais Popular",
-      features: [
-        "Acesso completo ao PDV",
-        "Gestão de produtos e estoque",
-        "Relatórios detalhados",
-        "Suporte prioritário",
-        "Economia de 41%",
-      ],
-    },
-  ];
+  const [plans, setPlans] = useState<any[]>([]);
+
+  // Buscar planos do banco de dados
+  useEffect(() => {
+    const fetchPlans = async () => {
+      const { data } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      if (data) {
+        setPlans(data.map((p: any) => ({
+          id: p.plan_key,
+          name: p.name,
+          price: Number(p.price),
+          duration: `${p.days} dias`,
+          days: p.days,
+          badge: p.badge,
+          features: p.features || [],
+        })));
+      }
+    };
+    fetchPlans();
+  }, []);
 
   // Buscar dados reais da assinatura/trial
   const fetchSubscriptionData = useCallback(async () => {
@@ -154,7 +150,7 @@ const Subscription = () => {
     }
   }, [paymentData, paymentStatus]);
 
-  const handleBuyPlan = async (planType: "3_months" | "1_year") => {
+  const handleBuyPlan = async (planType: string) => {
     setIsGenerating(true);
     setPaymentData(null);
     setPaymentStatus('pending');

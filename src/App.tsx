@@ -42,7 +42,9 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminShortcuts from "./pages/admin/AdminShortcuts";
 import AdminSpins from "./pages/admin/AdminSpins";
+import AdminPlans from "./pages/admin/AdminPlans";
 import NotFound from "./pages/NotFound";
+import PublicCatalog from "./pages/PublicCatalog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import About from "./pages/About";
@@ -85,6 +87,7 @@ const App = () => {
               <Route path="atalhos" element={<AdminShortcuts />} />
               <Route path="roleta" element={<AdminSpins />} />
               <Route path="termos" element={<AdminLegalDocs />} />
+              <Route path="planos" element={<AdminPlans />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
@@ -114,6 +117,7 @@ const App = () => {
               <Route path="/caixa-de-mensagem" element={<Inbox />} />
             </Route>
 
+            <Route path="/catalogo/:storeId" element={<PublicCatalog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

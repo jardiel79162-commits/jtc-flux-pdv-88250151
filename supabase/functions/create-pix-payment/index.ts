@@ -7,13 +7,8 @@ const corsHeaders = {
 };
 
 interface CreatePaymentRequest {
-  planType: '3_months' | '1_year';
+  planType: string;
 }
-
-const PLANS = {
-  '3_months': { price: 29.99, days: 90, name: 'Plano 3 Meses' },
-  '1_year': { price: 69.99, days: 365, name: 'Plano 1 Ano' },
-};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -44,14 +39,28 @@ serve(async (req) => {
     }
 
     const { planType }: CreatePaymentRequest = await req.json();
-    const plan = PLANS[planType];
-    
-    if (!plan) {
-      return new Response(JSON.stringify({ error: 'Plano inválido' }), {
+
+    // Fetch plan from database
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { data: planData, error: planError } = await supabaseAdmin
+      .from('subscription_plans')
+      .select('plan_key, name, price, days, is_active')
+      .eq('plan_key', planType)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (planError || !planData) {
+      return new Response(JSON.stringify({ error: 'Plano inválido ou inativo' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const plan = { price: Number(planData.price), days: planData.days, name: planData.name };
 
     const accessToken = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN');
     if (!accessToken) {
@@ -103,11 +112,7 @@ serve(async (req) => {
     const qrCodeBase64 = mpData.point_of_interaction?.transaction_data?.qr_code_base64;
     const pixCopyPaste = mpData.point_of_interaction?.transaction_data?.qr_code;
 
-    // Salvar pagamento no banco usando service role para bypass RLS
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Reutiliza supabaseAdmin já criado acima
 
     const { data: payment, error: insertError } = await supabaseAdmin
       .from('subscription_payments')

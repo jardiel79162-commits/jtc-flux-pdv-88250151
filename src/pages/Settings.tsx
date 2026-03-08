@@ -16,6 +16,54 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useNavigate } from "react-router-dom";
 import { generateInviteCode } from "@/lib/inviteCode";
 
+const CatalogShareSection = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
+
+  const catalogUrl = userId ? `${window.location.origin}/catalogo/${userId}` : "";
+
+  const handleCopy = async () => {
+    if (!catalogUrl) return;
+    await navigator.clipboard.writeText(catalogUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsApp = () => {
+    if (!catalogUrl) return;
+    const text = `Confira nosso catálogo de produtos! ${catalogUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  if (!userId) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <Input value={catalogUrl} readOnly className="text-xs" />
+        <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1 flex-shrink-0">
+          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+          {copied ? "Copiado!" : "Copiar"}
+        </Button>
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={handleWhatsApp} className="gap-1">
+          <Share2 className="w-3 h-3" /> Compartilhar via WhatsApp
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => window.open(catalogUrl, "_blank")} className="gap-1">
+          <Eye className="w-3 h-3" /> Ver Catálogo
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const Settings = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -414,7 +462,26 @@ const Settings = () => {
           </Collapsible>
         </Card>
 
-        {/* Configuração PIX */}
+        {/* Catálogo Digital */}
+        <Card className="overflow-hidden">
+          <Collapsible open={openSection === 'catalog'}>
+            <CardHeader className="cursor-pointer" onClick={() => toggleSection('catalog')}>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Share2 className="w-5 h-5 text-primary" />
+                Catálogo Digital
+              </CardTitle>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Compartilhe seu catálogo de produtos com seus clientes via link público ou WhatsApp.
+                </p>
+                <CatalogShareSection />
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
         <Card className="overflow-hidden">
           <Collapsible open={openSection === 'pixConfig'}>
             <CardHeader className="cursor-pointer" onClick={() => toggleSection('pixConfig')}>

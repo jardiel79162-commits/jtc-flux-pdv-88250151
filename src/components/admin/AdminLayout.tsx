@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, CreditCard, FileText, Shield, LogOut, Menu, X,
-  Loader2, Building2, UserCog, MessageCircle, ShieldAlert, Zap, Ticket, Scale
+  Loader2, Building2, UserCog, MessageCircle, ShieldAlert, Zap, Ticket, Scale, Tags
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminApi } from "@/hooks/useAdminApi";
@@ -20,6 +20,7 @@ const menuItems = [
   { path: "/admin/atalhos", label: "Atalhos", icon: Zap, end: false },
   { path: "/admin/roleta", label: "Roleta", icon: Ticket, end: false },
   { path: "/admin/termos", label: "Termos & Privacidade", icon: Scale, end: false },
+  { path: "/admin/planos", label: "Planos", icon: Tags, end: false },
 ];
 // Rotas removidas do admin: produtos, vendas, clientes, fornecedores (dados dos usuários)
 
