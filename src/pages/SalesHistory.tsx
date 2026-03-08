@@ -98,6 +98,7 @@ const SalesHistory = () => {
           return {
             ...sale,
             customer_name: sale.customers?.name,
+            employee_name: (sale as any).employee_name || null,
             items: items?.map(item => ({
               product_id: item.product_id,
               quantity: item.quantity,
