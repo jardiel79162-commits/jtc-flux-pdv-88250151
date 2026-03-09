@@ -1139,6 +1139,33 @@ const Auth = () => {
                       )}
                     </div>
 
+                    {isFetchingCNPJ && docType === "cnpj" && (
+                      <div className="flex items-center gap-1.5">
+                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground">Buscando dados do CNPJ...</p>
+                      </div>
+                    )}
+
+                    {docType === "cpf" && (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-semibold text-foreground/90">Sexo</Label>
+                        <RadioGroup
+                          value={gender}
+                          onValueChange={(val: "masculino" | "feminino") => setGender(val)}
+                          className="flex gap-6"
+                        >
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="masculino" id="gender-m" />
+                            <Label htmlFor="gender-m" className="text-sm font-medium cursor-pointer">Masculino</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="feminino" id="gender-f" />
+                            <Label htmlFor="gender-f" className="text-sm font-medium cursor-pointer">Feminino</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
+
                     <Button
                       type="button"
                       onClick={handleNextStep}
