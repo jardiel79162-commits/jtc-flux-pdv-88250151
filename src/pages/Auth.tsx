@@ -867,32 +867,32 @@ const Auth = () => {
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
                     {/* Welcome text */}
-                    <div className="text-center pb-2">
+                    <div className="text-center pb-3">
                       <motion.p 
-                        className="text-lg font-semibold text-foreground"
+                        className="text-xl font-bold text-[#e0e6ff]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
                       >
                         Bem-vindo de volta 👋
                       </motion.p>
-                      <p className="text-sm text-muted-foreground mt-1">Entre com suas credenciais</p>
+                      <p className="text-sm text-[#5a6180] mt-1">Entre com suas credenciais</p>
                     </div>
 
                     <motion.div 
-                      className="space-y-3"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 }}
                     >
-                      <Label htmlFor="identifier" className="text-sm font-semibold text-foreground/90">E-mail ou CPF</Label>
+                      <Label htmlFor="identifier" className="text-sm font-semibold text-[#a0aad4]">E-mail ou CPF</Label>
                       <Input
                         id="identifier"
                         name="identifier"
                         placeholder="seu@email.com ou 000.000.000-00"
                         required
                         disabled={isLoading}
-                        className="h-14 text-base bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060]]] transition-all duration-300"
+                        className="h-14 text-base bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060] transition-all duration-300"
                       />
                     </motion.div>
 
