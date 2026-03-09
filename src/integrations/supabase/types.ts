@@ -1383,6 +1383,10 @@ export type Database = {
       is_cpf_blocked: { Args: { check_cpf: string }; Returns: boolean }
       is_owner_or_employee: { Args: { _owner_id: string }; Returns: boolean }
       is_system_admin: { Args: { _user_id: string }; Returns: boolean }
+      open_weekly_gift: {
+        Args: { p_days_added: number; p_prize_label: string; p_user_id: string }
+        Returns: Json
+      }
       redeem_weekly_code: {
         Args: { p_code: string; p_user_id: string }
         Returns: Json
