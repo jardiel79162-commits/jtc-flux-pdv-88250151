@@ -1,0 +1,1 @@
+ALTER TABLE public.system_settings_global ADD COLUMN IF NOT EXISTS redemption_event_minute integer DEFAULT 0;

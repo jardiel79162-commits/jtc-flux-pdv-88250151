@@ -1269,6 +1269,7 @@ export type Database = {
           redemption_event_day: number | null
           redemption_event_duration: number | null
           redemption_event_hour: number | null
+          redemption_event_minute: number | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -1280,6 +1281,7 @@ export type Database = {
           redemption_event_day?: number | null
           redemption_event_duration?: number | null
           redemption_event_hour?: number | null
+          redemption_event_minute?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -1291,6 +1293,7 @@ export type Database = {
           redemption_event_day?: number | null
           redemption_event_duration?: number | null
           redemption_event_hour?: number | null
+          redemption_event_minute?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
