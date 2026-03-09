@@ -84,10 +84,8 @@ const App = () => {
               <Route path="mensagens" element={<AdminMessages />} />
               <Route path="indicacoes" element={<AdminReferrals />} />
               <Route path="atalhos" element={<AdminShortcuts />} />
-              <Route path="roleta" element={<AdminSpins />} />
               <Route path="termos" element={<AdminLegalDocs />} />
               <Route path="planos" element={<AdminPlans />} />
-              <Route path="presente" element={<AdminRedemption />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
