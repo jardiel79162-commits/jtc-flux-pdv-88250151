@@ -45,6 +45,7 @@ const Auth = () => {
   const [accountCreated, setAccountCreated] = useState(false);
   const [docType, setDocType] = useState<"cpf" | "cnpj">("cpf");
   const [gender, setGender] = useState<"masculino" | "feminino" | "">("");
+  const [businessType, setBusinessType] = useState<"comercio" | "loja_roupas" | "delivery">("comercio");
   const [formData, setFormData] = useState({
     fullName: "",
     cpf: "",
