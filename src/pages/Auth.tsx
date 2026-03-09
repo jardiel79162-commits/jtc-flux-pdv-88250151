@@ -1129,7 +1129,16 @@ const Auth = () => {
                           type="email"
                           placeholder="seu@email.com"
                           value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormData({ ...formData, email: val });
+                            setEmailAvailable(null);
+                            setEmailError(null);
+                            if (isValidEmailProvider(val)) {
+                              if (emailCheckTimeout.current) clearTimeout(emailCheckTimeout.current);
+                              emailCheckTimeout.current = setTimeout(() => checkEmailAvailability(val), 600);
+                            }
+                          }}
                           required
                           disabled={isLoading}
                           className={`h-12 bg-muted/30 border-border/40 focus:ring-2 rounded-xl transition-all duration-300 pr-28 ${
