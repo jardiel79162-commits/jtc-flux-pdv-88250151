@@ -1279,8 +1279,13 @@ const Auth = () => {
                           const formatted = formatPhone(e.target.value);
                           setFormData({ ...formData, phone: formatted });
                           const clean = formatted.replace(/\D/g, "");
+                          setPhoneAvailable(null);
                           if (clean.length > 0 && clean.length < 11) {
                             setPhoneError("Telefone deve ter 11 dígitos");
+                          } else if (clean.length === 11) {
+                            setPhoneError(null);
+                            if (phoneCheckTimeout.current) clearTimeout(phoneCheckTimeout.current);
+                            phoneCheckTimeout.current = setTimeout(() => checkPhoneAvailability(clean), 500);
                           } else {
                             setPhoneError(null);
                           }
@@ -1289,9 +1294,18 @@ const Auth = () => {
                         disabled={isLoading}
                         inputMode="numeric"
                         maxLength={15}
-                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${phoneError ? "border-destructive ring-destructive/20" : ""}`}
+                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${phoneError ? "border-destructive ring-destructive/20" : phoneAvailable === true ? "border-accent ring-accent/20" : ""}`}
                       />
-                      {phoneError && <p className="text-xs text-destructive font-medium">{phoneError}</p>}
+                      {isCheckingPhone && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground">Verificando disponibilidade...</p>
+                        </div>
+                      )}
+                      {phoneError && <p className="text-xs text-destructive font-medium flex items-center gap-1"><XCircle className="h-3 w-3" />{phoneError}</p>}
+                      {!phoneError && phoneAvailable === true && !isCheckingPhone && (
+                        <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Telefone disponível</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
