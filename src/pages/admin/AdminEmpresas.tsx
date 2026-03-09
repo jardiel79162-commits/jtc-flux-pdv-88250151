@@ -79,6 +79,10 @@ export default function AdminEmpresas() {
   const [extendUser, setExtendUser] = useState<UserProfile | null>(null);
   const [extendDays, setExtendDays] = useState("30");
 
+  // Business type dialog
+  const [businessTypeUser, setBusinessTypeUser] = useState<UserProfile | null>(null);
+  const [newBusinessType, setNewBusinessType] = useState("comercio");
+
   const { toast } = useToast();
 
   useEffect(() => { loadUsers(); }, [page]);
