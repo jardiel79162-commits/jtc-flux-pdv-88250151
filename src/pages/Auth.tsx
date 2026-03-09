@@ -1829,7 +1829,7 @@ const Auth = () => {
                 )}
 
                 {/* Step 6 - Email Verification */}
-                {registerStep === 6 && (
+                {registerStep === 7 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, scale: 0.95 }}
