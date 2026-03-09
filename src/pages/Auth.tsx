@@ -503,6 +503,7 @@ const Auth = () => {
         city: selectedCidade,
         state: selectedEstado,
         password: formData.password,
+        gender: gender || undefined,
         referredByCode: hasInviteCode && codeValidationStatus === "valid" ? inviteCode : undefined,
       };
 
