@@ -86,7 +86,7 @@ export default function AdminRedemption() {
 
       toast({
         title: "Configurações salvas!",
-        description: `Evento: ${DAYS_OF_WEEK.find(d => d.value === eventDay)?.label} às ${eventHour}:00 (${eventDuration} min)`,
+        description: `Evento: ${DAYS_OF_WEEK.find(d => d.value === eventDay)?.label} às ${formatTimeLabel(parseInt(eventHour), parseInt(eventMinute))} (${eventDuration} min)`,
       });
     } catch (error: any) {
       toast({
