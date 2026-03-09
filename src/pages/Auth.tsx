@@ -686,7 +686,7 @@ const Auth = () => {
                 transition={{ type: "spring", stiffness: 180, delay: 0.4 }}
               >
                 <div className="auth-logo-glow" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-16 h-16 rounded-2xl object-cover shadow-xl ring-1 ring-white/8" style={{ pointerEvents: 'auto' }} />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-16 h-16 rounded-full object-cover shadow-xl ring-1 ring-white/8" style={{ pointerEvents: 'auto' }} />
               </motion.div>
               <div className="text-center space-y-1">
                 <CardTitle className="text-xl font-black">
