@@ -55,6 +55,8 @@ export default function AdminEmpresas() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [unblockCheck, setUnblockCheck] = useState<{ canUnblock: boolean; reusedField: string } | null>(null);
+  const [unblockLoading, setUnblockLoading] = useState(false);
 
   // Detail panel
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
