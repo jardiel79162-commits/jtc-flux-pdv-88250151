@@ -1793,7 +1793,7 @@ const Auth = () => {
                 )}
 
                 {/* Step 5 - CAPTCHA */}
-                {registerStep === 5 && (
+                {registerStep === 6 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
