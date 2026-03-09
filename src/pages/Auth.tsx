@@ -700,17 +700,25 @@ const Auth = () => {
           <div className="auth-card-glow-tr" />
           <div className="auth-card-glow-bl" />
 
-          <CardHeader className="text-center pb-4 pt-8 relative z-10">
-            <div className="flex flex-col items-center gap-5 mb-2">
-              <div className="relative group">
+          <CardHeader className="text-center pb-3 pt-8 relative z-10">
+            <div className="flex flex-col items-center gap-4 mb-1">
+              <motion.div 
+                className="relative group"
+                initial={{ scale: 0, rotate: -10 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 180, delay: 0.4 }}
+              >
                 <div className="auth-logo-glow" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-20 h-20 rounded-full object-cover shadow-xl ring-2 ring-white/10" />
-              </div>
-              <div className="text-center space-y-1">
-                <CardTitle className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</CardTitle>
-                <CardDescription className="text-base text-muted-foreground">Acesse sua conta ou crie uma nova</CardDescription>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-2 gap-1.5 text-muted-foreground hover:text-primary">
-                  <Info className="w-4 h-4" />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-18 h-18 rounded-2xl object-cover shadow-xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
+              </motion.div>
+              <div className="text-center space-y-1.5">
+                <CardTitle className="text-2xl font-black">
+                  <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">JTC </span>
+                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">FluxPDV</span>
+                </CardTitle>
+                <CardDescription className="text-sm text-[#6b7394]">Acesse sua conta ou crie uma nova</CardDescription>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-1 gap-1.5 text-[#5a6180] hover:text-primary text-xs">
+                  <Info className="w-3.5 h-3.5" />
                   Sobre o Sistema
                 </Button>
               </div>
@@ -719,11 +727,11 @@ const Auth = () => {
 
           <CardContent className="relative z-10 px-6 pb-8">
             <Tabs defaultValue="login" className="w-full" onValueChange={() => { setRegisterStep(1); setAuthError(null); }}>
-              <TabsList className="grid w-full grid-cols-2 mb-8 p-1.5 bg-muted/30 rounded-xl h-14">
-                <TabsTrigger value="login" className="auth-tab font-bold text-base rounded-lg transition-all duration-300">
+              <TabsList className="grid w-full grid-cols-2 mb-7 p-1.5 bg-white/[0.03] rounded-2xl h-14 border border-white/[0.04]">
+                <TabsTrigger value="login" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
                   Entrar
                 </TabsTrigger>
-                <TabsTrigger value="register" className="auth-tab font-bold text-base rounded-lg transition-all duration-300">
+                <TabsTrigger value="register" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
                   Criar Conta
                 </TabsTrigger>
               </TabsList>
