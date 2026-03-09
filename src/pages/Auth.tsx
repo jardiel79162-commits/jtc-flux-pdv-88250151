@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
 import { generateDeviceFingerprint } from "@/lib/fingerprint";
 import { useNavigate } from "react-router-dom";
@@ -70,7 +70,14 @@ const Auth = () => {
   const [cidades, setCidades] = useState<Cidade[]>([]);
   const [isFetchingCEP, setIsFetchingCEP] = useState(false);
   const [cpfError, setCpfError] = useState<string | null>(null);
+  const [cpfAvailable, setCpfAvailable] = useState<boolean | null>(null);
+  const [isCheckingCpf, setIsCheckingCpf] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const cpfCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const emailCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Invite code
   const [hasInviteCode, setHasInviteCode] = useState<boolean | null>(null);
@@ -336,6 +343,30 @@ const Auth = () => {
     else if (provider === "outlook") window.open("https://outlook.live.com", "_blank");
   };
 
+  const checkCpfAvailability = useCallback(async (cleanDoc: string) => {
+    setIsCheckingCpf(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('check_cpf_available', { p_cpf: cleanDoc });
+      if (!error) {
+        setCpfAvailable(data === true);
+        if (data === false) setCpfError(`${docType.toUpperCase()} já cadastrado`);
+      }
+    } catch { /* ignore */ }
+    setIsCheckingCpf(false);
+  }, [docType]);
+
+  const checkEmailAvailability = useCallback(async (email: string) => {
+    setIsCheckingEmail(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('check_email_available', { p_email: email });
+      if (!error) {
+        setEmailAvailable(data === true);
+        if (data === false) setEmailError("Este e-mail já está cadastrado");
+      }
+    } catch { /* ignore */ }
+    setIsCheckingEmail(false);
+  }, []);
+
   const validateStep1 = () => {
     if (!formData.fullName.trim()) { setAuthError(docType === "cnpj" ? "Nome fantasia da empresa é obrigatório." : "Nome completo é obrigatório."); return false; }
     const docValue = formData.cpf.replace(/\D/g, "");
@@ -344,6 +375,7 @@ const Auth = () => {
     } else {
       if (!isValidCNPJ(docValue)) { setAuthError("CNPJ inválido. Verifique os números digitados."); return false; }
     }
+    if (cpfAvailable === false) { setAuthError(`${docType.toUpperCase()} já cadastrado. Use outro ou faça login.`); return false; }
     setAuthError(null);
     return true;
   };
@@ -351,6 +383,7 @@ const Auth = () => {
   const validateStep2 = () => {
     if (!formData.email.includes("@")) { setAuthError("E-mail inválido. Digite um e-mail válido."); return false; }
     if (!isValidEmailProvider(formData.email)) { setAuthError("Só aceitamos e-mails @gmail.com ou @outlook.com."); return false; }
+    if (emailAvailable === false) { setAuthError("Este e-mail já está cadastrado. Use outro ou faça login."); return false; }
     const phoneValue = formData.phone.replace(/\D/g, "");
     if (phoneValue.length !== 11) { setAuthError("Telefone deve ter 11 dígitos (DDD + número)."); return false; }
     if (formData.password.length < 6) { setAuthError("Senha deve ter no mínimo 6 caracteres."); return false; }
@@ -510,6 +543,9 @@ const Auth = () => {
     setCodeValidationStatus("idle");
     setAccountCreated(false);
     setCaptchaVerified(false);
+    setCpfAvailable(null);
+    setEmailAvailable(null);
+    setEmailError(null);
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
@@ -1002,6 +1038,7 @@ const Auth = () => {
                           setDocType(val);
                           setFormData({ ...formData, cpf: "" });
                           setCpfError(null);
+                          setCpfAvailable(null);
                         }}
                         className="flex gap-6"
                       >
@@ -1027,9 +1064,17 @@ const Auth = () => {
                           setFormData({ ...formData, cpf: formatted });
                           const clean = formatted.replace(/\D/g, "");
                           const expectedLen = docType === "cpf" ? 11 : 14;
+                          setCpfAvailable(null);
                           if (clean.length === expectedLen) {
                             const isValid = docType === "cpf" ? isValidCPF(clean) : isValidCNPJ(clean);
-                            setCpfError(!isValid ? `${docType.toUpperCase()} inválido` : null);
+                            if (!isValid) {
+                              setCpfError(`${docType.toUpperCase()} inválido`);
+                            } else {
+                              setCpfError(null);
+                              // Debounced availability check
+                              if (cpfCheckTimeout.current) clearTimeout(cpfCheckTimeout.current);
+                              cpfCheckTimeout.current = setTimeout(() => checkCpfAvailability(clean), 500);
+                            }
                           } else {
                             setCpfError(null);
                           }
@@ -1038,9 +1083,18 @@ const Auth = () => {
                         disabled={isLoading}
                         inputMode="numeric"
                         maxLength={docType === "cpf" ? 14 : 18}
-                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${cpfError ? "border-destructive ring-destructive/20" : ""}`}
+                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${cpfError ? "border-destructive ring-destructive/20" : cpfAvailable === true ? "border-accent ring-accent/20" : ""}`}
                       />
-                      {cpfError && <p className="text-xs text-destructive font-medium">{cpfError}</p>}
+                      {isCheckingCpf && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground">Verificando disponibilidade...</p>
+                        </div>
+                      )}
+                      {cpfError && <p className="text-xs text-destructive font-medium flex items-center gap-1"><XCircle className="h-3 w-3" />{cpfError}</p>}
+                      {!cpfError && cpfAvailable === true && !isCheckingCpf && (
+                        <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />{docType.toUpperCase()} disponível</p>
+                      )}
                     </div>
 
                     <Button
@@ -1079,7 +1133,16 @@ const Auth = () => {
                           type="email"
                           placeholder="seu@email.com"
                           value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormData({ ...formData, email: val });
+                            setEmailAvailable(null);
+                            setEmailError(null);
+                            if (isValidEmailProvider(val)) {
+                              if (emailCheckTimeout.current) clearTimeout(emailCheckTimeout.current);
+                              emailCheckTimeout.current = setTimeout(() => checkEmailAvailability(val), 600);
+                            }
+                          }}
                           required
                           disabled={isLoading}
                           className={`h-12 bg-muted/30 border-border/40 focus:ring-2 rounded-xl transition-all duration-300 pr-28 ${
@@ -1121,11 +1184,19 @@ const Auth = () => {
                         const provider = getEmailProvider(formData.email);
                         const domain = formData.email.split("@")[1] || "";
                         const hasDot = formData.email.includes("@") && domain.includes(".");
-                        return provider === "unknown" && hasDot ? (
-                          <p className="text-xs text-destructive font-medium">Apenas @gmail.com ou @outlook.com são aceitos</p>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">Apenas @gmail.com ou @outlook.com</p>
-                        );
+                        if (provider === "unknown" && hasDot) {
+                          return <p className="text-xs text-destructive font-medium">Apenas @gmail.com ou @outlook.com são aceitos</p>;
+                        }
+                        if (isCheckingEmail) {
+                          return <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Verificando e-mail...</p>;
+                        }
+                        if (emailError) {
+                          return <p className="text-xs text-destructive font-medium flex items-center gap-1"><XCircle className="h-3 w-3" />{emailError}</p>;
+                        }
+                        if (emailAvailable === true) {
+                          return <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />E-mail disponível</p>;
+                        }
+                        return <p className="text-xs text-muted-foreground">Apenas @gmail.com ou @outlook.com</p>;
                       })()}
                     </div>
 
