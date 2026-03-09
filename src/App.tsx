@@ -24,11 +24,9 @@ import Settings from "./pages/Settings";
 import SalesHistory from "./pages/SalesHistory";
 import Suppliers from "./pages/Suppliers";
 import SupplierForm from "./pages/SupplierForm";
-import WeeklyRedemption from "./pages/WeeklyRedemption";
 import Employees from "./pages/Employees";
 import Calculator from "./pages/Calculator";
 import Manuals from "./pages/Manuals";
-import PrizeWheel from "./pages/PrizeWheel";
 
 import DashboardLayout from "./components/DashboardLayout";
 import AdminLayout from "./components/admin/AdminLayout";
