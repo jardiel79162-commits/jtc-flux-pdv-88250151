@@ -165,6 +165,6 @@ export const MENU_PERMISSIONS: Record<string, PermissionKey> = {
   
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
-  "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/pedidos": PERMISSION_KEYS.access_orders,
   "/funcionarios": PERMISSION_KEYS.manage_employees,
 };

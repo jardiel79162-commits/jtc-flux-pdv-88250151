@@ -278,8 +278,6 @@ const DashboardLayoutInner = () => {
     ...(multiEmployeesEnabled ? [{ icon: UsersRound, label: "Funcionários", path: "/funcionarios" }] : []),
     { icon: Settings, label: "Configurações", path: "/configuracoes" },
     { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
-    { icon: Gift, label: "Resgate Semanal", path: "/resgate-semanal" },
-    { icon: Trophy, label: "Roleta de Prêmios", path: "/roleta" },
     { icon: Info, label: "Sobre", path: "/sobre" },
     { icon: MessageCircle, label: "Caixa de Mensagem", path: "/caixa-de-mensagem" },
     ...(isSystemAdmin ? [{ icon: Shield, label: "Painel Admin", path: "/admin" }] : []),

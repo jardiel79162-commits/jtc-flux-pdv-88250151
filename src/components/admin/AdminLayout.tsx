@@ -18,10 +18,8 @@ const menuItems = [
   { path: "/admin/mensagens", label: "Mensagens", icon: MessageCircle, end: false },
   { path: "/admin/indicacoes", label: "Antifraude", icon: ShieldAlert, end: false },
   { path: "/admin/atalhos", label: "Atalhos", icon: Zap, end: false },
-  { path: "/admin/roleta", label: "Roleta", icon: Ticket, end: false },
   { path: "/admin/termos", label: "Termos & Privacidade", icon: Scale, end: false },
   { path: "/admin/planos", label: "Planos", icon: Tags, end: false },
-  { path: "/admin/presente", label: "Presente Misterioso", icon: Gift, end: false },
 ];
 // Rotas removidas do admin: produtos, vendas, clientes, fornecedores (dados dos usuários)
 
