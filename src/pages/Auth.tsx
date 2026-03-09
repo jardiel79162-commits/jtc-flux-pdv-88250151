@@ -997,9 +997,9 @@ const Auth = () => {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     key="step-1"
                   >
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground">Dados Pessoais</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Informe seu nome e documento</p>
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Dados Pessoais</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Informe seu nome e documento</p>
                     </div>
 
                     <div className="space-y-3">
