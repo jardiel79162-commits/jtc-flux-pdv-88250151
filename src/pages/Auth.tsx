@@ -1035,6 +1035,7 @@ const Auth = () => {
                           setDocType(val);
                           setFormData({ ...formData, cpf: "" });
                           setCpfError(null);
+                          setCpfAvailable(null);
                         }}
                         className="flex gap-6"
                       >
