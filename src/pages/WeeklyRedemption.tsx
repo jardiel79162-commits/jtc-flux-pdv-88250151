@@ -87,8 +87,38 @@ const WeeklyRedemption = () => {
     }
   }, []);
 
-  // Verifica horário do evento (segunda 16:00-17:00 horário de Brasília)
+  // Carrega configurações do evento do banco
+  const loadEventSettings = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("system_settings_global")
+        .select("redemption_event_day, redemption_event_hour, redemption_event_duration")
+        .limit(1)
+        .maybeSingle();
+
+      if (error || !data) return { day: 1, hour: 16, duration: 60 };
+      return {
+        day: (data as any).redemption_event_day ?? 1,
+        hour: (data as any).redemption_event_hour ?? 16,
+        duration: (data as any).redemption_event_duration ?? 60,
+      };
+    } catch {
+      return { day: 1, hour: 16, duration: 60 };
+    }
+  }, []);
+
+  const [eventSettings, setEventSettings] = useState<{ day: number; hour: number; duration: number } | null>(null);
+
+  useEffect(() => {
+    loadEventSettings().then(setEventSettings);
+  }, [loadEventSettings]);
+
+  // Verifica horário do evento com base nas configurações do banco
   const checkEventStatus = useCallback(() => {
+    if (!eventSettings) return false;
+
+    const { day: eventDay, hour: eventHour, duration: eventDuration } = eventSettings;
+
     const now = new Date();
     
     // Ajusta para o horário de Brasília (UTC-3)
@@ -103,46 +133,45 @@ const WeeklyRedemption = () => {
     const minutes = brazilTime.getMinutes();
     const seconds = brazilTime.getSeconds();
     
-    // Segunda-feira = 1, horário 16:00-17:00
-    const isMonday = dayOfWeek === 1;
-    const isInTimeWindow = hours === 16;
+    // Calcula se estamos na janela do evento
+    const eventStartMinutes = eventHour * 60;
+    const eventEndMinutes = eventStartMinutes + eventDuration;
+    const currentMinutes = hours * 60 + minutes;
     
-    if (isMonday && isInTimeWindow) {
-      // Calcula tempo restante até 17:00
-      const remainingMinutes = 59 - minutes;
-      const remainingSeconds = 59 - seconds;
-      setTimeRemaining(`${String(remainingMinutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`);
+    const isCorrectDay = dayOfWeek === eventDay;
+    const isInTimeWindow = currentMinutes >= eventStartMinutes && currentMinutes < eventEndMinutes;
+    
+    if (isCorrectDay && isInTimeWindow) {
+      const remainingTotalSeconds = (eventEndMinutes - currentMinutes) * 60 - seconds;
+      const remainingMin = Math.floor(remainingTotalSeconds / 60);
+      const remainingSec = remainingTotalSeconds % 60;
+      setTimeRemaining(`${String(remainingMin).padStart(2, "0")}:${String(remainingSec).padStart(2, "0")}`);
       return true;
     }
     
-    // Calcula próxima segunda às 16:00
-    const nextMonday = new Date(brazilTime);
-    let daysUntilMonday;
+    // Calcula próximo evento
+    const daysOfWeek = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+    const nextEvent = new Date(brazilTime);
+    let daysUntil;
     
-    if (dayOfWeek === 0) {
-      daysUntilMonday = 1;
-    } else if (dayOfWeek === 1) {
-      if (hours < 16) {
-        daysUntilMonday = 0;
-      } else {
-        daysUntilMonday = 7;
-      }
+    if (dayOfWeek === eventDay && currentMinutes < eventStartMinutes) {
+      daysUntil = 0;
     } else {
-      daysUntilMonday = 8 - dayOfWeek;
+      daysUntil = (eventDay - dayOfWeek + 7) % 7;
+      if (daysUntil === 0) daysUntil = 7;
     }
     
-    nextMonday.setDate(brazilTime.getDate() + daysUntilMonday);
-    nextMonday.setHours(16, 0, 0, 0);
+    nextEvent.setDate(brazilTime.getDate() + daysUntil);
     
-    const nextEventDate = nextMonday.toLocaleDateString("pt-BR", {
+    const nextEventDate = nextEvent.toLocaleDateString("pt-BR", {
       weekday: "long",
       day: "2-digit",
       month: "2-digit",
     });
     
-    setNextEventTime(`${nextEventDate} às 16:00`);
+    setNextEventTime(`${nextEventDate} às ${String(eventHour).padStart(2, "0")}:00`);
     return false;
-  }, []);
+  }, [eventSettings]);
 
   useEffect(() => {
     const init = async () => {
