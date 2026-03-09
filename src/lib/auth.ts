@@ -32,6 +32,7 @@ export const signUp = async (data: SignUpData) => {
         neighborhood: data.neighborhood,
         city: data.city,
         state: data.state,
+        gender: data.gender || null,
         referred_by_code: data.referredByCode || null,
       },
     },
