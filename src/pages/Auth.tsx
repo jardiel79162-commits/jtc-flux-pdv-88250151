@@ -1493,14 +1493,14 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 4 - CAPTCHA */}
-                {registerStep === 4 && (
+                {/* Step 5 - CAPTCHA */}
+                {registerStep === 5 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
-                    key="step-4"
+                    key="step-5"
                   >
                     <div className="text-center mb-4">
                       <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
