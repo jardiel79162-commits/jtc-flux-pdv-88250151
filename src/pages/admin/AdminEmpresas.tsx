@@ -172,6 +172,12 @@ export default function AdminEmpresas() {
     setExtendUser(null);
   };
 
+  const handleChangeBusinessType = async () => {
+    if (!businessTypeUser) return;
+    await handleAction("change_business_type", businessTypeUser.user_id, { business_type: newBusinessType });
+    setBusinessTypeUser(null);
+  };
+
 
   const getSubStatus = (user: any) => {
     const now = new Date();
