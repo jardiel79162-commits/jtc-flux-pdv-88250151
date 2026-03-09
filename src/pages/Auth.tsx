@@ -344,6 +344,11 @@ const Auth = () => {
     } else {
       if (!isValidCNPJ(docValue)) { setAuthError("CNPJ inválido. Verifique os números digitados."); return false; }
     }
+    setAuthError(null);
+    return true;
+  };
+
+  const validateStep2 = () => {
     if (!formData.email.includes("@")) { setAuthError("E-mail inválido. Digite um e-mail válido."); return false; }
     if (!isValidEmailProvider(formData.email)) { setAuthError("Só aceitamos e-mails @gmail.com ou @outlook.com."); return false; }
     const phoneValue = formData.phone.replace(/\D/g, "");
@@ -354,7 +359,7 @@ const Auth = () => {
     return true;
   };
 
-  const validateStep2 = () => {
+  const validateStep3 = () => {
     const cepValue = formData.cep.replace(/\D/g, "");
     if (cepValue.length !== 8) { setAuthError("CEP inválido. Digite um CEP com 8 dígitos."); return false; }
     if (!addressData.street.trim()) { setAuthError("Rua é obrigatória."); return false; }
@@ -370,8 +375,8 @@ const Auth = () => {
     setAuthError(null);
     if (registerStep === 1 && validateStep1()) setRegisterStep(2);
     else if (registerStep === 2 && validateStep2()) setRegisterStep(3);
-    else if (registerStep === 3) {
-      // Validate invite code if needed, then go to CAPTCHA step
+    else if (registerStep === 3 && validateStep3()) setRegisterStep(4);
+    else if (registerStep === 4) {
       if (hasInviteCode === null) {
         setAuthError("Selecione se possui código de convite.");
         return;
@@ -381,7 +386,7 @@ const Auth = () => {
         return;
       }
       setCaptchaVerified(false);
-      setRegisterStep(4);
+      setRegisterStep(5);
     }
   };
 
@@ -953,9 +958,9 @@ const Auth = () => {
 
               {/* REGISTER TAB */}
               <TabsContent value="register" className="space-y-5">
-                <div className="flex justify-center items-center gap-2 mb-8 py-2">
+                <div className="flex justify-center items-center gap-1.5 mb-8 py-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
                     <motion.div 
                       className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
                       initial={false}
@@ -964,8 +969,8 @@ const Auth = () => {
                       style={{ transformOrigin: "left" }}
                     />
                   </div>
-                  <StepIndicator step={2} label="Endereço" icon={MapPin} />
-                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                  <StepIndicator step={2} label="Contato" icon={Mail} />
+                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
                     <motion.div 
                       className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
                       initial={false}
@@ -974,8 +979,8 @@ const Auth = () => {
                       style={{ transformOrigin: "left" }}
                     />
                   </div>
-                  <StepIndicator step={3} label="Código" icon={Ticket} />
-                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                  <StepIndicator step={3} label="Endereço" icon={MapPin} />
+                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
                     <motion.div 
                       className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
                       initial={false}
@@ -984,8 +989,8 @@ const Auth = () => {
                       style={{ transformOrigin: "left" }}
                     />
                   </div>
-                  <StepIndicator step={4} label="Captcha" icon={Shield} />
-                  <div className="flex-1 h-1 rounded-full max-w-8 overflow-hidden bg-white/5">
+                  <StepIndicator step={4} label="Código" icon={Ticket} />
+                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
                     <motion.div 
                       className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
                       initial={false}
@@ -994,7 +999,17 @@ const Auth = () => {
                       style={{ transformOrigin: "left" }}
                     />
                   </div>
-                  <StepIndicator step={5} label="E-mail" icon={Mail} />
+                  <StepIndicator step={5} label="Captcha" icon={Shield} />
+                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
+                      initial={false}
+                      animate={{ scaleX: registerStep > 5 ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </div>
+                  <StepIndicator step={6} label="Fim" icon={Sparkles} />
                 </div>
 
                 {/* Step 1 */}
@@ -1009,7 +1024,7 @@ const Auth = () => {
                   >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Dados Pessoais</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Preencha suas informações básicas</p>
+                      <p className="text-sm text-muted-foreground mt-1">Informe seu nome e documento</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1074,6 +1089,33 @@ const Auth = () => {
                         className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${cpfError ? "border-destructive ring-destructive/20" : ""}`}
                       />
                       {cpfError && <p className="text-xs text-destructive font-medium">{cpfError}</p>}
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={handleNextStep}
+                      className="w-full h-14 text-base font-bold mt-6 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                      disabled={isLoading}
+                    >
+                      Próximo
+                      <ChevronRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </motion.div>
+                )}
+
+                {/* Step 2 - Contato & Senha */}
+                {registerStep === 2 && (
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-2"
+                  >
+                    <div className="text-center mb-6">
+                      <h3 className="font-bold text-xl text-foreground">Contato & Senha</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Informe e-mail, telefone e crie sua senha</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1210,22 +1252,24 @@ const Auth = () => {
                       </div>
                     )}
 
-                    {/* Errors shown via modal */}
-
-                    <Button
-                      type="button"
-                      onClick={handleNextStep}
-                      className="w-full h-14 text-base font-bold mt-6 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
-                      disabled={isLoading}
-                    >
-                      Próximo
-                      <ChevronRight className="ml-2 h-5 w-5" />
-                    </Button>
+                    <div className="flex gap-3 mt-6">
+                      <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
+                        <ChevronLeft className="mr-2 h-5 w-5" />Voltar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleNextStep}
+                        className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
+                        disabled={isLoading}
+                      >
+                        Próximo<ChevronRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </div>
                   </motion.div>
                 )}
 
-                {/* Step 2 */}
-                {registerStep === 2 && (
+                {/* Step 3 - Endereço */}
+                {registerStep === 3 && (
                   <motion.div 
                     className="space-y-5"
                     initial={{ opacity: 0, x: 20 }}
@@ -1348,14 +1392,14 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 3 */}
-                {registerStep === 3 && (
+                {/* Step 4 - Código de Convite */}
+                {registerStep === 4 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
-                    key="step-3"
+                    key="step-4"
                   >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Código de Convite</h3>
@@ -1449,14 +1493,14 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 4 - CAPTCHA */}
-                {registerStep === 4 && (
+                {/* Step 5 - CAPTCHA */}
+                {registerStep === 5 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
-                    key="step-4"
+                    key="step-5"
                   >
                     <div className="text-center mb-4">
                       <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
@@ -1485,14 +1529,14 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 5 - Email Verification */}
-                {registerStep === 5 && (
+                {/* Step 6 - Email Verification */}
+                {registerStep === 6 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    key="step-5"
+                    key="step-6"
                   >
                     <div className="text-center mb-6">
                       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
