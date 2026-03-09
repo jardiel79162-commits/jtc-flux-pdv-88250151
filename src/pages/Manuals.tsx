@@ -161,18 +161,7 @@ const manualSections: ManualSection[] = [
       { title: "Pagar com PIX", description: "Clique em \"Pagar com PIX\" no plano desejado. Um QR Code será gerado para pagamento." },
       { title: "Escanear ou copiar", description: "Escaneie o QR Code no app do banco ou copie o código PIX Copia e Cola." },
       { title: "Confirmação automática", description: "O sistema detecta automaticamente quando o pagamento é confirmado e ativa sua assinatura instantaneamente." },
-      { title: "Dias extras", description: "Use códigos de convite e o bônus semanal para ganhar dias extras de assinatura gratuitamente." },
-    ],
-  },
-  {
-    id: "bonus-semanal",
-    icon: <Gift className="w-5 h-5" />,
-    title: "Bônus Semanal",
-    steps: [
-      { title: "O que é?", description: "Todo domingo você pode resgatar um bônus semanal que dá dias extras de assinatura gratuitamente." },
-      { title: "Como resgatar", description: "Acesse o painel e clique no atalho \"Bônus\" ou vá em \"Resgate Semanal\" no menu." },
-      { title: "Gerar código", description: "Clique em \"Gerar Código Semanal\" para receber seu código de resgate." },
-      { title: "Ativar bônus", description: "O código será ativado automaticamente e os dias extras serão adicionados à sua assinatura." },
+      { title: "Dias extras", description: "Use códigos de convite para ganhar dias extras de assinatura gratuitamente." },
     ],
   },
   {

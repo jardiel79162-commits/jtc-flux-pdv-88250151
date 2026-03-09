@@ -18,7 +18,6 @@ import {
   X,
   History,
   Truck,
-  Gift,
   Sun,
   Moon,
   RefreshCw,
@@ -26,8 +25,9 @@ import {
   ShieldOff,
   Info,
   MessageCircle,
-  Trophy,
   UsersRound,
+  ClipboardList,
+} from "lucide-react";
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
