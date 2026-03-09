@@ -897,11 +897,12 @@ const Auth = () => {
                     </motion.div>
 
                     <motion.div 
-                      className="space-y-3"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.25 }}
+                      className="space-y-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
                     >
+                      <Label htmlFor="password" className="text-sm font-semibold text-[#a0aad4]">Senha</Label>
                       <div className="relative group">
                         <Input
                           id="password"
@@ -910,12 +911,12 @@ const Auth = () => {
                           placeholder="••••••••"
                           required
                           disabled={isLoading}
-                          className="h-14 text-base pr-14 bgwhite/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060]0 transition-all duration-300"
+                          className="h-14 text-base pr-14 bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060] transition-all duration-300"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-200 p-1"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5a6180] hover:text-primary transition-colors duration-200 p-1"
                         >
                           {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
