@@ -343,6 +343,30 @@ const Auth = () => {
     else if (provider === "outlook") window.open("https://outlook.live.com", "_blank");
   };
 
+  const checkCpfAvailability = useCallback(async (cleanDoc: string) => {
+    setIsCheckingCpf(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('check_cpf_available', { p_cpf: cleanDoc });
+      if (!error) {
+        setCpfAvailable(data === true);
+        if (data === false) setCpfError(`${docType.toUpperCase()} já cadastrado`);
+      }
+    } catch { /* ignore */ }
+    setIsCheckingCpf(false);
+  }, [docType]);
+
+  const checkEmailAvailability = useCallback(async (email: string) => {
+    setIsCheckingEmail(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('check_email_available', { p_email: email });
+      if (!error) {
+        setEmailAvailable(data === true);
+        if (data === false) setEmailError("Este e-mail já está cadastrado");
+      }
+    } catch { /* ignore */ }
+    setIsCheckingEmail(false);
+  }, []);
+
   const validateStep1 = () => {
     if (!formData.fullName.trim()) { setAuthError(docType === "cnpj" ? "Nome fantasia da empresa é obrigatório." : "Nome completo é obrigatório."); return false; }
     const docValue = formData.cpf.replace(/\D/g, "");
@@ -351,6 +375,7 @@ const Auth = () => {
     } else {
       if (!isValidCNPJ(docValue)) { setAuthError("CNPJ inválido. Verifique os números digitados."); return false; }
     }
+    if (cpfAvailable === false) { setAuthError(`${docType.toUpperCase()} já cadastrado. Use outro ou faça login.`); return false; }
     setAuthError(null);
     return true;
   };
