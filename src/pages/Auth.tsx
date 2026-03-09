@@ -582,6 +582,9 @@ const Auth = () => {
     setCpfAvailable(null);
     setEmailAvailable(null);
     setEmailError(null);
+    setPhoneAvailable(null);
+    setPhoneError(null);
+    setGender("");
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
