@@ -446,6 +446,10 @@ const Auth = () => {
     else if (registerStep === 2 && validateStep2()) setRegisterStep(3);
     else if (registerStep === 3 && validateStep3()) setRegisterStep(4);
     else if (registerStep === 4) {
+      // Business type step - just advance
+      setRegisterStep(5);
+    }
+    else if (registerStep === 5) {
       if (hasInviteCode === null) {
         setAuthError("Selecione se possui código de convite.");
         return;
@@ -455,7 +459,7 @@ const Auth = () => {
         return;
       }
       setCaptchaVerified(false);
-      setRegisterStep(5);
+      setRegisterStep(6);
     }
   };
 
