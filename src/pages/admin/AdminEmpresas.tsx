@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search, Loader2, ShieldOff, ShieldCheck, Trash2, Edit, KeyRound, ChevronRight,
-  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus, MessageCircle
+  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus, MessageCircle, RefreshCw
 } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
