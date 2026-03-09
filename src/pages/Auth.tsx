@@ -1479,8 +1479,8 @@ const Auth = () => {
                     key="step-5"
                   >
                     <div className="text-center mb-4">
-                      <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Complete o desafio para continuar</p>
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Verificação de Segurança</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Complete o desafio para continuar</p>
                     </div>
 
                     <JTCCaptcha onVerified={setCaptchaVerified} />
