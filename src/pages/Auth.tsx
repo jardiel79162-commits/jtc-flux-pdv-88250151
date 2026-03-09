@@ -558,9 +558,9 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
-        {/* Floating particles — subtle and elegant */}
-        {Array.from({ length: 20 }).map((_, i) => {
-          const size = 1.5 + Math.random() * 2;
+        {/* Floating particles — minimal */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const size = 1 + Math.random() * 1.5;
           return (
             <motion.div
               key={i}
@@ -569,101 +569,78 @@ const Auth = () => {
                 width: size,
                 height: size,
                 background: i % 3 === 0 
-                  ? 'hsl(229 100% 70% / 0.4)' 
+                  ? 'hsl(229 100% 70% / 0.35)' 
                   : i % 3 === 1 
-                  ? 'hsl(163 100% 50% / 0.3)' 
-                  : 'hsl(260 80% 70% / 0.2)',
-                left: `${5 + Math.random() * 90}%`,
-                top: `${5 + Math.random() * 90}%`,
+                  ? 'hsl(260 80% 70% / 0.2)' 
+                  : 'hsl(163 100% 50% / 0.15)',
+                left: `${8 + Math.random() * 84}%`,
+                top: `${8 + Math.random() * 84}%`,
               }}
               animate={{
-                y: [0, -(15 + Math.random() * 30), 0],
-                opacity: [0.05, 0.5, 0.05],
-                scale: [0.8, 1.2, 0.8],
+                y: [0, -(10 + Math.random() * 20), 0],
+                opacity: [0.05, 0.4, 0.05],
               }}
               transition={{
-                duration: 5 + Math.random() * 8,
+                duration: 6 + Math.random() * 10,
                 repeat: Infinity,
-                delay: Math.random() * 5,
+                delay: Math.random() * 6,
                 ease: "easeInOut",
               }}
             />
           );
         })}
-        {/* Subtle line accents */}
-        <motion.div
-          className="absolute top-1/4 left-0 w-full h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, hsl(229 100% 65% / 0.06), transparent)' }}
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-3/4 left-0 w-full h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, hsl(163 100% 50% / 0.04), transparent)' }}
-          animate={{ opacity: [0.2, 0.5, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
       </div>
 
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
         {/* Branding section */}
         <motion.div 
-          className="hidden lg:flex flex-col justify-center space-y-10 p-8"
+          className="hidden lg:flex flex-col justify-center space-y-8 p-6"
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <div className="space-y-8">
-            <div className="flex items-center gap-6">
+          <div className="space-y-6">
+            <div className="flex items-center gap-5">
               <motion.div 
                 className="relative group"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
               >
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/40 via-accent/20 to-primary/40 rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-700 animate-[pulse_4s_ease-in-out_infinite]" />
-                <div className="relative">
-                  <img src={logo} alt="JTC FluxPDV" className="relative w-28 h-28 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
-                  <motion.div 
-                    className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg shadow-accent/40"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-white" />
-                  </motion.div>
-                </div>
+                <div className="absolute -inset-5 bg-gradient-to-r from-[hsl(229,100%,55%/0.3)] via-[hsl(260,80%,55%/0.15)] to-[hsl(163,100%,44%/0.2)] rounded-3xl blur-3xl opacity-50 group-hover:opacity-70 transition-all duration-700" />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-24 h-24 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
               </motion.div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <h1 className="text-5xl xl:text-6xl font-black tracking-tight leading-none">
-                  <span className="bg-gradient-to-r from-white via-primary-foreground to-white/70 bg-clip-text text-transparent">JTC</span>
-                  <span className="bg-gradient-to-r from-primary via-[hsl(229,100%,72%)] to-accent bg-clip-text text-transparent"> FluxPDV</span>
+                  <span className="text-white/90">JTC</span>
+                  <span className="bg-gradient-to-r from-[hsl(229,100%,65%)] via-[hsl(260,80%,65%)] to-[hsl(163,100%,50%)] bg-clip-text text-transparent"> FluxPDV</span>
                 </h1>
-                <p className="text-base text-[#6b7394] font-light max-w-xs tracking-wide">
-                  O sistema de gestão que sua loja merece
+                <p className="text-[#5a6480] font-light text-sm tracking-wide">
+                  Sistema completo de gestão para sua loja
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {[
-              { icon: ShoppingCart, title: "PDV Rápido e Intuitivo", desc: "Vendas em segundos com interface simplificada", color: "from-primary/20 to-primary/5", iconBg: "from-primary to-[hsl(229,100%,72%)]", borderColor: "border-primary/10" },
-              { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", color: "from-accent/15 to-accent/5", iconBg: "from-accent to-accent/70", borderColor: "border-accent/10" },
-              { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", color: "from-[hsl(260,80%,60%)]/15 to-[hsl(260,80%,60%)]/5", iconBg: "from-[hsl(260,80%,60%)] to-[hsl(260,80%,70%)]", borderColor: "border-[hsl(260,80%,60%)]/10" },
+              { icon: ShoppingCart, title: "PDV Rápido e Intuitivo", desc: "Vendas em segundos com interface simplificada", gradient: "from-[hsl(229,100%,55%)] to-[hsl(229,100%,70%)]", bg: "from-[hsl(229,100%,55%/0.08)] to-transparent", border: "border-[hsl(229,100%,55%/0.1)]" },
+              { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", gradient: "from-[hsl(163,100%,44%)] to-[hsl(163,100%,55%)]", bg: "from-[hsl(163,100%,44%/0.06)] to-transparent", border: "border-[hsl(163,100%,44%/0.08)]" },
+              { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", gradient: "from-[hsl(260,80%,60%)] to-[hsl(260,80%,72%)]", bg: "from-[hsl(260,80%,60%/0.06)] to-transparent", border: "border-[hsl(260,80%,60%/0.08)]" },
             ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
-                className={`flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r ${item.color} backdrop-blur-xl border ${item.borderColor} transition-all duration-500 hover:border-white/15 hover:scale-[1.02] group cursor-pointer`}
+                transition={{ delay: 0.5 + i * 0.12, duration: 0.5 }}
+                className={`flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r ${item.bg} border ${item.border} transition-all duration-500 hover:border-white/10 group cursor-default`}
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.iconBg} flex items-center justify-center shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
-                  <item.icon className="w-6 h-6 text-white" />
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                  <item.icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#e0e6ff]">{item.title}</h3>
-                  <p className="text-[#6b7394] text-sm">{item.desc}</p>
+                  <h3 className="font-bold text-sm text-[#d0d8f0]">{item.title}</h3>
+                  <p className="text-[#5a6480] text-xs">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -673,19 +650,19 @@ const Auth = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.5 }}
-            className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-accent/10 to-transparent border border-accent/15 backdrop-blur-sm"
+            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-[hsl(163,100%,44%/0.06)] to-transparent border border-[hsl(163,100%,44%/0.1)]"
           >
             <motion.div 
-              className="w-11 h-11 rounded-xl bg-accent/15 flex items-center justify-center"
+              className="w-10 h-10 rounded-xl bg-[hsl(163,100%,44%/0.1)] flex items-center justify-center"
               animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+              transition={{ duration: 4, repeat: Infinity, delay: 1 }}
             >
-              <Gift className="w-5 h-5 text-accent" />
+              <Gift className="w-4.5 h-4.5 text-[hsl(163,100%,50%)]" />
             </motion.div>
             <div>
-              <p className="font-bold text-sm text-[#e0e6ff]">Programa de Indicação</p>
-              <p className="text-sm text-[#6b7394]">
-                Convide amigos e ganhe <span className="text-accent font-bold">1 mês grátis</span>!
+              <p className="font-bold text-xs text-[#d0d8f0]">Programa de Indicação</p>
+              <p className="text-xs text-[#5a6480]">
+                Convide amigos e ganhe <span className="text-[hsl(163,100%,50%)] font-bold">1 mês grátis</span>!
               </p>
             </div>
           </motion.div>
@@ -700,8 +677,8 @@ const Auth = () => {
           <div className="auth-card-glow-tr" />
           <div className="auth-card-glow-bl" />
 
-          <CardHeader className="text-center pb-3 pt-8 relative z-10">
-            <div className="flex flex-col items-center gap-4 mb-1">
+          <CardHeader className="text-center pb-2 pt-7 relative z-10">
+            <div className="flex flex-col items-center gap-3 mb-1">
               <motion.div 
                 className="relative group"
                 initial={{ scale: 0, rotate: -10 }}
@@ -709,29 +686,29 @@ const Auth = () => {
                 transition={{ type: "spring", stiffness: 180, delay: 0.4 }}
               >
                 <div className="auth-logo-glow" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-18 h-18 rounded-2xl object-cover shadow-xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-16 h-16 rounded-2xl object-cover shadow-xl ring-1 ring-white/8" style={{ pointerEvents: 'auto' }} />
               </motion.div>
-              <div className="text-center space-y-1.5">
-                <CardTitle className="text-2xl font-black">
-                  <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">JTC </span>
-                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">FluxPDV</span>
+              <div className="text-center space-y-1">
+                <CardTitle className="text-xl font-black">
+                  <span className="text-white/90">JTC </span>
+                  <span className="bg-gradient-to-r from-[hsl(229,100%,65%)] to-[hsl(260,80%,65%)] bg-clip-text text-transparent">FluxPDV</span>
                 </CardTitle>
-                <CardDescription className="text-sm text-[#6b7394]">Acesse sua conta ou crie uma nova</CardDescription>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-1 gap-1.5 text-[#5a6180] hover:text-primary text-xs">
-                  <Info className="w-3.5 h-3.5" />
+                <CardDescription className="text-xs text-[#5a6480]">Acesse sua conta ou crie uma nova</CardDescription>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-0.5 gap-1 text-[#4a5478] hover:text-[hsl(229,100%,70%)] text-[11px] h-7 px-2">
+                  <Info className="w-3 h-3" />
                   Sobre o Sistema
                 </Button>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent className="relative z-10 px-6 pb-8">
+          <CardContent className="relative z-10 px-5 sm:px-6 pb-7">
             <Tabs defaultValue="login" className="w-full" onValueChange={() => { setRegisterStep(1); setAuthError(null); }}>
-              <TabsList className="grid w-full grid-cols-2 mb-7 p-1.5 bg-white/[0.03] rounded-2xl h-14 border border-white/[0.04]">
-                <TabsTrigger value="login" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
+              <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-white/[0.03] rounded-xl h-12 border border-white/[0.04]">
+                <TabsTrigger value="login" className="auth-tab font-bold text-sm rounded-lg transition-all duration-300">
                   Entrar
                 </TabsTrigger>
-                <TabsTrigger value="register" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
+                <TabsTrigger value="register" className="auth-tab font-bold text-sm rounded-lg transition-all duration-300">
                   Criar Conta
                 </TabsTrigger>
               </TabsList>
