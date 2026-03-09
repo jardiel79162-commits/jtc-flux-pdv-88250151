@@ -1377,9 +1377,9 @@ const Auth = () => {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     key="step-4"
                   >
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground">Código de Convite</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Você tem um código de convite de um amigo?</p>
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Código de Convite</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Você tem um código de convite de um amigo?</p>
                     </div>
 
                     {hasInviteCode === null ? (
