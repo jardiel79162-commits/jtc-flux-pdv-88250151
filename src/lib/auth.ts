@@ -12,6 +12,7 @@ export interface SignUpData {
   neighborhood: string;
   city: string;
   state: string;
+  gender?: string;
   referredByCode?: string;
 }
 
