@@ -702,13 +702,13 @@ const Auth = () => {
             </div>
           </CardHeader>
 
-          <CardContent className="relative z-10 px-6 pb-8">
+          <CardContent className="relative z-10 px-5 sm:px-6 pb-7">
             <Tabs defaultValue="login" className="w-full" onValueChange={() => { setRegisterStep(1); setAuthError(null); }}>
-              <TabsList className="grid w-full grid-cols-2 mb-7 p-1.5 bg-white/[0.03] rounded-2xl h-14 border border-white/[0.04]">
-                <TabsTrigger value="login" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
+              <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-white/[0.03] rounded-xl h-12 border border-white/[0.04]">
+                <TabsTrigger value="login" className="auth-tab font-bold text-sm rounded-lg transition-all duration-300">
                   Entrar
                 </TabsTrigger>
-                <TabsTrigger value="register" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
+                <TabsTrigger value="register" className="auth-tab font-bold text-sm rounded-lg transition-all duration-300">
                   Criar Conta
                 </TabsTrigger>
               </TabsList>
