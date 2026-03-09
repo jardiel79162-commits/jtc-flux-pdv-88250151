@@ -927,13 +927,14 @@ const Auth = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.35 }}
+                      transition={{ delay: 0.3 }}
                     >
                       <Button
                         type="submit"
-                        className="auth-btn-primary w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                        className="auth-btn-primary w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-[hsl(229,100%,62%)] to-primary/90 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 rounded-2xl relative overflow-hidden group"
                         disabled={isLoading}
                       >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                         {isLoading ? (
                           <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
                         ) : (
