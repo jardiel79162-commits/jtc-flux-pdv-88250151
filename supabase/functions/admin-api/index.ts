@@ -175,14 +175,63 @@ serve(async (req) => {
 
       case 'block_user': {
         const { user_id: targetId } = params;
+        // Get user's CPF to add to blocked_cpfs
+        const { data: blockedProfile } = await supabaseAdmin.from('profiles').select('cpf').eq('user_id', targetId).maybeSingle();
         await supabaseAdmin.from('profiles').update({ is_blocked: true }).eq('user_id', targetId);
+        // Add CPF to blocked_cpfs so it can't be reused
+        if (blockedProfile?.cpf) {
+          await supabaseAdmin.from('blocked_cpfs').upsert({ cpf: blockedProfile.cpf, reason: 'Bloqueado pelo administrador' }, { onConflict: 'cpf' });
+        }
         await supabaseAdmin.from('system_logs').insert({ user_id: user.id, event_type: 'user_blocked', description: 'Usuário bloqueado', metadata: { target_user_id: targetId } });
         return jsonResponse({ success: true });
       }
 
+      case 'check_unblock': {
+        // Check if the blocked user's credentials (CPF/email) have been reused by another account
+        const { user_id: targetId } = params;
+        const { data: targetProfile } = await supabaseAdmin.from('profiles').select('cpf, email').eq('user_id', targetId).maybeSingle();
+        if (!targetProfile) return jsonResponse({ can_unblock: false, reason: 'Perfil não encontrado' });
+        
+        let reused = false;
+        let reusedField = '';
+        
+        // Check if CPF is used by another profile
+        if (targetProfile.cpf) {
+          const { data: otherCpf } = await supabaseAdmin.from('profiles')
+            .select('user_id')
+            .eq('cpf', targetProfile.cpf)
+            .neq('user_id', targetId)
+            .limit(1);
+          if (otherCpf && otherCpf.length > 0) {
+            reused = true;
+            reusedField = 'CPF';
+          }
+        }
+        
+        // Check if email is used by another profile
+        if (!reused && targetProfile.email) {
+          const { data: otherEmail } = await supabaseAdmin.from('profiles')
+            .select('user_id')
+            .eq('email', targetProfile.email)
+            .neq('user_id', targetId)
+            .limit(1);
+          if (otherEmail && otherEmail.length > 0) {
+            reused = true;
+            reusedField = 'E-mail';
+          }
+        }
+        
+        return jsonResponse({ can_unblock: !reused, reused_field: reusedField });
+      }
+
       case 'unblock_user': {
         const { user_id: targetId } = params;
+        // Remove CPF from blocked_cpfs
+        const { data: unblockedProfile } = await supabaseAdmin.from('profiles').select('cpf').eq('user_id', targetId).maybeSingle();
         await supabaseAdmin.from('profiles').update({ is_blocked: false }).eq('user_id', targetId);
+        if (unblockedProfile?.cpf) {
+          await supabaseAdmin.from('blocked_cpfs').delete().eq('cpf', unblockedProfile.cpf);
+        }
         await supabaseAdmin.from('system_logs').insert({ user_id: user.id, event_type: 'user_unblocked', description: 'Usuário desbloqueado', metadata: { target_user_id: targetId } });
         return jsonResponse({ success: true });
       }
