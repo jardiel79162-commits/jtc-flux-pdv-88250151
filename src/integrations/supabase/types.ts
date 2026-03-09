@@ -263,6 +263,141 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          unit_price: number
+          variant_info: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          unit_price?: number
+          variant_info?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          unit_price?: number
+          variant_info?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_orders: {
+        Row: {
+          created_at: string
+          customer_address: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          notes: string | null
+          order_number: number
+          payment_method: string
+          status: string
+          store_user_id: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          payment_method?: string
+          status?: string
+          store_user_id: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          payment_method?: string
+          status?: string
+          store_user_id?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_payment_settings: {
+        Row: {
+          card_on_delivery_enabled: boolean | null
+          cash_enabled: boolean | null
+          created_at: string
+          id: string
+          mercado_pago_enabled: boolean | null
+          pix_bank: string | null
+          pix_enabled: boolean | null
+          pix_key: string | null
+          pix_receiver_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_on_delivery_enabled?: boolean | null
+          cash_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          mercado_pago_enabled?: boolean | null
+          pix_bank?: string | null
+          pix_enabled?: boolean | null
+          pix_key?: string | null
+          pix_receiver_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_on_delivery_enabled?: boolean | null
+          cash_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          mercado_pago_enabled?: boolean | null
+          pix_bank?: string | null
+          pix_enabled?: boolean | null
+          pix_key?: string | null
+          pix_receiver_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string
@@ -546,6 +681,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          product_id: string
+          size: string | null
+          sku: string | null
+          stock_quantity: number
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          product_id: string
+          size?: string | null
+          sku?: string | null
+          stock_quantity?: number
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string
+          size?: string | null
+          sku?: string | null
+          stock_quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -1007,6 +1183,7 @@ export type Database = {
       }
       store_settings: {
         Row: {
+          business_type: string | null
           category: string | null
           commercial_phone: string | null
           created_at: string
@@ -1030,6 +1207,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          business_type?: string | null
           category?: string | null
           commercial_phone?: string | null
           created_at?: string
@@ -1053,6 +1231,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          business_type?: string | null
           category?: string | null
           commercial_phone?: string | null
           created_at?: string
