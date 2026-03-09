@@ -520,29 +520,29 @@ const Auth = () => {
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
     >
       <motion.div 
-        className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
+        className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
           registerStep === step
-            ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
+            ? "bg-gradient-to-br from-primary to-[hsl(229,100%,72%)] text-white shadow-lg shadow-primary/40 ring-2 ring-primary/20"
             : registerStep > step
-              ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/20"
-              : "bg-white/5 text-muted-foreground border border-white/10"
+              ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/25"
+              : "bg-white/[0.03] text-[#4a5478] border border-white/[0.06]"
         }`}
         layout
       >
         <AnimatePresence mode="wait">
           {registerStep > step ? (
             <motion.div key="check" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
-              <Check className="w-5 h-5" />
+              <Check className="w-4.5 h-4.5" />
             </motion.div>
           ) : (
             <motion.div key="icon" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4.5 h-4.5" />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
-      <span className={`text-xs font-semibold transition-colors duration-300 ${
-        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-muted-foreground/60"
+      <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 ${
+        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-[#3a4060]"
       }`}>
         {label}
       </span>
@@ -558,35 +558,31 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
-        {/* Floating particles — varied sizes & shapes */}
-        {Array.from({ length: 30 }).map((_, i) => {
-          const size = 1 + Math.random() * 3;
-          const isCircle = i % 3 !== 0;
+        {/* Floating particles — subtle and elegant */}
+        {Array.from({ length: 20 }).map((_, i) => {
+          const size = 1.5 + Math.random() * 2;
           return (
             <motion.div
               key={i}
-              className="absolute"
+              className="absolute rounded-full"
               style={{
                 width: size,
                 height: size,
-                borderRadius: isCircle ? '9999px' : '2px',
                 background: i % 3 === 0 
-                  ? 'hsl(229 100% 70% / 0.5)' 
+                  ? 'hsl(229 100% 70% / 0.4)' 
                   : i % 3 === 1 
-                  ? 'hsl(163 100% 50% / 0.4)' 
-                  : 'hsl(260 80% 70% / 0.3)',
+                  ? 'hsl(163 100% 50% / 0.3)' 
+                  : 'hsl(260 80% 70% / 0.2)',
                 left: `${5 + Math.random() * 90}%`,
                 top: `${5 + Math.random() * 90}%`,
-                rotate: isCircle ? 0 : 45,
               }}
               animate={{
-                y: [0, -(20 + Math.random() * 40), 0],
-                x: [0, (Math.random() - 0.5) * 20, 0],
-                opacity: [0.1, 0.7, 0.1],
-                scale: [0.8, 1.3, 0.8],
+                y: [0, -(15 + Math.random() * 30), 0],
+                opacity: [0.05, 0.5, 0.05],
+                scale: [0.8, 1.2, 0.8],
               }}
               transition={{
-                duration: 4 + Math.random() * 6,
+                duration: 5 + Math.random() * 8,
                 repeat: Infinity,
                 delay: Math.random() * 5,
                 ease: "easeInOut",
@@ -594,85 +590,80 @@ const Auth = () => {
             />
           );
         })}
-        {/* Shooting stars */}
-        {Array.from({ length: 3 }).map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            className="absolute h-px"
-            style={{
-              width: 60 + Math.random() * 80,
-              background: 'linear-gradient(90deg, transparent, hsl(229 100% 70% / 0.6), transparent)',
-              top: `${15 + i * 25}%`,
-              left: '-100px',
-            }}
-            animate={{
-              x: ['0vw', '120vw'],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 2 + Math.random() * 2,
-              repeat: Infinity,
-              delay: 3 + i * 5 + Math.random() * 3,
-              ease: "easeIn",
-            }}
-          />
-        ))}
+        {/* Subtle line accents */}
+        <motion.div
+          className="absolute top-1/4 left-0 w-full h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, hsl(229 100% 65% / 0.06), transparent)' }}
+          animate={{ opacity: [0.3, 0.7, 0.3] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-3/4 left-0 w-full h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, hsl(163 100% 50% / 0.04), transparent)' }}
+          animate={{ opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
       </div>
 
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-20 items-center relative z-10">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
         {/* Branding section */}
         <motion.div 
-          className="hidden lg:flex flex-col justify-center space-y-8 p-8"
+          className="hidden lg:flex flex-col justify-center space-y-10 p-8"
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <div className="space-y-8">
-            <div className="flex items-center gap-7">
+            <div className="flex items-center gap-6">
               <motion.div 
                 className="relative group"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
               >
-                <div className="absolute -inset-3 bg-gradient-to-r from-primary via-accent to-primary rounded-full blur-lg opacity-50 group-hover:opacity-70 transition-all duration-700 animate-[pulse_3s_ease-in-out_infinite]" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/40 via-accent/20 to-primary/40 rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-700 animate-[pulse_4s_ease-in-out_infinite]" />
                 <div className="relative">
-                  <img src={logo} alt="JTC FluxPDV" className="relative w-32 h-32 rounded-full object-cover shadow-2xl ring-2 ring-white/20" />
-                  <div className="absolute -bottom-1 -right-1 w-11 h-11 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg shadow-accent/30">
-                    <CheckCircle2 className="w-6 h-6 text-white" />
-                  </div>
+                  <img src={logo} alt="JTC FluxPDV" className="relative w-28 h-28 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
+                  <motion.div 
+                    className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg shadow-accent/40"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-white" />
+                  </motion.div>
                 </div>
               </motion.div>
-              <div className="space-y-3">
-                <h1 className="text-5xl xl:text-6xl font-black tracking-tight">
-                  <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</span>
+              <div className="space-y-2">
+                <h1 className="text-5xl xl:text-6xl font-black tracking-tight leading-none">
+                  <span className="bg-gradient-to-r from-white via-primary-foreground to-white/70 bg-clip-text text-transparent">JTC</span>
+                  <span className="bg-gradient-to-r from-primary via-[hsl(229,100%,72%)] to-accent bg-clip-text text-transparent"> FluxPDV</span>
                 </h1>
-                <p className="text-lg text-muted-foreground/90 font-normal max-w-xs">
+                <p className="text-base text-[#6b7394] font-light max-w-xs tracking-wide">
                   O sistema de gestão que sua loja merece
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3">
             {[
-              { icon: ShoppingCart, title: "PDV Rápido e Intuitivo", desc: "Vendas em segundos com interface simplificada", gradient: "from-primary to-primary/70", shadow: "shadow-primary/20" },
-              { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", gradient: "from-accent to-accent/70", shadow: "shadow-accent/20" },
-              { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", gradient: "from-success to-success/70", shadow: "shadow-success/20" },
+              { icon: ShoppingCart, title: "PDV Rápido e Intuitivo", desc: "Vendas em segundos com interface simplificada", color: "from-primary/20 to-primary/5", iconBg: "from-primary to-[hsl(229,100%,72%)]", borderColor: "border-primary/10" },
+              { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", color: "from-accent/15 to-accent/5", iconBg: "from-accent to-accent/70", borderColor: "border-accent/10" },
+              { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", color: "from-[hsl(260,80%,60%)]/15 to-[hsl(260,80%,60%)]/5", iconBg: "from-[hsl(260,80%,60%)] to-[hsl(260,80%,70%)]", borderColor: "border-[hsl(260,80%,60%)]/10" },
             ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
-                className="flex items-center gap-5 p-5 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] hover:shadow-xl group cursor-pointer"
+                className={`flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r ${item.color} backdrop-blur-xl border ${item.borderColor} transition-all duration-500 hover:border-white/15 hover:scale-[1.02] group cursor-pointer`}
               >
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg ${item.shadow} group-hover:scale-110 transition-transform duration-300`}>
-                  <item.icon className="w-7 h-7 text-white" />
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.iconBg} flex items-center justify-center shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
+                  <item.icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm">{item.desc}</p>
+                  <h3 className="font-bold text-base text-[#e0e6ff]">{item.title}</h3>
+                  <p className="text-[#6b7394] text-sm">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -682,14 +673,18 @@ const Auth = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.5 }}
-            className="flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/30 backdrop-blur-sm"
+            className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-accent/10 to-transparent border border-accent/15 backdrop-blur-sm"
           >
-            <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-              <Gift className="w-6 h-6 text-accent" />
-            </div>
+            <motion.div 
+              className="w-11 h-11 rounded-xl bg-accent/15 flex items-center justify-center"
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+            >
+              <Gift className="w-5 h-5 text-accent" />
+            </motion.div>
             <div>
-              <p className="font-bold text-foreground">Programa de Indicação</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-bold text-sm text-[#e0e6ff]">Programa de Indicação</p>
+              <p className="text-sm text-[#6b7394]">
                 Convide amigos e ganhe <span className="text-accent font-bold">1 mês grátis</span>!
               </p>
             </div>
@@ -705,17 +700,25 @@ const Auth = () => {
           <div className="auth-card-glow-tr" />
           <div className="auth-card-glow-bl" />
 
-          <CardHeader className="text-center pb-4 pt-8 relative z-10">
-            <div className="flex flex-col items-center gap-5 mb-2">
-              <div className="relative group">
+          <CardHeader className="text-center pb-3 pt-8 relative z-10">
+            <div className="flex flex-col items-center gap-4 mb-1">
+              <motion.div 
+                className="relative group"
+                initial={{ scale: 0, rotate: -10 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 180, delay: 0.4 }}
+              >
                 <div className="auth-logo-glow" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-20 h-20 rounded-full object-cover shadow-xl ring-2 ring-white/10" />
-              </div>
-              <div className="text-center space-y-1">
-                <CardTitle className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">JTC FluxPDV</CardTitle>
-                <CardDescription className="text-base text-muted-foreground">Acesse sua conta ou crie uma nova</CardDescription>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-2 gap-1.5 text-muted-foreground hover:text-primary">
-                  <Info className="w-4 h-4" />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-18 h-18 rounded-2xl object-cover shadow-xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
+              </motion.div>
+              <div className="text-center space-y-1.5">
+                <CardTitle className="text-2xl font-black">
+                  <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">JTC </span>
+                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">FluxPDV</span>
+                </CardTitle>
+                <CardDescription className="text-sm text-[#6b7394]">Acesse sua conta ou crie uma nova</CardDescription>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-1 gap-1.5 text-[#5a6180] hover:text-primary text-xs">
+                  <Info className="w-3.5 h-3.5" />
                   Sobre o Sistema
                 </Button>
               </div>
@@ -724,11 +727,11 @@ const Auth = () => {
 
           <CardContent className="relative z-10 px-6 pb-8">
             <Tabs defaultValue="login" className="w-full" onValueChange={() => { setRegisterStep(1); setAuthError(null); }}>
-              <TabsList className="grid w-full grid-cols-2 mb-8 p-1.5 bg-muted/30 rounded-xl h-14">
-                <TabsTrigger value="login" className="auth-tab font-bold text-base rounded-lg transition-all duration-300">
+              <TabsList className="grid w-full grid-cols-2 mb-7 p-1.5 bg-white/[0.03] rounded-2xl h-14 border border-white/[0.04]">
+                <TabsTrigger value="login" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
                   Entrar
                 </TabsTrigger>
-                <TabsTrigger value="register" className="auth-tab font-bold text-base rounded-lg transition-all duration-300">
+                <TabsTrigger value="register" className="auth-tab font-bold text-sm rounded-xl transition-all duration-300">
                   Criar Conta
                 </TabsTrigger>
               </TabsList>
@@ -864,41 +867,42 @@ const Auth = () => {
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
                     {/* Welcome text */}
-                    <div className="text-center pb-2">
+                    <div className="text-center pb-3">
                       <motion.p 
-                        className="text-lg font-semibold text-foreground"
+                        className="text-xl font-bold text-[#e0e6ff]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
                       >
                         Bem-vindo de volta 👋
                       </motion.p>
-                      <p className="text-sm text-muted-foreground mt-1">Entre com suas credenciais</p>
+                      <p className="text-sm text-[#5a6180] mt-1">Entre com suas credenciais</p>
                     </div>
 
                     <motion.div 
-                      className="space-y-3"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 }}
                     >
-                      <Label htmlFor="identifier" className="text-sm font-semibold text-foreground/90">E-mail ou CPF</Label>
+                      <Label htmlFor="identifier" className="text-sm font-semibold text-[#a0aad4]">E-mail ou CPF</Label>
                       <Input
                         id="identifier"
                         name="identifier"
                         placeholder="seu@email.com ou 000.000.000-00"
                         required
                         disabled={isLoading}
-                        className="h-14 text-base bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-5 placeholder:text-muted-foreground/50 transition-all duration-300"
+                        className="h-14 text-base bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060] transition-all duration-300"
                       />
                     </motion.div>
 
                     <motion.div 
-                      className="space-y-3"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.25 }}
+                      className="space-y-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
                     >
+                      <Label htmlFor="password" className="text-sm font-semibold text-[#a0aad4]">Senha</Label>
                       <div className="relative group">
                         <Input
                           id="password"
@@ -907,12 +911,12 @@ const Auth = () => {
                           placeholder="••••••••"
                           required
                           disabled={isLoading}
-                          className="h-14 text-base pr-14 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-5 placeholder:text-muted-foreground/50 transition-all duration-300"
+                          className="h-14 text-base pr-14 bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060] transition-all duration-300"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-200 p-1"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5a6180] hover:text-primary transition-colors duration-200 p-1"
                         >
                           {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
@@ -924,13 +928,14 @@ const Auth = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.35 }}
+                      transition={{ delay: 0.3 }}
                     >
                       <Button
                         type="submit"
-                        className="auth-btn-primary w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                        className="auth-btn-primary w-full h-14 text-base font-bold bg-gradient-to-r from-primary via-[hsl(229,100%,62%)] to-primary/90 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 rounded-2xl relative overflow-hidden group"
                         disabled={isLoading}
                       >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                         {isLoading ? (
                           <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
                         ) : (
@@ -958,56 +963,26 @@ const Auth = () => {
 
               {/* REGISTER TAB */}
               <TabsContent value="register" className="space-y-5">
-                <div className="flex justify-center items-center gap-1.5 mb-8 py-2">
+                <div className="flex justify-center items-center gap-1 mb-8 py-3 px-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 1 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 1 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={2} label="Contato" icon={Mail} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 2 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 2 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={3} label="Endereço" icon={MapPin} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 3 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 3 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={4} label="Código" icon={Ticket} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 4 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 4 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={5} label="Captcha" icon={Shield} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 5 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 5 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={6} label="Fim" icon={Sparkles} />
                 </div>
@@ -1022,9 +997,9 @@ const Auth = () => {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     key="step-1"
                   >
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground">Dados Pessoais</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Informe seu nome e documento</p>
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Dados Pessoais</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Informe seu nome e documento</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1094,9 +1069,10 @@ const Auth = () => {
                     <Button
                       type="button"
                       onClick={handleNextStep}
-                      className="w-full h-14 text-base font-bold mt-6 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                      className="w-full h-14 text-base font-bold mt-6 bg-gradient-to-r from-primary via-[hsl(229,100%,62%)] to-primary/90 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 rounded-2xl relative overflow-hidden group"
                       disabled={isLoading}
                     >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                       Próximo
                       <ChevronRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -1113,9 +1089,9 @@ const Auth = () => {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     key="step-2"
                   >
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground">Contato & Senha</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Informe e-mail, telefone e crie sua senha</p>
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Contato & Senha</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Informe e-mail, telefone e crie sua senha</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1277,9 +1253,9 @@ const Auth = () => {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     key="step-2"
                   >
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground">Endereço</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Digite o CEP para preenchimento automático</p>
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Endereço</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Digite o CEP para preenchimento automático</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1401,9 +1377,9 @@ const Auth = () => {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     key="step-4"
                   >
-                    <div className="text-center mb-6">
-                      <h3 className="font-bold text-xl text-foreground">Código de Convite</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Você tem um código de convite de um amigo?</p>
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Código de Convite</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Você tem um código de convite de um amigo?</p>
                     </div>
 
                     {hasInviteCode === null ? (
@@ -1503,8 +1479,8 @@ const Auth = () => {
                     key="step-5"
                   >
                     <div className="text-center mb-4">
-                      <h3 className="font-bold text-xl text-foreground">Verificação de Segurança</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Complete o desafio para continuar</p>
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Verificação de Segurança</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Complete o desafio para continuar</p>
                     </div>
 
                     <JTCCaptcha onVerified={setCaptchaVerified} />
