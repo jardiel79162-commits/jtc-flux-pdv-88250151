@@ -558,35 +558,31 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
-        {/* Floating particles — varied sizes & shapes */}
-        {Array.from({ length: 30 }).map((_, i) => {
-          const size = 1 + Math.random() * 3;
-          const isCircle = i % 3 !== 0;
+        {/* Floating particles — subtle and elegant */}
+        {Array.from({ length: 20 }).map((_, i) => {
+          const size = 1.5 + Math.random() * 2;
           return (
             <motion.div
               key={i}
-              className="absolute"
+              className="absolute rounded-full"
               style={{
                 width: size,
                 height: size,
-                borderRadius: isCircle ? '9999px' : '2px',
                 background: i % 3 === 0 
-                  ? 'hsl(229 100% 70% / 0.5)' 
+                  ? 'hsl(229 100% 70% / 0.4)' 
                   : i % 3 === 1 
-                  ? 'hsl(163 100% 50% / 0.4)' 
-                  : 'hsl(260 80% 70% / 0.3)',
+                  ? 'hsl(163 100% 50% / 0.3)' 
+                  : 'hsl(260 80% 70% / 0.2)',
                 left: `${5 + Math.random() * 90}%`,
                 top: `${5 + Math.random() * 90}%`,
-                rotate: isCircle ? 0 : 45,
               }}
               animate={{
-                y: [0, -(20 + Math.random() * 40), 0],
-                x: [0, (Math.random() - 0.5) * 20, 0],
-                opacity: [0.1, 0.7, 0.1],
-                scale: [0.8, 1.3, 0.8],
+                y: [0, -(15 + Math.random() * 30), 0],
+                opacity: [0.05, 0.5, 0.05],
+                scale: [0.8, 1.2, 0.8],
               }}
               transition={{
-                duration: 4 + Math.random() * 6,
+                duration: 5 + Math.random() * 8,
                 repeat: Infinity,
                 delay: Math.random() * 5,
                 ease: "easeInOut",
@@ -594,29 +590,19 @@ const Auth = () => {
             />
           );
         })}
-        {/* Shooting stars */}
-        {Array.from({ length: 3 }).map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            className="absolute h-px"
-            style={{
-              width: 60 + Math.random() * 80,
-              background: 'linear-gradient(90deg, transparent, hsl(229 100% 70% / 0.6), transparent)',
-              top: `${15 + i * 25}%`,
-              left: '-100px',
-            }}
-            animate={{
-              x: ['0vw', '120vw'],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 2 + Math.random() * 2,
-              repeat: Infinity,
-              delay: 3 + i * 5 + Math.random() * 3,
-              ease: "easeIn",
-            }}
-          />
-        ))}
+        {/* Subtle line accents */}
+        <motion.div
+          className="absolute top-1/4 left-0 w-full h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, hsl(229 100% 65% / 0.06), transparent)' }}
+          animate={{ opacity: [0.3, 0.7, 0.3] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-3/4 left-0 w-full h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, hsl(163 100% 50% / 0.04), transparent)' }}
+          animate={{ opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
       </div>
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-20 items-center relative z-10">
