@@ -105,9 +105,9 @@ export const PERMISSION_GROUPS = [
     ],
   },
   {
-    label: "Resgate Semanal",
+    label: "Pedidos (Delivery)",
     permissions: [
-      { key: PERMISSION_KEYS.access_redemption, label: "Acessar Resgate Semanal" },
+      { key: PERMISSION_KEYS.access_orders, label: "Acessar Pedidos do Delivery" },
     ],
   },
   {
