@@ -54,7 +54,6 @@ const quickActions = [
   { label: "Configurações", path: "/configuracoes", image: quickActionConfiguracoes },
   { label: "Assinatura", path: "/assinatura", image: quickActionAssinatura },
   { label: "Calculadora", path: "/calculadora", image: quickActionCalculadora },
-  { label: "Bônus", path: "/resgate-semanal", image: quickActionBonus },
 ];
 
 const containerVariants = {
