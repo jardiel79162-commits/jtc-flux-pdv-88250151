@@ -77,8 +77,12 @@ const Auth = () => {
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [phoneAvailable, setPhoneAvailable] = useState<boolean | null>(null);
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+  const [isFetchingCNPJ, setIsFetchingCNPJ] = useState(false);
   const cpfCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const emailCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const phoneCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Invite code
   const [hasInviteCode, setHasInviteCode] = useState<boolean | null>(null);
