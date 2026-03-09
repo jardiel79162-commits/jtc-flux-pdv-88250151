@@ -592,6 +592,30 @@ export default function AdminEmpresas() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Business Type Dialog */}
+      <Dialog open={!!businessTypeUser} onOpenChange={(open) => !open && setBusinessTypeUser(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Alterar Tipo de Negócio - {businessTypeUser?.store_name || businessTypeUser?.full_name}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Tipo de Negócio</Label>
+              <Select value={newBusinessType} onValueChange={setNewBusinessType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="comercio">Comércio</SelectItem>
+                  <SelectItem value="loja_roupas">Loja de Roupas</SelectItem>
+                  <SelectItem value="delivery">Delivery</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBusinessTypeUser(null)}>Cancelar</Button>
+            <Button onClick={handleChangeBusinessType}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
