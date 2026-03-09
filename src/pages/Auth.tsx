@@ -543,6 +543,9 @@ const Auth = () => {
     setCodeValidationStatus("idle");
     setAccountCreated(false);
     setCaptchaVerified(false);
+    setCpfAvailable(null);
+    setEmailAvailable(null);
+    setEmailError(null);
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
