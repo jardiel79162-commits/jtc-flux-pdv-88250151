@@ -18,12 +18,20 @@ const DAYS_OF_WEEK = [
   { value: "6", label: "Sábado" },
 ];
 
+const formatTimeLabel = (hour: number, minute: number) => {
+  const h = String(hour).padStart(2, "0");
+  const m = String(minute).padStart(2, "0");
+  const period = hour < 12 ? "da manhã" : hour < 18 ? "da tarde" : "da noite";
+  return `${h}:${m} (${period})`;
+};
+
 export default function AdminRedemption() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [eventDay, setEventDay] = useState("1");
   const [eventHour, setEventHour] = useState("16");
+  const [eventMinute, setEventMinute] = useState("0");
   const [eventDuration, setEventDuration] = useState("60");
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export default function AdminRedemption() {
     try {
       const { data, error } = await supabase
         .from("system_settings_global")
-        .select("redemption_event_day, redemption_event_hour, redemption_event_duration")
+        .select("redemption_event_day, redemption_event_hour, redemption_event_minute, redemption_event_duration")
         .limit(1)
         .maybeSingle();
 
@@ -43,6 +51,7 @@ export default function AdminRedemption() {
       if (data) {
         setEventDay(String((data as any).redemption_event_day ?? 1));
         setEventHour(String((data as any).redemption_event_hour ?? 16));
+        setEventMinute(String((data as any).redemption_event_minute ?? 0));
         setEventDuration(String((data as any).redemption_event_duration ?? 60));
       }
     } catch (error) {
