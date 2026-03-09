@@ -420,6 +420,7 @@ const Auth = () => {
     if (emailAvailable === false) { setAuthError("Este e-mail já está cadastrado. Use outro ou faça login."); return false; }
     const phoneValue = formData.phone.replace(/\D/g, "");
     if (phoneValue.length !== 11) { setAuthError("Telefone deve ter 11 dígitos (DDD + número)."); return false; }
+    if (phoneAvailable === false) { setAuthError("Este telefone já está cadastrado."); return false; }
     if (formData.password.length < 6) { setAuthError("Senha deve ter no mínimo 6 caracteres."); return false; }
     if (formData.password !== formData.confirmPassword) { setAuthError("As senhas não coincidem. Verifique e tente novamente."); return false; }
     setAuthError(null);
