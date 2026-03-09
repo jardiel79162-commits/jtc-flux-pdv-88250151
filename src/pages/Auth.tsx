@@ -1392,14 +1392,14 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 3 */}
-                {registerStep === 3 && (
+                {/* Step 4 - Código de Convite */}
+                {registerStep === 4 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
-                    key="step-3"
+                    key="step-4"
                   >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Código de Convite</h3>
