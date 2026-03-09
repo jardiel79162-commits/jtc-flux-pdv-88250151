@@ -44,6 +44,7 @@ const Auth = () => {
   const [registerStep, setRegisterStep] = useState(1);
   const [accountCreated, setAccountCreated] = useState(false);
   const [docType, setDocType] = useState<"cpf" | "cnpj">("cpf");
+  const [gender, setGender] = useState<"masculino" | "feminino" | "">("");
   const [formData, setFormData] = useState({
     fullName: "",
     cpf: "",
