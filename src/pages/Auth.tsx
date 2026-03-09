@@ -892,7 +892,7 @@ const Auth = () => {
                         placeholder="seu@email.com ou 000.000.000-00"
                         required
                         disabled={isLoading}
-                        className="h-14 text-base bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060] transition-all duration-300"
+                        className="h-14 text-base bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 rounded-2xl pl-5 placeholder:text-[#3a4060]] transition-all duration-300"
                       />
                     </motion.div>
 
