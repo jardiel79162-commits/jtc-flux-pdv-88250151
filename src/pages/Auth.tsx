@@ -1060,9 +1060,17 @@ const Auth = () => {
                           setFormData({ ...formData, cpf: formatted });
                           const clean = formatted.replace(/\D/g, "");
                           const expectedLen = docType === "cpf" ? 11 : 14;
+                          setCpfAvailable(null);
                           if (clean.length === expectedLen) {
                             const isValid = docType === "cpf" ? isValidCPF(clean) : isValidCNPJ(clean);
-                            setCpfError(!isValid ? `${docType.toUpperCase()} inválido` : null);
+                            if (!isValid) {
+                              setCpfError(`${docType.toUpperCase()} inválido`);
+                            } else {
+                              setCpfError(null);
+                              // Debounced availability check
+                              if (cpfCheckTimeout.current) clearTimeout(cpfCheckTimeout.current);
+                              cpfCheckTimeout.current = setTimeout(() => checkCpfAvailability(clean), 500);
+                            }
                           } else {
                             setCpfError(null);
                           }
@@ -1071,9 +1079,18 @@ const Auth = () => {
                         disabled={isLoading}
                         inputMode="numeric"
                         maxLength={docType === "cpf" ? 14 : 18}
-                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${cpfError ? "border-destructive ring-destructive/20" : ""}`}
+                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${cpfError ? "border-destructive ring-destructive/20" : cpfAvailable === true ? "border-accent ring-accent/20" : ""}`}
                       />
-                      {cpfError && <p className="text-xs text-destructive font-medium">{cpfError}</p>}
+                      {isCheckingCpf && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground">Verificando disponibilidade...</p>
+                        </div>
+                      )}
+                      {cpfError && <p className="text-xs text-destructive font-medium flex items-center gap-1"><XCircle className="h-3 w-3" />{cpfError}</p>}
+                      {!cpfError && cpfAvailable === true && !isCheckingCpf && (
+                        <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />{docType.toUpperCase()} disponível</p>
+                      )}
                     </div>
 
                     <Button
