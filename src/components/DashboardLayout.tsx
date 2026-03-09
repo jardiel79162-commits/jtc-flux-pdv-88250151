@@ -28,7 +28,6 @@ import {
   UsersRound,
   ClipboardList,
 } from "lucide-react";
-} from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
 import { useSubscription } from "@/hooks/useSubscription";
