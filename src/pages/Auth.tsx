@@ -963,56 +963,26 @@ const Auth = () => {
 
               {/* REGISTER TAB */}
               <TabsContent value="register" className="space-y-5">
-                <div className="flex justify-center items-center gap-1.5 mb-8 py-2">
+                <div className="flex justify-center items-center gap-1 mb-8 py-3 px-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 1 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 1 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={2} label="Contato" icon={Mail} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 2 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 2 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={3} label="Endereço" icon={MapPin} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 3 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 3 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={4} label="Código" icon={Ticket} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 4 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 4 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={5} label="Captcha" icon={Shield} />
-                  <div className="flex-1 h-1 rounded-full max-w-6 overflow-hidden bg-white/5">
-                    <motion.div 
-                      className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70"
-                      initial={false}
-                      animate={{ scaleX: registerStep > 5 ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ transformOrigin: "left" }}
-                    />
+                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 5 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={6} label="Fim" icon={Sparkles} />
                 </div>
