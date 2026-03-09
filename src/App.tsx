@@ -44,6 +44,7 @@ import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminShortcuts from "./pages/admin/AdminShortcuts";
 import AdminSpins from "./pages/admin/AdminSpins";
 import AdminPlans from "./pages/admin/AdminPlans";
+import AdminRedemption from "./pages/admin/AdminRedemption";
 import NotFound from "./pages/NotFound";
 import PublicCatalog from "./pages/PublicCatalog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -89,6 +90,7 @@ const App = () => {
               <Route path="roleta" element={<AdminSpins />} />
               <Route path="termos" element={<AdminLegalDocs />} />
               <Route path="planos" element={<AdminPlans />} />
+              <Route path="presente" element={<AdminRedemption />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
