@@ -18,12 +18,20 @@ const DAYS_OF_WEEK = [
   { value: "6", label: "Sábado" },
 ];
 
+const formatTimeLabel = (hour: number, minute: number) => {
+  const h = String(hour).padStart(2, "0");
+  const m = String(minute).padStart(2, "0");
+  const period = hour < 12 ? "da manhã" : hour < 18 ? "da tarde" : "da noite";
+  return `${h}:${m} (${period})`;
+};
+
 export default function AdminRedemption() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [eventDay, setEventDay] = useState("1");
   const [eventHour, setEventHour] = useState("16");
+  const [eventMinute, setEventMinute] = useState("0");
   const [eventDuration, setEventDuration] = useState("60");
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export default function AdminRedemption() {
     try {
       const { data, error } = await supabase
         .from("system_settings_global")
-        .select("redemption_event_day, redemption_event_hour, redemption_event_duration")
+        .select("redemption_event_day, redemption_event_hour, redemption_event_minute, redemption_event_duration")
         .limit(1)
         .maybeSingle();
 
@@ -43,6 +51,7 @@ export default function AdminRedemption() {
       if (data) {
         setEventDay(String((data as any).redemption_event_day ?? 1));
         setEventHour(String((data as any).redemption_event_hour ?? 16));
+        setEventMinute(String((data as any).redemption_event_minute ?? 0));
         setEventDuration(String((data as any).redemption_event_duration ?? 60));
       }
     } catch (error) {
@@ -68,6 +77,7 @@ export default function AdminRedemption() {
         .update({
           redemption_event_day: parseInt(eventDay),
           redemption_event_hour: parseInt(eventHour),
+          redemption_event_minute: parseInt(eventMinute),
           redemption_event_duration: parseInt(eventDuration),
         } as any)
         .eq("id", existing.id);
@@ -76,7 +86,7 @@ export default function AdminRedemption() {
 
       toast({
         title: "Configurações salvas!",
-        description: `Evento: ${DAYS_OF_WEEK.find(d => d.value === eventDay)?.label} às ${eventHour}:00 (${eventDuration} min)`,
+        description: `Evento: ${DAYS_OF_WEEK.find(d => d.value === eventDay)?.label} às ${formatTimeLabel(parseInt(eventHour), parseInt(eventMinute))} (${eventDuration} min)`,
       });
     } catch (error: any) {
       toast({
@@ -118,7 +128,7 @@ export default function AdminRedemption() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label className="font-semibold">Dia da Semana</Label>
               <Select value={eventDay} onValueChange={setEventDay}>
@@ -136,35 +146,58 @@ export default function AdminRedemption() {
             </div>
 
             <div className="space-y-2">
-              <Label className="font-semibold">Hora de Início</Label>
-              <Select value={eventHour} onValueChange={setEventHour}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <SelectItem key={i} value={String(i)}>
-                      {String(i).padStart(2, "0")}:00
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="font-semibold">Duração (minutos)</Label>
+              <Label className="font-semibold">Duração do evento (minutos)</Label>
               <Input
                 type="number"
                 min={10}
                 max={1440}
                 value={eventDuration}
                 onChange={(e) => setEventDuration(e.target.value)}
+                placeholder="Ex: 60"
               />
+              <p className="text-xs text-muted-foreground">Mínimo 10 min, máximo 1440 min (24h)</p>
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label className="font-semibold">Horário de Início</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Hora (0-23)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={eventHour}
+                  onChange={(e) => {
+                    const val = Math.min(23, Math.max(0, parseInt(e.target.value) || 0));
+                    setEventHour(String(val));
+                  }}
+                  placeholder="Ex: 13"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Minutos (0-59)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={eventMinute}
+                  onChange={(e) => {
+                    const val = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
+                    setEventMinute(String(val));
+                  }}
+                  placeholder="Ex: 30"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Use formato 24h — Ex: 13 = 1h da tarde, 0 = meia-noite, 18 = 6h da noite
+            </p>
+          </div>
+
           <div className="bg-muted/50 rounded-xl p-4 border">
-            <p className="text-sm font-medium text-foreground mb-1">Resumo:</p>
+            <p className="text-sm font-medium text-foreground mb-1">📋 Resumo:</p>
             <p className="text-sm text-muted-foreground">
               O presente misterioso será liberado toda{" "}
               <strong className="text-primary">
@@ -172,7 +205,7 @@ export default function AdminRedemption() {
               </strong>{" "}
               às{" "}
               <strong className="text-primary">
-                {String(eventHour).padStart(2, "0")}:00
+                {formatTimeLabel(parseInt(eventHour), parseInt(eventMinute))}
               </strong>{" "}
               (horário de Brasília), com duração de{" "}
               <strong className="text-primary">{eventDuration} minutos</strong>.
