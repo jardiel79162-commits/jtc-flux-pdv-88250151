@@ -383,6 +383,7 @@ const Auth = () => {
   const validateStep2 = () => {
     if (!formData.email.includes("@")) { setAuthError("E-mail inválido. Digite um e-mail válido."); return false; }
     if (!isValidEmailProvider(formData.email)) { setAuthError("Só aceitamos e-mails @gmail.com ou @outlook.com."); return false; }
+    if (emailAvailable === false) { setAuthError("Este e-mail já está cadastrado. Use outro ou faça login."); return false; }
     const phoneValue = formData.phone.replace(/\D/g, "");
     if (phoneValue.length !== 11) { setAuthError("Telefone deve ter 11 dígitos (DDD + número)."); return false; }
     if (formData.password.length < 6) { setAuthError("Senha deve ter no mínimo 6 caracteres."); return false; }
