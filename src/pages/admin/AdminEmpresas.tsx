@@ -96,6 +96,7 @@ export default function AdminEmpresas() {
 
   const loadDetail = async (user: UserProfile) => {
     setSelectedUser(user);
+    setUnblockCheck(null);
     setDetailLoading(true);
     try {
       const data = await adminApi("get_user_detail", { user_id: user.user_id });
