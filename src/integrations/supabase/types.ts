@@ -1355,6 +1355,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_cpf_available: { Args: { p_cpf: string }; Returns: boolean }
+      check_email_available: { Args: { p_email: string }; Returns: boolean }
       create_weekly_code_for_user:
         | { Args: { p_user_id: string }; Returns: string }
         | {
