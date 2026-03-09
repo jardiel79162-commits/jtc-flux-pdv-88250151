@@ -558,9 +558,9 @@ const Auth = () => {
         <div className="auth-orb auth-orb-3" />
         <div className="auth-orb auth-orb-4" />
         <div className="auth-grid-overlay" />
-        {/* Floating particles — subtle and elegant */}
-        {Array.from({ length: 20 }).map((_, i) => {
-          const size = 1.5 + Math.random() * 2;
+        {/* Floating particles — minimal */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const size = 1 + Math.random() * 1.5;
           return (
             <motion.div
               key={i}
@@ -569,40 +569,26 @@ const Auth = () => {
                 width: size,
                 height: size,
                 background: i % 3 === 0 
-                  ? 'hsl(229 100% 70% / 0.4)' 
+                  ? 'hsl(229 100% 70% / 0.35)' 
                   : i % 3 === 1 
-                  ? 'hsl(163 100% 50% / 0.3)' 
-                  : 'hsl(260 80% 70% / 0.2)',
-                left: `${5 + Math.random() * 90}%`,
-                top: `${5 + Math.random() * 90}%`,
+                  ? 'hsl(260 80% 70% / 0.2)' 
+                  : 'hsl(163 100% 50% / 0.15)',
+                left: `${8 + Math.random() * 84}%`,
+                top: `${8 + Math.random() * 84}%`,
               }}
               animate={{
-                y: [0, -(15 + Math.random() * 30), 0],
-                opacity: [0.05, 0.5, 0.05],
-                scale: [0.8, 1.2, 0.8],
+                y: [0, -(10 + Math.random() * 20), 0],
+                opacity: [0.05, 0.4, 0.05],
               }}
               transition={{
-                duration: 5 + Math.random() * 8,
+                duration: 6 + Math.random() * 10,
                 repeat: Infinity,
-                delay: Math.random() * 5,
+                delay: Math.random() * 6,
                 ease: "easeInOut",
               }}
             />
           );
         })}
-        {/* Subtle line accents */}
-        <motion.div
-          className="absolute top-1/4 left-0 w-full h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, hsl(229 100% 65% / 0.06), transparent)' }}
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-3/4 left-0 w-full h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, hsl(163 100% 50% / 0.04), transparent)' }}
-          animate={{ opacity: [0.2, 0.5, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
       </div>
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
