@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search, Loader2, ShieldOff, ShieldCheck, Trash2, Edit, KeyRound, ChevronRight,
-  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus, MessageCircle
+  Store, Package, ShoppingCart, Users as UsersIcon, Truck, Calendar, CreditCard, UserPlus, Eye, EyeOff, X, CalendarPlus, MessageCircle, RefreshCw
 } from "lucide-react";
 import { adminApi } from "@/hooks/useAdminApi";
 import { useToast } from "@/hooks/use-toast";
@@ -78,6 +79,10 @@ export default function AdminEmpresas() {
   // Extend subscription dialog
   const [extendUser, setExtendUser] = useState<UserProfile | null>(null);
   const [extendDays, setExtendDays] = useState("30");
+
+  // Business type dialog
+  const [businessTypeUser, setBusinessTypeUser] = useState<UserProfile | null>(null);
+  const [newBusinessType, setNewBusinessType] = useState("comercio");
 
   const { toast } = useToast();
 
@@ -166,6 +171,12 @@ export default function AdminEmpresas() {
     if (!extendUser) return;
     await handleAction("extend_subscription", extendUser.user_id, { days: parseInt(extendDays) });
     setExtendUser(null);
+  };
+
+  const handleChangeBusinessType = async () => {
+    if (!businessTypeUser) return;
+    await handleAction("change_business_type", businessTypeUser.user_id, { business_type: newBusinessType });
+    setBusinessTypeUser(null);
   };
 
 
@@ -309,6 +320,12 @@ export default function AdminEmpresas() {
                   )}
                   <Button size="sm" variant="outline" onClick={() => { setExtendUser(selectedUser); setExtendDays("30"); }}>
                     <CalendarPlus className="w-3 h-3 mr-1" />Estender
+                  </Button>
+                  <Button size="sm" variant="outline" className="text-purple-600 border-purple-600/30" onClick={() => {
+                    setBusinessTypeUser(selectedUser);
+                    setNewBusinessType(detail?.storeSettings?.business_type || "comercio");
+                  }}>
+                    <RefreshCw className="w-3 h-3 mr-1" />Tipo Negócio
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => setDeleteUser(selectedUser)} disabled={selectedUser.is_system_admin}>
                     <Trash2 className="w-3 h-3 mr-1" />Deletar
@@ -576,6 +593,30 @@ export default function AdminEmpresas() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Business Type Dialog */}
+      <Dialog open={!!businessTypeUser} onOpenChange={(open) => !open && setBusinessTypeUser(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Alterar Tipo de Negócio - {businessTypeUser?.store_name || businessTypeUser?.full_name}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Tipo de Negócio</Label>
+              <Select value={newBusinessType} onValueChange={setNewBusinessType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="comercio">Comércio</SelectItem>
+                  <SelectItem value="loja_roupas">Loja de Roupas</SelectItem>
+                  <SelectItem value="delivery">Delivery</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBusinessTypeUser(null)}>Cancelar</Button>
+            <Button onClick={handleChangeBusinessType}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

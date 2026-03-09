@@ -116,6 +116,7 @@ const App = () => {
             </Route>
 
             <Route path="/catalogo/:slug" element={<PublicCatalog />} />
+            <Route path="/loja/:slug" element={<PublicCatalog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

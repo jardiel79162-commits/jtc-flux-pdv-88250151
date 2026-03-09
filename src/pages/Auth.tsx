@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield, Sparkles, Lock } from "lucide-react";
+import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield, Sparkles, Lock, Truck } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth";
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
@@ -446,6 +446,10 @@ const Auth = () => {
     else if (registerStep === 2 && validateStep2()) setRegisterStep(3);
     else if (registerStep === 3 && validateStep3()) setRegisterStep(4);
     else if (registerStep === 4) {
+      // Business type step - just advance
+      setRegisterStep(5);
+    }
+    else if (registerStep === 5) {
       if (hasInviteCode === null) {
         setAuthError("Selecione se possui código de convite.");
         return;
@@ -455,7 +459,7 @@ const Auth = () => {
         return;
       }
       setCaptchaVerified(false);
-      setRegisterStep(5);
+      setRegisterStep(6);
     }
   };
 
@@ -540,6 +544,16 @@ const Auth = () => {
 
       // Auto-confirm está ativado, então fazemos login automático
       await signIn(data.email, data.password);
+      
+      // Save business_type to store_settings
+      const { data: { session: newSess } } = await supabase.auth.getSession();
+      if (newSess) {
+        await supabase.from("store_settings").upsert({
+          user_id: newSess.user.id,
+          business_type: businessType,
+        }, { onConflict: "user_id" });
+      }
+      
       toast({ title: "Conta criada!", description: "Bem-vindo ao JTC FluxPDV!" });
       navigate("/dashboard");
 
@@ -1617,8 +1631,68 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 4 - Código de Convite */}
+                {/* Step 4 - Tipo de Negócio */}
                 {registerStep === 4 && (
+                  <motion.div 
+                    className="space-y-6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-4-business"
+                  >
+                    <div className="text-center mb-5">
+                      <h3 className="font-bold text-xl text-[#e0e6ff]">Tipo do Negócio</h3>
+                      <p className="text-sm text-[#5a6180] mt-1">Escolha o tipo de negócio da sua loja</p>
+                      <p className="text-xs text-[#4a5478] mt-2">⚠️ Esta escolha não poderá ser alterada depois</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {[
+                        { value: "comercio" as const, icon: ShoppingCart, label: "Comércio", desc: "Mercados, mercearias, conveniências, lojas gerais" },
+                        { value: "loja_roupas" as const, icon: Package, label: "Loja de Roupas", desc: "Vestuário com variações de tamanho e cor" },
+                        { value: "delivery" as const, icon: Truck, label: "Delivery", desc: "Restaurantes, lanchonetes, delivery com pedidos online" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setBusinessType(opt.value)}
+                          className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 text-left ${
+                            businessType === opt.value
+                              ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
+                              : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
+                          }`}
+                        >
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                            businessType === opt.value
+                              ? "bg-gradient-to-br from-primary to-primary/70 text-white"
+                              : "bg-muted text-muted-foreground"
+                          }`}>
+                            <opt.icon className="w-6 h-6" />
+                          </div>
+                          <div className="flex-1">
+                            <p className={`font-bold text-sm ${businessType === opt.value ? "text-primary" : "text-foreground/90"}`}>{opt.label}</p>
+                            <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                          </div>
+                          {businessType === opt.value && (
+                            <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-3 mt-6">
+                      <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
+                        <ChevronLeft className="mr-2 h-5 w-5" />Voltar
+                      </Button>
+                      <Button type="button" onClick={handleNextStep} className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300" disabled={isLoading}>
+                        Próximo<ChevronRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 5 - Código de Convite */}
+                {registerStep === 5 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
@@ -1719,7 +1793,7 @@ const Auth = () => {
                 )}
 
                 {/* Step 5 - CAPTCHA */}
-                {registerStep === 5 && (
+                {registerStep === 6 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
@@ -1755,7 +1829,7 @@ const Auth = () => {
                 )}
 
                 {/* Step 6 - Email Verification */}
-                {registerStep === 6 && (
+                {registerStep === 7 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, scale: 0.95 }}

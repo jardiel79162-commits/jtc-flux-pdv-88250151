@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { AuriChat } from "@/components/AuriChat";
+import { useBusinessType } from "@/hooks/useBusinessType";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,8 @@ import {
   MessageCircle,
   UsersRound,
   ClipboardList,
+  Shirt,
+  Globe,
 } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import logo from "@/assets/logo.jpg";
@@ -57,6 +60,7 @@ const DashboardLayoutInner = () => {
   const { isExpired, isTrial } = useSubscription();
   const { theme, toggleTheme } = useThemeContext();
   const { isAdmin, isEmployee, adminId, hasPermission, loading: permLoading } = usePermissions();
+  const { businessType, isDelivery, isClothing } = useBusinessType();
   useSystemColor();
 
   // Bloquear scroll global quando o menu está aberto (inclui iOS overscroll)
@@ -266,21 +270,60 @@ const DashboardLayoutInner = () => {
     return () => window.removeEventListener('store-settings-updated', handler);
   }, [session, isEmployee, adminId]);
 
-  const allMenuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-    { icon: Package, label: "Produtos", path: "/produtos" },
-    { icon: ShoppingCart, label: "Venda", path: "/pdv" },
-    { icon: Users, label: "Clientes", path: "/clientes" },
-    { icon: Truck, label: "Fornecedores", path: "/fornecedores" },
-    { icon: History, label: "Histórico", path: "/historico" },
-    { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
-    ...(multiEmployeesEnabled ? [{ icon: UsersRound, label: "Funcionários", path: "/funcionarios" }] : []),
-    { icon: Settings, label: "Configurações", path: "/configuracoes" },
-    { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
-    { icon: Info, label: "Sobre", path: "/sobre" },
-    { icon: MessageCircle, label: "Caixa de Mensagem", path: "/caixa-de-mensagem" },
-    ...(isSystemAdmin ? [{ icon: Shield, label: "Painel Admin", path: "/admin" }] : []),
-  ];
+  // Build menu items based on business type
+  const buildMenuItems = () => {
+    const items: { icon: any; label: string; path: string }[] = [
+      { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    ];
+
+    if (isDelivery) {
+      items.push(
+        { icon: ClipboardList, label: "Pedidos", path: "/pedidos" },
+        { icon: Package, label: "Produtos", path: "/produtos" },
+        { icon: Globe, label: "Catálogo", path: "/catalogo-link" },
+        { icon: Users, label: "Clientes", path: "/clientes" },
+        { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
+      );
+    } else if (isClothing) {
+      items.push(
+        { icon: Package, label: "Produtos", path: "/produtos" },
+        { icon: ShoppingCart, label: "Venda", path: "/pdv" },
+        { icon: Users, label: "Clientes", path: "/clientes" },
+        { icon: Truck, label: "Fornecedores", path: "/fornecedores" },
+        { icon: History, label: "Histórico", path: "/historico" },
+        { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
+      );
+    } else {
+      // Comércio (default)
+      items.push(
+        { icon: Package, label: "Produtos", path: "/produtos" },
+        { icon: ShoppingCart, label: "Venda", path: "/pdv" },
+        { icon: Users, label: "Clientes", path: "/clientes" },
+        { icon: Truck, label: "Fornecedores", path: "/fornecedores" },
+        { icon: History, label: "Histórico", path: "/historico" },
+        { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
+      );
+    }
+
+    if (multiEmployeesEnabled) {
+      items.push({ icon: UsersRound, label: "Funcionários", path: "/funcionarios" });
+    }
+
+    items.push(
+      { icon: Settings, label: "Configurações", path: "/configuracoes" },
+      { icon: CreditCard, label: "Assinatura", path: "/assinatura" },
+      { icon: Info, label: "Sobre", path: "/sobre" },
+      { icon: MessageCircle, label: "Caixa de Mensagem", path: "/caixa-de-mensagem" },
+    );
+
+    if (isSystemAdmin) {
+      items.push({ icon: Shield, label: "Painel Admin", path: "/admin" });
+    }
+
+    return items;
+  };
+
+  const allMenuItems = buildMenuItems();
 
   const menuItems = allMenuItems.filter((item) => {
     if (item.path === "/dashboard") return true;
