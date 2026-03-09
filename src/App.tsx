@@ -24,11 +24,9 @@ import Settings from "./pages/Settings";
 import SalesHistory from "./pages/SalesHistory";
 import Suppliers from "./pages/Suppliers";
 import SupplierForm from "./pages/SupplierForm";
-import WeeklyRedemption from "./pages/WeeklyRedemption";
 import Employees from "./pages/Employees";
 import Calculator from "./pages/Calculator";
 import Manuals from "./pages/Manuals";
-import PrizeWheel from "./pages/PrizeWheel";
 
 import DashboardLayout from "./components/DashboardLayout";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -42,9 +40,8 @@ import AdminLegalDocs from "./pages/admin/AdminLegalDocs";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminShortcuts from "./pages/admin/AdminShortcuts";
-import AdminSpins from "./pages/admin/AdminSpins";
 import AdminPlans from "./pages/admin/AdminPlans";
-import AdminRedemption from "./pages/admin/AdminRedemption";
+import DeliveryOrders from "./pages/DeliveryOrders";
 import NotFound from "./pages/NotFound";
 import PublicCatalog from "./pages/PublicCatalog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -87,10 +84,8 @@ const App = () => {
               <Route path="mensagens" element={<AdminMessages />} />
               <Route path="indicacoes" element={<AdminReferrals />} />
               <Route path="atalhos" element={<AdminShortcuts />} />
-              <Route path="roleta" element={<AdminSpins />} />
               <Route path="termos" element={<AdminLegalDocs />} />
               <Route path="planos" element={<AdminPlans />} />
-              <Route path="presente" element={<AdminRedemption />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
 
@@ -113,11 +108,10 @@ const App = () => {
               <Route path="/fornecedores/novo" element={<SupplierForm />} />
               <Route path="/fornecedores/editar/:id" element={<SupplierForm />} />
               <Route path="/funcionarios" element={<Employees />} />
-              <Route path="/resgate-semanal" element={<WeeklyRedemption />} />
               <Route path="/calculadora" element={<Calculator />} />
               <Route path="/auri" element={<Auri />} />
               <Route path="/manuais" element={<Manuals />} />
-              <Route path="/roleta" element={<PrizeWheel />} />
+              <Route path="/pedidos" element={<DeliveryOrders />} />
               <Route path="/caixa-de-mensagem" element={<Inbox />} />
             </Route>
 

@@ -34,8 +34,8 @@ export const PERMISSION_KEYS = {
   // Subscription
   access_subscription: "access_subscription",
 
-  // Weekly Redemption
-  access_redemption: "access_redemption",
+  // Delivery Orders
+  access_orders: "access_orders",
 
   // Employees
   manage_employees: "manage_employees",
@@ -105,9 +105,9 @@ export const PERMISSION_GROUPS = [
     ],
   },
   {
-    label: "Resgate Semanal",
+    label: "Pedidos (Delivery)",
     permissions: [
-      { key: PERMISSION_KEYS.access_redemption, label: "Acessar Resgate Semanal" },
+      { key: PERMISSION_KEYS.access_orders, label: "Acessar Pedidos do Delivery" },
     ],
   },
   {
@@ -136,7 +136,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/relatorios": PERMISSION_KEYS.access_reports,
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
-  "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/pedidos": PERMISSION_KEYS.access_orders,
   "/funcionarios": PERMISSION_KEYS.manage_employees,
 };
 
@@ -150,7 +150,7 @@ export const QUICK_ACTION_PERMISSIONS: Record<string, PermissionKey> = {
   "/relatorios": PERMISSION_KEYS.access_reports,
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
-  "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/pedidos": PERMISSION_KEYS.access_orders,
   "/funcionarios": PERMISSION_KEYS.manage_employees,
 };
 
@@ -165,6 +165,6 @@ export const MENU_PERMISSIONS: Record<string, PermissionKey> = {
   
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
-  "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/pedidos": PERMISSION_KEYS.access_orders,
   "/funcionarios": PERMISSION_KEYS.manage_employees,
 };
