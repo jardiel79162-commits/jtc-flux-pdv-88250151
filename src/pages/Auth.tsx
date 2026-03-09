@@ -677,8 +677,8 @@ const Auth = () => {
           <div className="auth-card-glow-tr" />
           <div className="auth-card-glow-bl" />
 
-          <CardHeader className="text-center pb-3 pt-8 relative z-10">
-            <div className="flex flex-col items-center gap-4 mb-1">
+          <CardHeader className="text-center pb-2 pt-7 relative z-10">
+            <div className="flex flex-col items-center gap-3 mb-1">
               <motion.div 
                 className="relative group"
                 initial={{ scale: 0, rotate: -10 }}
@@ -686,16 +686,16 @@ const Auth = () => {
                 transition={{ type: "spring", stiffness: 180, delay: 0.4 }}
               >
                 <div className="auth-logo-glow" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-18 h-18 rounded-2xl object-cover shadow-xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-16 h-16 rounded-2xl object-cover shadow-xl ring-1 ring-white/8" style={{ pointerEvents: 'auto' }} />
               </motion.div>
-              <div className="text-center space-y-1.5">
-                <CardTitle className="text-2xl font-black">
-                  <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">JTC </span>
-                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">FluxPDV</span>
+              <div className="text-center space-y-1">
+                <CardTitle className="text-xl font-black">
+                  <span className="text-white/90">JTC </span>
+                  <span className="bg-gradient-to-r from-[hsl(229,100%,65%)] to-[hsl(260,80%,65%)] bg-clip-text text-transparent">FluxPDV</span>
                 </CardTitle>
-                <CardDescription className="text-sm text-[#6b7394]">Acesse sua conta ou crie uma nova</CardDescription>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-1 gap-1.5 text-[#5a6180] hover:text-primary text-xs">
-                  <Info className="w-3.5 h-3.5" />
+                <CardDescription className="text-xs text-[#5a6480]">Acesse sua conta ou crie uma nova</CardDescription>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/sobre")} className="mt-0.5 gap-1 text-[#4a5478] hover:text-[hsl(229,100%,70%)] text-[11px] h-7 px-2">
+                  <Info className="w-3 h-3" />
                   Sobre o Sistema
                 </Button>
               </div>
