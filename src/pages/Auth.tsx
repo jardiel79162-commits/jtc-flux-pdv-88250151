@@ -372,7 +372,35 @@ const Auth = () => {
     setIsCheckingEmail(false);
   }, []);
 
-  const validateStep1 = () => {
+  const checkPhoneAvailability = useCallback(async (phone: string) => {
+    setIsCheckingPhone(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('check_phone_available', { p_phone: phone });
+      if (!error) {
+        setPhoneAvailable(data === true);
+        if (data === false) setPhoneError("Este telefone já está cadastrado");
+      }
+    } catch { /* ignore */ }
+    setIsCheckingPhone(false);
+  }, []);
+
+  const fetchCNPJData = useCallback(async (cnpj: string) => {
+    setIsFetchingCNPJ(true);
+    try {
+      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+      if (response.ok) {
+        const data = await response.json();
+        const nome = data.nome_fantasia || data.razao_social || "";
+        if (nome) {
+          setFormData(prev => ({ ...prev, fullName: nome }));
+          toast({ title: "CNPJ encontrado!", description: `Empresa: ${nome}` });
+        }
+      }
+    } catch { /* ignore */ }
+    setIsFetchingCNPJ(false);
+  }, [toast]);
+
+
     if (!formData.fullName.trim()) { setAuthError(docType === "cnpj" ? "Nome fantasia da empresa é obrigatório." : "Nome completo é obrigatório."); return false; }
     const docValue = formData.cpf.replace(/\D/g, "");
     if (docType === "cpf") {
