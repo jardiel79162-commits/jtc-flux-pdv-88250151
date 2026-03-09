@@ -44,6 +44,7 @@ const Auth = () => {
   const [registerStep, setRegisterStep] = useState(1);
   const [accountCreated, setAccountCreated] = useState(false);
   const [docType, setDocType] = useState<"cpf" | "cnpj">("cpf");
+  const [gender, setGender] = useState<"masculino" | "feminino" | "">("");
   const [formData, setFormData] = useState({
     fullName: "",
     cpf: "",
@@ -76,8 +77,12 @@ const Auth = () => {
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [phoneAvailable, setPhoneAvailable] = useState<boolean | null>(null);
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+  const [isFetchingCNPJ, setIsFetchingCNPJ] = useState(false);
   const cpfCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const emailCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const phoneCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Invite code
   const [hasInviteCode, setHasInviteCode] = useState<boolean | null>(null);
@@ -367,6 +372,34 @@ const Auth = () => {
     setIsCheckingEmail(false);
   }, []);
 
+  const checkPhoneAvailability = useCallback(async (phone: string) => {
+    setIsCheckingPhone(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('check_phone_available', { p_phone: phone });
+      if (!error) {
+        setPhoneAvailable(data === true);
+        if (data === false) setPhoneError("Este telefone já está cadastrado");
+      }
+    } catch { /* ignore */ }
+    setIsCheckingPhone(false);
+  }, []);
+
+  const fetchCNPJData = useCallback(async (cnpj: string) => {
+    setIsFetchingCNPJ(true);
+    try {
+      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+      if (response.ok) {
+        const data = await response.json();
+        const nome = data.nome_fantasia || data.razao_social || "";
+        if (nome) {
+          setFormData(prev => ({ ...prev, fullName: nome }));
+          toast({ title: "CNPJ encontrado!", description: `Empresa: ${nome}` });
+        }
+      }
+    } catch { /* ignore */ }
+    setIsFetchingCNPJ(false);
+  }, [toast]);
+
   const validateStep1 = () => {
     if (!formData.fullName.trim()) { setAuthError(docType === "cnpj" ? "Nome fantasia da empresa é obrigatório." : "Nome completo é obrigatório."); return false; }
     const docValue = formData.cpf.replace(/\D/g, "");
@@ -376,6 +409,7 @@ const Auth = () => {
       if (!isValidCNPJ(docValue)) { setAuthError("CNPJ inválido. Verifique os números digitados."); return false; }
     }
     if (cpfAvailable === false) { setAuthError(`${docType.toUpperCase()} já cadastrado. Use outro ou faça login.`); return false; }
+    if (docType === "cpf" && !gender) { setAuthError("Selecione seu sexo."); return false; }
     setAuthError(null);
     return true;
   };
@@ -386,6 +420,7 @@ const Auth = () => {
     if (emailAvailable === false) { setAuthError("Este e-mail já está cadastrado. Use outro ou faça login."); return false; }
     const phoneValue = formData.phone.replace(/\D/g, "");
     if (phoneValue.length !== 11) { setAuthError("Telefone deve ter 11 dígitos (DDD + número)."); return false; }
+    if (phoneAvailable === false) { setAuthError("Este telefone já está cadastrado."); return false; }
     if (formData.password.length < 6) { setAuthError("Senha deve ter no mínimo 6 caracteres."); return false; }
     if (formData.password !== formData.confirmPassword) { setAuthError("As senhas não coincidem. Verifique e tente novamente."); return false; }
     setAuthError(null);
@@ -468,6 +503,7 @@ const Auth = () => {
         city: selectedCidade,
         state: selectedEstado,
         password: formData.password,
+        gender: gender || undefined,
         referredByCode: hasInviteCode && codeValidationStatus === "valid" ? inviteCode : undefined,
       };
 
@@ -546,6 +582,9 @@ const Auth = () => {
     setCpfAvailable(null);
     setEmailAvailable(null);
     setEmailError(null);
+    setPhoneAvailable(null);
+    setPhoneError(null);
+    setGender("");
   };
 
   const StepIndicator = ({ step, label, icon: Icon }: { step: number; label: string; icon: any }) => (
@@ -1071,9 +1110,12 @@ const Auth = () => {
                               setCpfError(`${docType.toUpperCase()} inválido`);
                             } else {
                               setCpfError(null);
-                              // Debounced availability check
                               if (cpfCheckTimeout.current) clearTimeout(cpfCheckTimeout.current);
                               cpfCheckTimeout.current = setTimeout(() => checkCpfAvailability(clean), 500);
+                              // Auto-fill company name for CNPJ
+                              if (docType === "cnpj") {
+                                fetchCNPJData(clean);
+                              }
                             }
                           } else {
                             setCpfError(null);
@@ -1096,6 +1138,33 @@ const Auth = () => {
                         <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />{docType.toUpperCase()} disponível</p>
                       )}
                     </div>
+
+                    {isFetchingCNPJ && docType === "cnpj" && (
+                      <div className="flex items-center gap-1.5">
+                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground">Buscando dados do CNPJ...</p>
+                      </div>
+                    )}
+
+                    {docType === "cpf" && (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-semibold text-foreground/90">Sexo</Label>
+                        <RadioGroup
+                          value={gender}
+                          onValueChange={(val: "masculino" | "feminino") => setGender(val)}
+                          className="flex gap-6"
+                        >
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="masculino" id="gender-m" />
+                            <Label htmlFor="gender-m" className="text-sm font-medium cursor-pointer">Masculino</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="feminino" id="gender-f" />
+                            <Label htmlFor="gender-f" className="text-sm font-medium cursor-pointer">Feminino</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
 
                     <Button
                       type="button"
@@ -1210,8 +1279,13 @@ const Auth = () => {
                           const formatted = formatPhone(e.target.value);
                           setFormData({ ...formData, phone: formatted });
                           const clean = formatted.replace(/\D/g, "");
+                          setPhoneAvailable(null);
                           if (clean.length > 0 && clean.length < 11) {
                             setPhoneError("Telefone deve ter 11 dígitos");
+                          } else if (clean.length === 11) {
+                            setPhoneError(null);
+                            if (phoneCheckTimeout.current) clearTimeout(phoneCheckTimeout.current);
+                            phoneCheckTimeout.current = setTimeout(() => checkPhoneAvailability(clean), 500);
                           } else {
                             setPhoneError(null);
                           }
@@ -1220,9 +1294,18 @@ const Auth = () => {
                         disabled={isLoading}
                         inputMode="numeric"
                         maxLength={15}
-                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${phoneError ? "border-destructive ring-destructive/20" : ""}`}
+                        className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${phoneError ? "border-destructive ring-destructive/20" : phoneAvailable === true ? "border-accent ring-accent/20" : ""}`}
                       />
-                      {phoneError && <p className="text-xs text-destructive font-medium">{phoneError}</p>}
+                      {isCheckingPhone && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground">Verificando disponibilidade...</p>
+                        </div>
+                      )}
+                      {phoneError && <p className="text-xs text-destructive font-medium flex items-center gap-1"><XCircle className="h-3 w-3" />{phoneError}</p>}
+                      {!phoneError && phoneAvailable === true && !isCheckingPhone && (
+                        <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Telefone disponível</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

@@ -640,6 +640,7 @@ export type Database = {
           email: string | null
           email_verified: boolean | null
           full_name: string | null
+          gender: string | null
           id: string
           invite_code: string | null
           is_blocked: boolean | null
@@ -665,6 +666,7 @@ export type Database = {
           email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           invite_code?: string | null
           is_blocked?: boolean | null
@@ -690,6 +692,7 @@ export type Database = {
           email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           invite_code?: string | null
           is_blocked?: boolean | null
@@ -1357,6 +1360,7 @@ export type Database = {
     Functions: {
       check_cpf_available: { Args: { p_cpf: string }; Returns: boolean }
       check_email_available: { Args: { p_email: string }; Returns: boolean }
+      check_phone_available: { Args: { p_phone: string }; Returns: boolean }
       create_weekly_code_for_user:
         | { Args: { p_user_id: string }; Returns: string }
         | {
