@@ -77,6 +77,7 @@ export default function AdminRedemption() {
         .update({
           redemption_event_day: parseInt(eventDay),
           redemption_event_hour: parseInt(eventHour),
+          redemption_event_minute: parseInt(eventMinute),
           redemption_event_duration: parseInt(eventDuration),
         } as any)
         .eq("id", existing.id);
