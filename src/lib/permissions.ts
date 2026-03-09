@@ -34,8 +34,8 @@ export const PERMISSION_KEYS = {
   // Subscription
   access_subscription: "access_subscription",
 
-  // Weekly Redemption
-  access_redemption: "access_redemption",
+  // Delivery Orders
+  access_orders: "access_orders",
 
   // Employees
   manage_employees: "manage_employees",
