@@ -1692,7 +1692,7 @@ const Auth = () => {
                 )}
 
                 {/* Step 5 - Código de Convite */}
-                {registerStep === 4 && (
+                {registerStep === 5 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
