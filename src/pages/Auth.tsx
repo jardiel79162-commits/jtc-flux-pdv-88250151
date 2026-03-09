@@ -607,8 +607,8 @@ const Auth = () => {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
               >
-                <div className="absolute -inset-5 bg-gradient-to-r from-[hsl(229,100%,55%/0.3)] via-[hsl(260,80%,55%/0.15)] to-[hsl(163,100%,44%/0.2)] rounded-3xl blur-3xl opacity-50 group-hover:opacity-70 transition-all duration-700" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-24 h-24 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
+                <div className="absolute -inset-5 bg-gradient-to-r from-[hsl(229,100%,55%/0.3)] via-[hsl(260,80%,55%/0.15)] to-[hsl(163,100%,44%/0.2)] rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-all duration-700" />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-24 h-24 rounded-full object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
               </motion.div>
               <div className="space-y-1">
                 <h1 className="text-5xl xl:text-6xl font-black tracking-tight leading-none">
@@ -686,7 +686,7 @@ const Auth = () => {
                 transition={{ type: "spring", stiffness: 180, delay: 0.4 }}
               >
                 <div className="auth-logo-glow" />
-                <img src={logo} alt="JTC FluxPDV" className="relative w-16 h-16 rounded-2xl object-cover shadow-xl ring-1 ring-white/8" style={{ pointerEvents: 'auto' }} />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-16 h-16 rounded-full object-cover shadow-xl ring-1 ring-white/8" style={{ pointerEvents: 'auto' }} />
               </motion.div>
               <div className="text-center space-y-1">
                 <CardTitle className="text-xl font-black">
