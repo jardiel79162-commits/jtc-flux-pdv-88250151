@@ -520,29 +520,29 @@ const Auth = () => {
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
     >
       <motion.div 
-        className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
+        className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-500 ${
           registerStep === step
-            ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
+            ? "bg-gradient-to-br from-primary to-[hsl(229,100%,72%)] text-white shadow-lg shadow-primary/40 ring-2 ring-primary/20"
             : registerStep > step
-              ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/20"
-              : "bg-white/5 text-muted-foreground border border-white/10"
+              ? "bg-gradient-to-br from-accent to-accent/80 text-white shadow-md shadow-accent/25"
+              : "bg-white/[0.03] text-[#4a5478] border border-white/[0.06]"
         }`}
         layout
       >
         <AnimatePresence mode="wait">
           {registerStep > step ? (
             <motion.div key="check" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
-              <Check className="w-5 h-5" />
+              <Check className="w-4.5 h-4.5" />
             </motion.div>
           ) : (
             <motion.div key="icon" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300 }}>
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4.5 h-4.5" />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
-      <span className={`text-xs font-semibold transition-colors duration-300 ${
-        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-muted-foreground/60"
+      <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 ${
+        registerStep === step ? "text-primary" : registerStep > step ? "text-accent" : "text-[#3a4060]"
       }`}>
         {label}
       </span>
