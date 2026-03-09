@@ -1180,11 +1180,19 @@ const Auth = () => {
                         const provider = getEmailProvider(formData.email);
                         const domain = formData.email.split("@")[1] || "";
                         const hasDot = formData.email.includes("@") && domain.includes(".");
-                        return provider === "unknown" && hasDot ? (
-                          <p className="text-xs text-destructive font-medium">Apenas @gmail.com ou @outlook.com são aceitos</p>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">Apenas @gmail.com ou @outlook.com</p>
-                        );
+                        if (provider === "unknown" && hasDot) {
+                          return <p className="text-xs text-destructive font-medium">Apenas @gmail.com ou @outlook.com são aceitos</p>;
+                        }
+                        if (isCheckingEmail) {
+                          return <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Verificando e-mail...</p>;
+                        }
+                        if (emailError) {
+                          return <p className="text-xs text-destructive font-medium flex items-center gap-1"><XCircle className="h-3 w-3" />{emailError}</p>;
+                        }
+                        if (emailAvailable === true) {
+                          return <p className="text-xs text-accent font-medium flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />E-mail disponível</p>;
+                        }
+                        return <p className="text-xs text-muted-foreground">Apenas @gmail.com ou @outlook.com</p>;
                       })()}
                     </div>
 
