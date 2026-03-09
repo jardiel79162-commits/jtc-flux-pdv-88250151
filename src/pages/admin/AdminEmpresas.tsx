@@ -314,6 +314,12 @@ export default function AdminEmpresas() {
                   <Button size="sm" variant="outline" onClick={() => { setExtendUser(selectedUser); setExtendDays("30"); }}>
                     <CalendarPlus className="w-3 h-3 mr-1" />Estender
                   </Button>
+                  <Button size="sm" variant="outline" className="text-purple-600 border-purple-600/30" onClick={() => {
+                    setBusinessTypeUser(selectedUser);
+                    setNewBusinessType(detail?.storeSettings?.business_type || "comercio");
+                  }}>
+                    <RefreshCw className="w-3 h-3 mr-1" />Tipo Negócio
+                  </Button>
                   <Button size="sm" variant="destructive" onClick={() => setDeleteUser(selectedUser)} disabled={selectedUser.is_system_admin}>
                     <Trash2 className="w-3 h-3 mr-1" />Deletar
                   </Button>
