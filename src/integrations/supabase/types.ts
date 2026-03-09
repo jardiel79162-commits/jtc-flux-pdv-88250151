@@ -1266,6 +1266,9 @@ export type Database = {
           maintenance_image_url: string | null
           maintenance_message: string | null
           maintenance_mode: boolean | null
+          redemption_event_day: number | null
+          redemption_event_duration: number | null
+          redemption_event_hour: number | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -1274,6 +1277,9 @@ export type Database = {
           maintenance_image_url?: string | null
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
+          redemption_event_day?: number | null
+          redemption_event_duration?: number | null
+          redemption_event_hour?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -1282,6 +1288,9 @@ export type Database = {
           maintenance_image_url?: string | null
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
+          redemption_event_day?: number | null
+          redemption_event_duration?: number | null
+          redemption_event_hour?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
