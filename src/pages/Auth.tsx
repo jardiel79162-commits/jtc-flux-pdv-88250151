@@ -400,7 +400,7 @@ const Auth = () => {
     setIsFetchingCNPJ(false);
   }, [toast]);
 
-
+  const validateStep1 = () => {
     if (!formData.fullName.trim()) { setAuthError(docType === "cnpj" ? "Nome fantasia da empresa é obrigatório." : "Nome completo é obrigatório."); return false; }
     const docValue = formData.cpf.replace(/\D/g, "");
     if (docType === "cpf") {
