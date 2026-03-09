@@ -409,6 +409,7 @@ const Auth = () => {
       if (!isValidCNPJ(docValue)) { setAuthError("CNPJ inválido. Verifique os números digitados."); return false; }
     }
     if (cpfAvailable === false) { setAuthError(`${docType.toUpperCase()} já cadastrado. Use outro ou faça login.`); return false; }
+    if (docType === "cpf" && !gender) { setAuthError("Selecione seu sexo."); return false; }
     setAuthError(null);
     return true;
   };
