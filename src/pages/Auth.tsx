@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
 import { generateDeviceFingerprint } from "@/lib/fingerprint";
 import { useNavigate } from "react-router-dom";
