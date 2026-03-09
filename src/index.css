@@ -515,17 +515,18 @@
 
   .auth-card input,
   .auth-card textarea {
-    background: rgba(255,255,255,0.05) !important;
-    border-color: rgba(255,255,255,0.1) !important;
+    background: rgba(255,255,255,0.04) !important;
+    border-color: rgba(255,255,255,0.08) !important;
     color: #e8eeff !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 0.875rem !important;
   }
 
   .auth-card input:focus,
   .auth-card textarea:focus {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: hsl(229 100% 65% / 0.5) !important;
-    box-shadow: 0 0 0 3px hsl(229 100% 65% / 0.1), 0 0 20px -5px hsl(229 100% 65% / 0.15) !important;
+    background: rgba(255,255,255,0.07) !important;
+    border-color: hsl(229 100% 65% / 0.45) !important;
+    box-shadow: 0 0 0 4px hsl(229 100% 65% / 0.08), 0 0 30px -8px hsl(229 100% 65% / 0.12) !important;
   }
 
   .auth-card input::placeholder,
