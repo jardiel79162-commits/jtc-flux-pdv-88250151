@@ -1110,9 +1110,12 @@ const Auth = () => {
                               setCpfError(`${docType.toUpperCase()} inválido`);
                             } else {
                               setCpfError(null);
-                              // Debounced availability check
                               if (cpfCheckTimeout.current) clearTimeout(cpfCheckTimeout.current);
                               cpfCheckTimeout.current = setTimeout(() => checkCpfAvailability(clean), 500);
+                              // Auto-fill company name for CNPJ
+                              if (docType === "cnpj") {
+                                fetchCNPJData(clean);
+                              }
                             }
                           } else {
                             setCpfError(null);
