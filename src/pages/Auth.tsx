@@ -1024,7 +1024,7 @@ const Auth = () => {
                   >
                     <div className="text-center mb-6">
                       <h3 className="font-bold text-xl text-foreground">Dados Pessoais</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Preencha suas informações básicas</p>
+                      <p className="text-sm text-muted-foreground mt-1">Informe seu nome e documento</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1089,6 +1089,33 @@ const Auth = () => {
                         className={`h-12 bg-muted/30 border-border/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-300 ${cpfError ? "border-destructive ring-destructive/20" : ""}`}
                       />
                       {cpfError && <p className="text-xs text-destructive font-medium">{cpfError}</p>}
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={handleNextStep}
+                      className="w-full h-14 text-base font-bold mt-6 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
+                      disabled={isLoading}
+                    >
+                      Próximo
+                      <ChevronRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </motion.div>
+                )}
+
+                {/* Step 2 - Contato & Senha */}
+                {registerStep === 2 && (
+                  <motion.div 
+                    className="space-y-5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key="step-2"
+                  >
+                    <div className="text-center mb-6">
+                      <h3 className="font-bold text-xl text-foreground">Contato & Senha</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Informe e-mail, telefone e crie sua senha</p>
                     </div>
 
                     <div className="space-y-3">
@@ -1225,22 +1252,24 @@ const Auth = () => {
                       </div>
                     )}
 
-                    {/* Errors shown via modal */}
-
-                    <Button
-                      type="button"
-                      onClick={handleNextStep}
-                      className="w-full h-14 text-base font-bold mt-6 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 rounded-full"
-                      disabled={isLoading}
-                    >
-                      Próximo
-                      <ChevronRight className="ml-2 h-5 w-5" />
-                    </Button>
+                    <div className="flex gap-3 mt-6">
+                      <Button type="button" variant="outline" onClick={handlePreviousStep} className="flex-1 h-14 rounded-xl border-border/50 hover:bg-muted/50" disabled={isLoading}>
+                        <ChevronLeft className="mr-2 h-5 w-5" />Voltar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleNextStep}
+                        className="flex-1 h-14 rounded-full bg-gradient-to-r from-primary via-primary to-primary/90 shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
+                        disabled={isLoading}
+                      >
+                        Próximo<ChevronRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </div>
                   </motion.div>
                 )}
 
-                {/* Step 2 */}
-                {registerStep === 2 && (
+                {/* Step 3 - Endereço */}
+                {registerStep === 3 && (
                   <motion.div 
                     className="space-y-5"
                     initial={{ opacity: 0, x: 20 }}
