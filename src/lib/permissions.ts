@@ -150,7 +150,7 @@ export const QUICK_ACTION_PERMISSIONS: Record<string, PermissionKey> = {
   "/relatorios": PERMISSION_KEYS.access_reports,
   "/configuracoes": PERMISSION_KEYS.access_settings,
   "/assinatura": PERMISSION_KEYS.access_subscription,
-  "/resgate-semanal": PERMISSION_KEYS.access_redemption,
+  "/pedidos": PERMISSION_KEYS.access_orders,
   "/funcionarios": PERMISSION_KEYS.manage_employees,
 };
 
