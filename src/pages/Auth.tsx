@@ -1529,14 +1529,14 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Step 5 - Email Verification */}
-                {registerStep === 5 && (
+                {/* Step 6 - Email Verification */}
+                {registerStep === 6 && (
                   <motion.div 
                     className="space-y-6"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    key="step-5"
+                    key="step-6"
                   >
                     <div className="text-center mb-6">
                       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
