@@ -21,7 +21,6 @@ import quickActionConfiguracoes from "@/assets/quick-action-configuracoes.png";
 import quickActionAssinatura from "@/assets/quick-action-assinatura.png";
 import quickActionFornecedores from "@/assets/quick-action-fornecedores.jpg";
 import quickActionCalculadora from "@/assets/quick-action-calculadora.png";
-import quickActionBonus from "@/assets/gift-box.jpg";
 import PageLoader from "@/components/PageLoader";
 
 interface DashboardData {
