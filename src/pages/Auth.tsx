@@ -70,7 +70,14 @@ const Auth = () => {
   const [cidades, setCidades] = useState<Cidade[]>([]);
   const [isFetchingCEP, setIsFetchingCEP] = useState(false);
   const [cpfError, setCpfError] = useState<string | null>(null);
+  const [cpfAvailable, setCpfAvailable] = useState<boolean | null>(null);
+  const [isCheckingCpf, setIsCheckingCpf] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const cpfCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const emailCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Invite code
   const [hasInviteCode, setHasInviteCode] = useState<boolean | null>(null);
