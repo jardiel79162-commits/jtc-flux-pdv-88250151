@@ -744,6 +744,26 @@ serve(async (req) => {
         return jsonResponse({ success: true, shortcuts: allShortcuts || [], added: toInsert.length });
       }
 
+      case 'change_business_type': {
+        const { user_id: targetId, business_type } = params;
+        const validTypes = ['comercio', 'loja_roupas', 'delivery'];
+        if (!validTypes.includes(business_type)) {
+          return jsonResponse({ error: 'Tipo de negócio inválido' }, 400);
+        }
+        const { data: existingStore } = await supabaseAdmin.from('store_settings').select('id').eq('user_id', targetId).maybeSingle();
+        if (existingStore) {
+          await supabaseAdmin.from('store_settings').update({ business_type }).eq('user_id', targetId);
+        } else {
+          await supabaseAdmin.from('store_settings').insert({ user_id: targetId, business_type });
+        }
+        await supabaseAdmin.from('system_logs').insert({
+          user_id: user.id, event_type: 'business_type_changed',
+          description: `Tipo de negócio alterado para ${business_type}`,
+          metadata: { target_user_id: targetId, business_type },
+        });
+        return jsonResponse({ success: true });
+      }
+
       default:
         return jsonResponse({ error: 'Ação inválida' }, 400);
     }
