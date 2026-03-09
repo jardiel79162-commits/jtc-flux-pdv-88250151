@@ -591,65 +591,56 @@ const Auth = () => {
         })}
       </div>
 
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
         {/* Branding section */}
         <motion.div 
-          className="hidden lg:flex flex-col justify-center space-y-10 p-8"
+          className="hidden lg:flex flex-col justify-center space-y-8 p-6"
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <div className="space-y-8">
-            <div className="flex items-center gap-6">
+          <div className="space-y-6">
+            <div className="flex items-center gap-5">
               <motion.div 
                 className="relative group"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
               >
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/40 via-accent/20 to-primary/40 rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-700 animate-[pulse_4s_ease-in-out_infinite]" />
-                <div className="relative">
-                  <img src={logo} alt="JTC FluxPDV" className="relative w-28 h-28 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
-                  <motion.div 
-                    className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg shadow-accent/40"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-white" />
-                  </motion.div>
-                </div>
+                <div className="absolute -inset-5 bg-gradient-to-r from-[hsl(229,100%,55%/0.3)] via-[hsl(260,80%,55%/0.15)] to-[hsl(163,100%,44%/0.2)] rounded-3xl blur-3xl opacity-50 group-hover:opacity-70 transition-all duration-700" />
+                <img src={logo} alt="JTC FluxPDV" className="relative w-24 h-24 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10" style={{ pointerEvents: 'auto' }} />
               </motion.div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <h1 className="text-5xl xl:text-6xl font-black tracking-tight leading-none">
-                  <span className="bg-gradient-to-r from-white via-primary-foreground to-white/70 bg-clip-text text-transparent">JTC</span>
-                  <span className="bg-gradient-to-r from-primary via-[hsl(229,100%,72%)] to-accent bg-clip-text text-transparent"> FluxPDV</span>
+                  <span className="text-white/90">JTC</span>
+                  <span className="bg-gradient-to-r from-[hsl(229,100%,65%)] via-[hsl(260,80%,65%)] to-[hsl(163,100%,50%)] bg-clip-text text-transparent"> FluxPDV</span>
                 </h1>
-                <p className="text-base text-[#6b7394] font-light max-w-xs tracking-wide">
-                  O sistema de gestão que sua loja merece
+                <p className="text-[#5a6480] font-light text-sm tracking-wide">
+                  Sistema completo de gestão para sua loja
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {[
-              { icon: ShoppingCart, title: "PDV Rápido e Intuitivo", desc: "Vendas em segundos com interface simplificada", color: "from-primary/20 to-primary/5", iconBg: "from-primary to-[hsl(229,100%,72%)]", borderColor: "border-primary/10" },
-              { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", color: "from-accent/15 to-accent/5", iconBg: "from-accent to-accent/70", borderColor: "border-accent/10" },
-              { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", color: "from-[hsl(260,80%,60%)]/15 to-[hsl(260,80%,60%)]/5", iconBg: "from-[hsl(260,80%,60%)] to-[hsl(260,80%,70%)]", borderColor: "border-[hsl(260,80%,60%)]/10" },
+              { icon: ShoppingCart, title: "PDV Rápido e Intuitivo", desc: "Vendas em segundos com interface simplificada", gradient: "from-[hsl(229,100%,55%)] to-[hsl(229,100%,70%)]", bg: "from-[hsl(229,100%,55%/0.08)] to-transparent", border: "border-[hsl(229,100%,55%/0.1)]" },
+              { icon: Package, title: "Controle de Estoque", desc: "Gerencie produtos e fornecedores facilmente", gradient: "from-[hsl(163,100%,44%)] to-[hsl(163,100%,55%)]", bg: "from-[hsl(163,100%,44%/0.06)] to-transparent", border: "border-[hsl(163,100%,44%/0.08)]" },
+              { icon: TrendingUp, title: "Relatórios Inteligentes", desc: "Métricas e insights para seu negócio crescer", gradient: "from-[hsl(260,80%,60%)] to-[hsl(260,80%,72%)]", bg: "from-[hsl(260,80%,60%/0.06)] to-transparent", border: "border-[hsl(260,80%,60%/0.08)]" },
             ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
-                className={`flex items-center gap-5 p-5 rounded-2xl bg-gradient-to-r ${item.color} backdrop-blur-xl border ${item.borderColor} transition-all duration-500 hover:border-white/15 hover:scale-[1.02] group cursor-pointer`}
+                transition={{ delay: 0.5 + i * 0.12, duration: 0.5 }}
+                className={`flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r ${item.bg} border ${item.border} transition-all duration-500 hover:border-white/10 group cursor-default`}
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.iconBg} flex items-center justify-center shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
-                  <item.icon className="w-6 h-6 text-white" />
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                  <item.icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#e0e6ff]">{item.title}</h3>
-                  <p className="text-[#6b7394] text-sm">{item.desc}</p>
+                  <h3 className="font-bold text-sm text-[#d0d8f0]">{item.title}</h3>
+                  <p className="text-[#5a6480] text-xs">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -659,19 +650,19 @@ const Auth = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.5 }}
-            className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-accent/10 to-transparent border border-accent/15 backdrop-blur-sm"
+            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-[hsl(163,100%,44%/0.06)] to-transparent border border-[hsl(163,100%,44%/0.1)]"
           >
             <motion.div 
-              className="w-11 h-11 rounded-xl bg-accent/15 flex items-center justify-center"
+              className="w-10 h-10 rounded-xl bg-[hsl(163,100%,44%/0.1)] flex items-center justify-center"
               animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+              transition={{ duration: 4, repeat: Infinity, delay: 1 }}
             >
-              <Gift className="w-5 h-5 text-accent" />
+              <Gift className="w-4.5 h-4.5 text-[hsl(163,100%,50%)]" />
             </motion.div>
             <div>
-              <p className="font-bold text-sm text-[#e0e6ff]">Programa de Indicação</p>
-              <p className="text-sm text-[#6b7394]">
-                Convide amigos e ganhe <span className="text-accent font-bold">1 mês grátis</span>!
+              <p className="font-bold text-xs text-[#d0d8f0]">Programa de Indicação</p>
+              <p className="text-xs text-[#5a6480]">
+                Convide amigos e ganhe <span className="text-[hsl(163,100%,50%)] font-bold">1 mês grátis</span>!
               </p>
             </div>
           </motion.div>
