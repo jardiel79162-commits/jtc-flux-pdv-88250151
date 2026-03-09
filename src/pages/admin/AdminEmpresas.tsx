@@ -55,6 +55,8 @@ export default function AdminEmpresas() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [unblockCheck, setUnblockCheck] = useState<{ canUnblock: boolean; reusedField: string } | null>(null);
+  const [unblockLoading, setUnblockLoading] = useState(false);
 
   // Detail panel
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -94,6 +96,7 @@ export default function AdminEmpresas() {
 
   const loadDetail = async (user: UserProfile) => {
     setSelectedUser(user);
+    setUnblockCheck(null);
     setDetailLoading(true);
     try {
       const data = await adminApi("get_user_detail", { user_id: user.user_id });
@@ -275,9 +278,30 @@ export default function AdminEmpresas() {
                   <Button size="sm" variant="outline" onClick={() => openEdit(selectedUser)}><Edit className="w-3 h-3 mr-1" />Editar</Button>
                   <Button size="sm" variant="outline" onClick={() => { setPasswordDialog(selectedUser); setNewPassword(""); }}><KeyRound className="w-3 h-3 mr-1" />Senha</Button>
                   {selectedUser.is_blocked ? (
-                    <Button size="sm" variant="outline" className="text-green-600 border-green-600/30" onClick={() => handleAction("unblock_user", selectedUser.user_id)} disabled={actionLoading === selectedUser.user_id}>
-                      <ShieldCheck className="w-3 h-3 mr-1" />Reativar
-                    </Button>
+                    unblockCheck === null ? (
+                      <Button size="sm" variant="outline" className="text-yellow-600 border-yellow-600/30" 
+                        disabled={unblockLoading}
+                        onClick={async () => {
+                          setUnblockLoading(true);
+                          try {
+                            const result = await adminApi("check_unblock", { user_id: selectedUser.user_id });
+                            setUnblockCheck({ canUnblock: result.can_unblock, reusedField: result.reused_field || '' });
+                          } catch { setUnblockCheck({ canUnblock: false, reusedField: 'Erro' }); }
+                          setUnblockLoading(false);
+                        }}>
+                        {unblockLoading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <ShieldCheck className="w-3 h-3 mr-1" />}
+                        Verificar Desbloqueio
+                      </Button>
+                    ) : unblockCheck.canUnblock ? (
+                      <Button size="sm" variant="outline" className="text-green-600 border-green-600/30" onClick={() => { handleAction("unblock_user", selectedUser.user_id); setUnblockCheck(null); }} disabled={actionLoading === selectedUser.user_id}>
+                        <ShieldCheck className="w-3 h-3 mr-1" />Desbloquear
+                      </Button>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
+                        <ShieldOff className="w-3 h-3" />
+                        Irreversível — {unblockCheck.reusedField} já reutilizado
+                      </div>
+                    )
                   ) : (
                     <Button size="sm" variant="outline" className="text-orange-600 border-orange-600/30" onClick={() => handleAction("block_user", selectedUser.user_id)} disabled={actionLoading === selectedUser.user_id || selectedUser.is_system_admin}>
                       <ShieldOff className="w-3 h-3 mr-1" />Suspender

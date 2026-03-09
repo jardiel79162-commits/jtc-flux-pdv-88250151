@@ -1052,6 +1052,123 @@ const Auth = () => {
                     <div className="text-center mb-5">
                       <h3 className="font-bold text-xl text-[#e0e6ff]">Dados Pessoais</h3>
                       <p className="text-sm text-[#5a6180] mt-1">Informe seu nome e documento</p>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="mt-1 gap-1 text-[#4a5478] hover:text-[hsl(229,100%,70%)] text-[11px] h-7 px-2">
+                            <HelpCircle className="w-3 h-3" />
+                            Como criar conta?
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-lg font-bold">
+                              {docType === "cpf" ? "📋 Como criar conta com CPF" : "🏢 Como criar conta com CNPJ"}
+                            </DialogTitle>
+                          </DialogHeader>
+                          {docType === "cpf" ? (
+                            <div className="space-y-4 text-sm">
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 1 — Dados Pessoais</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Digite seu <strong>nome completo</strong></li>
+                                  <li>Selecione <strong>CPF</strong> como tipo de cadastro</li>
+                                  <li>Digite seu CPF (o sistema verifica automaticamente se está disponível)</li>
+                                  <li>Selecione seu <strong>sexo</strong> (Masculino ou Feminino)</li>
+                                  <li>Clique em <strong>Próximo</strong></li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 2 — Contato & Senha</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Digite seu <strong>e-mail</strong> (apenas Gmail ou Outlook)</li>
+                                  <li>Digite seu <strong>telefone</strong> com DDD</li>
+                                  <li>Crie uma <strong>senha</strong> com no mínimo 6 caracteres</li>
+                                  <li>Confirme a senha</li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 3 — Endereço</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Digite o <strong>CEP</strong> (preenche cidade/estado automaticamente)</li>
+                                  <li>Complete rua, número e bairro</li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 4 — Código de Convite</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Se tiver um código, digite-o para ganhar benefícios</li>
+                                  <li>Caso não tenha, selecione <strong>"Não tenho"</strong></li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 5 — Verificação</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Resolva o <strong>CAPTCHA</strong> para confirmar que você é humano</li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 6 — Finalização</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Confirme seu e-mail clicando no link enviado</li>
+                                  <li>Pronto! Sua conta está criada 🎉</li>
+                                </ol>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-4 text-sm">
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 1 — Dados da Empresa</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Selecione <strong>CNPJ</strong> como tipo de cadastro</li>
+                                  <li>Digite o CNPJ da empresa (14 dígitos)</li>
+                                  <li>O sistema busca automaticamente o <strong>nome fantasia</strong> da empresa via consulta pública</li>
+                                  <li>Caso queira, ajuste o nome manualmente</li>
+                                  <li>Clique em <strong>Próximo</strong></li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 2 — Contato & Senha</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Digite o <strong>e-mail da empresa</strong> (apenas Gmail ou Outlook)</li>
+                                  <li>Digite o <strong>telefone</strong> com DDD</li>
+                                  <li>Crie uma <strong>senha</strong> com no mínimo 6 caracteres</li>
+                                  <li>Confirme a senha</li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 3 — Endereço</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Digite o <strong>CEP</strong> do estabelecimento</li>
+                                  <li>Complete rua, número e bairro</li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 4 — Código de Convite</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Se tiver um código, digite-o para ganhar benefícios</li>
+                                  <li>Caso não tenha, selecione <strong>"Não tenho"</strong></li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 5 — Verificação</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Resolva o <strong>CAPTCHA</strong> para confirmar</li>
+                                </ol>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-primary">Etapa 6 — Finalização</p>
+                                <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                                  <li>Confirme o e-mail clicando no link enviado</li>
+                                  <li>Pronto! Sua empresa está cadastrada 🎉</li>
+                                </ol>
+                              </div>
+                              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                                <p className="text-xs text-primary font-medium">💡 Dica: Ao digitar o CNPJ, o nome da empresa é preenchido automaticamente pela consulta à base pública da Receita Federal.</p>
+                              </div>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
                     </div>
 
                     <div className="space-y-3">
