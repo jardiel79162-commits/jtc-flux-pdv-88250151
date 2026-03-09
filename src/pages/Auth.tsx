@@ -344,6 +344,11 @@ const Auth = () => {
     } else {
       if (!isValidCNPJ(docValue)) { setAuthError("CNPJ inválido. Verifique os números digitados."); return false; }
     }
+    setAuthError(null);
+    return true;
+  };
+
+  const validateStep2 = () => {
     if (!formData.email.includes("@")) { setAuthError("E-mail inválido. Digite um e-mail válido."); return false; }
     if (!isValidEmailProvider(formData.email)) { setAuthError("Só aceitamos e-mails @gmail.com ou @outlook.com."); return false; }
     const phoneValue = formData.phone.replace(/\D/g, "");
@@ -354,7 +359,7 @@ const Auth = () => {
     return true;
   };
 
-  const validateStep2 = () => {
+  const validateStep3 = () => {
     const cepValue = formData.cep.replace(/\D/g, "");
     if (cepValue.length !== 8) { setAuthError("CEP inválido. Digite um CEP com 8 dígitos."); return false; }
     if (!addressData.street.trim()) { setAuthError("Rua é obrigatória."); return false; }
@@ -370,8 +375,8 @@ const Auth = () => {
     setAuthError(null);
     if (registerStep === 1 && validateStep1()) setRegisterStep(2);
     else if (registerStep === 2 && validateStep2()) setRegisterStep(3);
-    else if (registerStep === 3) {
-      // Validate invite code if needed, then go to CAPTCHA step
+    else if (registerStep === 3 && validateStep3()) setRegisterStep(4);
+    else if (registerStep === 4) {
       if (hasInviteCode === null) {
         setAuthError("Selecione se possui código de convite.");
         return;
@@ -381,7 +386,7 @@ const Auth = () => {
         return;
       }
       setCaptchaVerified(false);
-      setRegisterStep(4);
+      setRegisterStep(5);
     }
   };
 
