@@ -72,14 +72,12 @@ export default function PublicCatalog() {
   const [pixCopied, setPixCopied] = useState(false);
 
   const [checkout, setCheckout] = useState({
-    cpf: "",
     name: "",
     phone: "",
     address: "",
     payment_method: "",
     notes: "",
   });
-  const [cpfLoading, setCpfLoading] = useState(false);
 
   const isDelivery = store?.business_type === "delivery";
 
@@ -262,7 +260,7 @@ export default function PublicCatalog() {
             </div>
           )}
 
-          <Button onClick={() => { setOrderSent(false); setCheckoutOpen(false); setCheckout({ cpf: "", name: "", phone: "", address: "", payment_method: "", notes: "" }); }} className="w-full" style={{ backgroundColor: accentColor }}>
+          <Button onClick={() => { setOrderSent(false); setCheckoutOpen(false); setCheckout({ name: "", phone: "", address: "", payment_method: "", notes: "" }); }} className="w-full" style={{ backgroundColor: accentColor }}>
             Fazer Novo Pedido
           </Button>
         </div>
@@ -454,35 +452,6 @@ export default function PublicCatalog() {
               <div className="space-y-3">
                 <p className="font-semibold text-sm">Dados para entrega</p>
                 <div className="space-y-2">
-                  <div className="relative">
-                    <Input
-                      placeholder="CPF (opcional - preenche nome automático)"
-                      value={checkout.cpf}
-                      onChange={async (e) => {
-                        const cpf = e.target.value.replace(/\D/g, "").slice(0, 11);
-                        const formatted = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                        setCheckout((prev) => ({ ...prev, cpf: formatted }));
-                        if (cpf.length === 11 && store?.user_id) {
-                          setCpfLoading(true);
-                          try {
-                            const { data } = await supabase.functions.invoke("public-catalog", {
-                              body: { action: "lookup_cpf", cpf, store_user_id: store.user_id },
-                            });
-                            if (data?.name) {
-                              setCheckout((prev) => ({
-                                ...prev,
-                                name: data.name,
-                                phone: data.phone || prev.phone,
-                                address: data.address || prev.address,
-                              }));
-                            }
-                          } catch {}
-                          setCpfLoading(false);
-                        }
-                      }}
-                    />
-                    {cpfLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-gray-400" />}
-                  </div>
                   <Input placeholder="Seu nome *" value={checkout.name} onChange={(e) => setCheckout({ ...checkout, name: e.target.value })} />
                   <Input placeholder="Seu telefone *" value={checkout.phone} onChange={(e) => setCheckout({ ...checkout, phone: e.target.value })} />
                   <Input placeholder="Endereço completo *" value={checkout.address} onChange={(e) => setCheckout({ ...checkout, address: e.target.value })} />
