@@ -510,6 +510,7 @@ const Auth = () => {
         password: formData.password,
         gender: gender || undefined,
         referredByCode: hasInviteCode && codeValidationStatus === "valid" ? inviteCode : undefined,
+        businessType: businessType,
       };
 
       await signUp(data);
