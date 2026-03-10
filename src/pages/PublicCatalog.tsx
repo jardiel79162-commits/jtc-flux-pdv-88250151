@@ -68,6 +68,7 @@ export default function PublicCatalog() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
+  const [lastOrderNumber, setLastOrderNumber] = useState<number | null>(null);
   const [sendingOrder, setSendingOrder] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
 
