@@ -171,6 +171,7 @@ export default function PublicCatalog() {
 
       if (error || data?.error) throw new Error(data?.error || "Erro ao enviar pedido");
 
+      setLastOrderNumber(data?.order_number || null);
       setOrderSent(true);
       setCart([]);
     } catch (err: any) {
