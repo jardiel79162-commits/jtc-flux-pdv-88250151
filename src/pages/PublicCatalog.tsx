@@ -72,12 +72,14 @@ export default function PublicCatalog() {
   const [pixCopied, setPixCopied] = useState(false);
 
   const [checkout, setCheckout] = useState({
+    cpf: "",
     name: "",
     phone: "",
     address: "",
     payment_method: "",
     notes: "",
   });
+  const [cpfLoading, setCpfLoading] = useState(false);
 
   const isDelivery = store?.business_type === "delivery";
 
