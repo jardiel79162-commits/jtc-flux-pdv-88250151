@@ -42,6 +42,7 @@ import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminShortcuts from "./pages/admin/AdminShortcuts";
 import AdminPlans from "./pages/admin/AdminPlans";
 import DeliveryOrders from "./pages/DeliveryOrders";
+import DeliveryPaymentSettings from "./pages/DeliveryPaymentSettings";
 import NotFound from "./pages/NotFound";
 import PublicCatalog from "./pages/PublicCatalog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -112,6 +113,7 @@ const App = () => {
               <Route path="/auri" element={<Auri />} />
               <Route path="/manuais" element={<Manuals />} />
               <Route path="/pedidos" element={<DeliveryOrders />} />
+              <Route path="/pagamentos-delivery" element={<DeliveryPaymentSettings />} />
               <Route path="/caixa-de-mensagem" element={<Inbox />} />
             </Route>
 

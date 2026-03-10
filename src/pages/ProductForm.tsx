@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
+import { useBusinessType } from "@/hooks/useBusinessType";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera } from "lucide-react";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { ImageUpload } from "@/components/ImageUpload";
+import { ProductVariantsEditor, type ProductVariant } from "@/components/ProductVariantsEditor";
 
 interface Category {
   id: string;
@@ -29,12 +31,14 @@ const ProductForm = () => {
   const { id } = useParams();
   const isEditing = !!id;
   const { toast } = useToast();
+  const { isClothing } = useBusinessType();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
 
   const [form, setForm] = useState({
     name: "",
@@ -113,6 +117,24 @@ const ProductForm = () => {
         hasStock: product.product_type === "servico" ? (product.stock_quantity > 0) : true,
         hasBarcode: product.product_type === "servico" ? !!product.barcode : true,
       });
+
+      // Load variants for clothing mode
+      if (isClothing) {
+        const { data: variantsData } = await supabase
+          .from("product_variants")
+          .select("*")
+          .eq("product_id", id)
+          .eq("user_id", user.id);
+        if (variantsData) {
+          setVariants(variantsData.map((v: any) => ({
+            id: v.id,
+            size: v.size || "",
+            color: v.color || "",
+            stock_quantity: v.stock_quantity || 0,
+            sku: v.sku || "",
+          })));
+        }
+      }
     }
 
     setIsLoading(false);
@@ -175,6 +197,24 @@ const ProductForm = () => {
           image_url: form.photo_url,
           user_id: user.id,
         });
+      }
+
+      // Save variants for clothing mode
+      if (isClothing && productId) {
+        // Delete existing variants and re-insert
+        await supabase.from("product_variants").delete().eq("product_id", productId);
+        if (variants.length > 0) {
+          await supabase.from("product_variants").insert(
+            variants.map((v) => ({
+              product_id: productId!,
+              user_id: user.id,
+              size: v.size || null,
+              color: v.color || null,
+              stock_quantity: v.stock_quantity || 0,
+              sku: v.sku || null,
+            }))
+          );
+        }
       }
 
       clearPersisted();
@@ -314,6 +354,11 @@ const ProductForm = () => {
           onImageUploaded={(url, imageCode) => setForm({ ...form, photo_url: url, photo_image_code: imageCode || "" })}
           label="Foto do Produto (opcional)"
         />
+
+        {/* Variants editor for clothing mode */}
+        {isClothing && (
+          <ProductVariantsEditor variants={variants} onChange={setVariants} />
+        )}
 
         <div className="flex items-center space-x-2">
           <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
