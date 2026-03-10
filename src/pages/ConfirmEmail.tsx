@@ -75,6 +75,16 @@ const ConfirmEmail = () => {
             throw verifyError;
           }
 
+          // Save business_type to store_settings from user metadata
+          const { data: { session: otpSession } } = await supabase.auth.getSession();
+          if (otpSession?.user) {
+            const bt = otpSession.user.user_metadata?.business_type || 'comercio';
+            await supabase.from("store_settings").upsert({
+              user_id: otpSession.user.id,
+              business_type: bt,
+            }, { onConflict: "user_id" });
+          }
+
           setStatus("success");
         } catch (err: any) {
           setStatus("error");
