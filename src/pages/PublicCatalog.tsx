@@ -68,6 +68,7 @@ export default function PublicCatalog() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
+  const [lastOrderNumber, setLastOrderNumber] = useState<number | null>(null);
   const [sendingOrder, setSendingOrder] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
 
@@ -170,6 +171,7 @@ export default function PublicCatalog() {
 
       if (error || data?.error) throw new Error(data?.error || "Erro ao enviar pedido");
 
+      setLastOrderNumber(data?.order_number || null);
       setOrderSent(true);
       setCart([]);
     } catch (err: any) {
@@ -243,7 +245,23 @@ export default function PublicCatalog() {
         <div className="text-center max-w-sm space-y-4">
           <CheckCircle className="w-20 h-20 mx-auto" style={{ color: accentColor }} />
           <h1 className="text-2xl font-bold text-gray-900">Pedido Enviado!</h1>
+          {lastOrderNumber && (
+            <p className="text-lg font-semibold" style={{ color: accentColor }}>
+              Pedido #{lastOrderNumber}
+            </p>
+          )}
           <p className="text-gray-600">Seu pedido foi recebido pela loja. Você receberá atualizações pelo telefone informado.</p>
+
+          {lastOrderNumber && (
+            <a
+              href={`/rastrear/${slug}?pedido=${lastOrderNumber}`}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-colors"
+              style={{ backgroundColor: accentColor }}
+            >
+              <Package className="w-4 h-4" />
+              Acompanhar Pedido
+            </a>
+          )}
 
           {checkout.payment_method === "pix" && paymentSettings?.pix_key && (
             <div className="bg-white rounded-xl p-4 border space-y-2 text-left">
@@ -260,7 +278,7 @@ export default function PublicCatalog() {
             </div>
           )}
 
-          <Button onClick={() => { setOrderSent(false); setCheckoutOpen(false); setCheckout({ name: "", phone: "", address: "", payment_method: "", notes: "" }); }} className="w-full" style={{ backgroundColor: accentColor }}>
+          <Button onClick={() => { setOrderSent(false); setCheckoutOpen(false); setLastOrderNumber(null); setCheckout({ name: "", phone: "", address: "", payment_method: "", notes: "" }); }} className="w-full" style={{ backgroundColor: accentColor }}>
             Fazer Novo Pedido
           </Button>
         </div>

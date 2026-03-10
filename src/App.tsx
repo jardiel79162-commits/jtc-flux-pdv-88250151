@@ -45,6 +45,7 @@ import DeliveryOrders from "./pages/DeliveryOrders";
 import DeliveryPaymentSettings from "./pages/DeliveryPaymentSettings";
 import NotFound from "./pages/NotFound";
 import PublicCatalog from "./pages/PublicCatalog";
+import OrderTracking from "./pages/OrderTracking";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import About from "./pages/About";
@@ -119,6 +120,8 @@ const App = () => {
 
             <Route path="/catalogo/:slug" element={<PublicCatalog />} />
             <Route path="/loja/:slug" element={<PublicCatalog />} />
+            <Route path="/rastrear/:slug" element={<OrderTracking />} />
+            <Route path="/rastrear" element={<OrderTracking />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

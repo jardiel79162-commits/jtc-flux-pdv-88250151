@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield, Sparkles, Lock, Truck } from "lucide-react";
+import { Mail, Gift, Eye, EyeOff, Loader2, CheckCircle2, XCircle, AlertTriangle, ChevronRight, ChevronLeft, HelpCircle, ExternalLink, ShoppingCart, Package, TrendingUp, Check, MapPin, Ticket, User, Info, Shield, Lock, Truck } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { signIn, signUp, type SignUpData, validateInviteCode } from "@/lib/auth";
 import { isValidCPF, isValidCNPJ } from "@/lib/cpfValidator";
@@ -510,6 +510,7 @@ const Auth = () => {
         password: formData.password,
         gender: gender || undefined,
         referredByCode: hasInviteCode && codeValidationStatus === "valid" ? inviteCode : undefined,
+        businessType: businessType,
       };
 
       await signUp(data);
@@ -542,20 +543,9 @@ const Auth = () => {
       clearFormPersist();
       clearAddressPersist();
 
-      // Auto-confirm está ativado, então fazemos login automático
-      await signIn(data.email, data.password);
-      
-      // Save business_type to store_settings
-      const { data: { session: newSess } } = await supabase.auth.getSession();
-      if (newSess) {
-        await supabase.from("store_settings").upsert({
-          user_id: newSess.user.id,
-          business_type: businessType,
-        }, { onConflict: "user_id" });
-      }
-      
-      toast({ title: "Conta criada!", description: "Bem-vindo ao JTC FluxPDV!" });
-      navigate("/dashboard");
+      // Go to email verification step
+      setAccountCreated(true);
+      setRegisterStep(7);
 
     } catch (error: any) {
       const errorMsg = (error.message || "").toLowerCase();
@@ -1032,26 +1022,30 @@ const Auth = () => {
               <TabsContent value="register" className="space-y-5">
                 <div className="flex justify-center items-center gap-1 mb-8 py-3 px-2">
                   <StepIndicator step={1} label="Dados" icon={User} />
-                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                  <div className="flex-1 h-0.5 rounded-full max-w-4 overflow-hidden bg-white/[0.04]">
                     <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 1 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={2} label="Contato" icon={Mail} />
-                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                  <div className="flex-1 h-0.5 rounded-full max-w-4 overflow-hidden bg-white/[0.04]">
                     <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 2 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
                   <StepIndicator step={3} label="Endereço" icon={MapPin} />
-                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                  <div className="flex-1 h-0.5 rounded-full max-w-4 overflow-hidden bg-white/[0.04]">
                     <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 3 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
-                  <StepIndicator step={4} label="Código" icon={Ticket} />
-                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                  <StepIndicator step={4} label="Negócio" icon={Truck} />
+                  <div className="flex-1 h-0.5 rounded-full max-w-4 overflow-hidden bg-white/[0.04]">
                     <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 4 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
-                  <StepIndicator step={5} label="Captcha" icon={Shield} />
-                  <div className="flex-1 h-0.5 rounded-full max-w-5 overflow-hidden bg-white/[0.04]">
+                  <StepIndicator step={5} label="Código" icon={Ticket} />
+                  <div className="flex-1 h-0.5 rounded-full max-w-4 overflow-hidden bg-white/[0.04]">
                     <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 5 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
                   </div>
-                  <StepIndicator step={6} label="Fim" icon={Sparkles} />
+                  <StepIndicator step={6} label="Captcha" icon={Shield} />
+                  <div className="flex-1 h-0.5 rounded-full max-w-4 overflow-hidden bg-white/[0.04]">
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60" initial={false} animate={{ scaleX: registerStep > 6 ? 1 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }} style={{ transformOrigin: "left" }} />
+                  </div>
+                  <StepIndicator step={7} label="Verificar" icon={Lock} />
                 </div>
 
                 {/* Step 1 */}
@@ -1882,6 +1876,8 @@ const Auth = () => {
                         try {
                           const { data: { session } } = await supabase.auth.getSession();
                           if (session?.user?.email_confirmed_at) {
+                            // Save business_type
+                            await supabase.from("store_settings").upsert({ user_id: session.user.id, business_type: businessType }, { onConflict: "user_id" });
                             toast({ title: "E-mail confirmado!", description: "Redirecionando para o dashboard..." });
                             navigate("/dashboard");
                             return;
@@ -1892,6 +1888,8 @@ const Auth = () => {
                             password: formData.password,
                           });
                           if (!error && data?.user?.email_confirmed_at) {
+                            // Save business_type
+                            await supabase.from("store_settings").upsert({ user_id: data.user.id, business_type: businessType }, { onConflict: "user_id" });
                             toast({ title: "E-mail confirmado!", description: "Redirecionando para o dashboard..." });
                             navigate("/dashboard");
                           } else {
