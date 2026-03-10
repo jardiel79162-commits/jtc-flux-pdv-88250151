@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
+import { useBusinessType } from "@/hooks/useBusinessType";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera } from "lucide-react";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { ImageUpload } from "@/components/ImageUpload";
+import { ProductVariantsEditor, type ProductVariant } from "@/components/ProductVariantsEditor";
 
 interface Category {
   id: string;
