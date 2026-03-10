@@ -45,6 +45,7 @@ import DeliveryOrders from "./pages/DeliveryOrders";
 import DeliveryPaymentSettings from "./pages/DeliveryPaymentSettings";
 import NotFound from "./pages/NotFound";
 import PublicCatalog from "./pages/PublicCatalog";
+import OrderTracking from "./pages/OrderTracking";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import About from "./pages/About";
