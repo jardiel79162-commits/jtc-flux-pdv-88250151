@@ -31,6 +31,7 @@ const ProductForm = () => {
   const { id } = useParams();
   const isEditing = !!id;
   const { toast } = useToast();
+  const { isClothing } = useBusinessType();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
