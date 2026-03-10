@@ -281,6 +281,7 @@ const DashboardLayoutInner = () => {
         { icon: ClipboardList, label: "Pedidos", path: "/pedidos" },
         { icon: Package, label: "Produtos", path: "/produtos" },
         { icon: Globe, label: "Catálogo", path: "/catalogo-link" },
+        { icon: CreditCard, label: "Pagamentos", path: "/pagamentos-delivery" },
         { icon: Users, label: "Clientes", path: "/clientes" },
         { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
       );
