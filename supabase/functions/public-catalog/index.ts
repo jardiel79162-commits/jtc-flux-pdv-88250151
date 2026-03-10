@@ -20,6 +20,44 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Handle CPF lookup - find customer by CPF in the store's customers
+    if (action === "lookup_cpf") {
+      const { cpf, store_user_id } = body;
+      if (!cpf || !store_user_id) {
+        return new Response(JSON.stringify({ error: "CPF e store_user_id obrigatórios" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const cleanCpf = cpf.replace(/\D/g, '');
+      const { data: customer } = await supabaseAdmin
+        .from('customers')
+        .select('name, phone, address')
+        .eq('user_id', store_user_id)
+        .eq('cpf', cleanCpf)
+        .maybeSingle();
+
+      if (customer) {
+        return new Response(JSON.stringify({ name: customer.name, phone: customer.phone, address: customer.address }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Also try formatted CPF
+      const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      const { data: customer2 } = await supabaseAdmin
+        .from('customers')
+        .select('name, phone, address')
+        .eq('user_id', store_user_id)
+        .eq('cpf', formattedCpf)
+        .maybeSingle();
+
+      return new Response(JSON.stringify(customer2 ? { name: customer2.name, phone: customer2.phone, address: customer2.address } : {}), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Handle order creation
     if (action === "create_order") {
       const { store_user_id, customer_name, customer_phone, customer_address, payment_method, notes, items, total_amount } = body;
