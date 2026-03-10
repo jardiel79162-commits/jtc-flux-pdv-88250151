@@ -38,6 +38,7 @@ const ProductForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
 
   const [form, setForm] = useState({
     name: "",
