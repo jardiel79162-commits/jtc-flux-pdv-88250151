@@ -120,6 +120,8 @@ const App = () => {
 
             <Route path="/catalogo/:slug" element={<PublicCatalog />} />
             <Route path="/loja/:slug" element={<PublicCatalog />} />
+            <Route path="/rastrear/:slug" element={<OrderTracking />} />
+            <Route path="/rastrear" element={<OrderTracking />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
