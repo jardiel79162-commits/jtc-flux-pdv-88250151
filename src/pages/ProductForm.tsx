@@ -199,6 +199,24 @@ const ProductForm = () => {
         });
       }
 
+      // Save variants for clothing mode
+      if (isClothing && productId) {
+        // Delete existing variants and re-insert
+        await supabase.from("product_variants").delete().eq("product_id", productId);
+        if (variants.length > 0) {
+          await supabase.from("product_variants").insert(
+            variants.map((v) => ({
+              product_id: productId!,
+              user_id: user.id,
+              size: v.size || null,
+              color: v.color || null,
+              stock_quantity: v.stock_quantity || 0,
+              sku: v.sku || null,
+            }))
+          );
+        }
+      }
+
       clearPersisted();
       navigate("/produtos");
     } finally {
