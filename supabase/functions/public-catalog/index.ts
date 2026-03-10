@@ -20,6 +20,73 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Track order by order number
+    if (action === "track_order") {
+      const { order_number } = body;
+      if (!order_number) {
+        return new Response(JSON.stringify({ error: "Número do pedido obrigatório" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      let orderQuery = supabaseAdmin
+        .from('delivery_orders')
+        .select('id, order_number, customer_name, customer_phone, customer_address, payment_method, status, total_amount, notes, created_at, store_user_id');
+
+      if (store_slug) {
+        // First get store user_id from slug
+        const { data: storeData } = await supabaseAdmin
+          .from('store_settings')
+          .select('user_id')
+          .eq('store_slug', store_slug)
+          .maybeSingle();
+        if (storeData) {
+          orderQuery = orderQuery.eq('store_user_id', storeData.user_id);
+        }
+      }
+
+      const { data: orderData, error: orderErr } = await orderQuery
+        .eq('order_number', order_number)
+        .maybeSingle();
+
+      if (orderErr || !orderData) {
+        return new Response(JSON.stringify({ error: "Pedido não encontrado" }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Get order items
+      const { data: items } = await supabaseAdmin
+        .from('delivery_order_items')
+        .select('product_name, quantity, unit_price')
+        .eq('order_id', orderData.id);
+
+      // Get store name
+      const { data: storeInfo } = await supabaseAdmin
+        .from('store_settings')
+        .select('store_name')
+        .eq('user_id', orderData.store_user_id)
+        .maybeSingle();
+
+      return new Response(JSON.stringify({
+        order_number: orderData.order_number,
+        customer_name: orderData.customer_name,
+        customer_phone: orderData.customer_phone,
+        customer_address: orderData.customer_address,
+        payment_method: orderData.payment_method,
+        status: orderData.status,
+        total_amount: orderData.total_amount,
+        notes: orderData.notes,
+        created_at: orderData.created_at,
+        store_name: storeInfo?.store_name || null,
+        items: items || [],
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // CPF lookup removed
 
     // Handle order creation
