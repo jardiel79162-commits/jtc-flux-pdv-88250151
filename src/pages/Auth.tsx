@@ -542,20 +542,9 @@ const Auth = () => {
       clearFormPersist();
       clearAddressPersist();
 
-      // Auto-confirm está ativado, então fazemos login automático
-      await signIn(data.email, data.password);
-      
-      // Save business_type to store_settings
-      const { data: { session: newSess } } = await supabase.auth.getSession();
-      if (newSess) {
-        await supabase.from("store_settings").upsert({
-          user_id: newSess.user.id,
-          business_type: businessType,
-        }, { onConflict: "user_id" });
-      }
-      
-      toast({ title: "Conta criada!", description: "Bem-vindo ao JTC FluxPDV!" });
-      navigate("/dashboard");
+      // Go to email verification step
+      setAccountCreated(true);
+      setRegisterStep(7);
 
     } catch (error: any) {
       const errorMsg = (error.message || "").toLowerCase();
