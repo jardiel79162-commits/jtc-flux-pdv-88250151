@@ -117,6 +117,24 @@ const ProductForm = () => {
         hasStock: product.product_type === "servico" ? (product.stock_quantity > 0) : true,
         hasBarcode: product.product_type === "servico" ? !!product.barcode : true,
       });
+
+      // Load variants for clothing mode
+      if (isClothing) {
+        const { data: variantsData } = await supabase
+          .from("product_variants")
+          .select("*")
+          .eq("product_id", id)
+          .eq("user_id", user.id);
+        if (variantsData) {
+          setVariants(variantsData.map((v: any) => ({
+            id: v.id,
+            size: v.size || "",
+            color: v.color || "",
+            stock_quantity: v.stock_quantity || 0,
+            sku: v.sku || "",
+          })));
+        }
+      }
     }
 
     setIsLoading(false);
