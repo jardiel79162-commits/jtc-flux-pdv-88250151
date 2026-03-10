@@ -14,6 +14,7 @@ export interface SignUpData {
   state: string;
   gender?: string;
   referredByCode?: string;
+  businessType?: string;
 }
 
 export const signUp = async (data: SignUpData) => {
