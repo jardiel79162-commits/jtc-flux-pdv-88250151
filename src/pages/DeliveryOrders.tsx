@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ClipboardList, Loader2, Phone, MapPin, Package, Clock } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ClipboardList, Loader2, Phone, MapPin, Package, Clock, Bell, BellOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import PageLoader from "@/components/PageLoader";
@@ -38,12 +40,40 @@ const PAYMENT_LABELS: Record<string, string> = {
   mercado_pago: "Mercado Pago",
 };
 
+// Simple notification sound using Web Audio API
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const playTone = (freq: number, start: number, duration: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + start + duration);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + duration);
+    };
+    // Play a pleasant 3-note chime
+    playTone(880, 0, 0.15);
+    playTone(1100, 0.15, 0.15);
+    playTone(1320, 0.3, 0.3);
+  } catch {
+    // Audio not available
+  }
+}
+
 export default function DeliveryOrders() {
   const [orders, setOrders] = useState<DeliveryOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const { toast } = useToast();
   const { getEffectiveUserId } = usePermissions();
+  const knownOrderIds = useRef<Set<string>>(new Set());
+  const initialLoadDone = useRef(false);
 
   const loadOrders = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -64,32 +94,64 @@ export default function DeliveryOrders() {
     if (error) {
       console.error(error);
     } else {
-      setOrders((data as any[]) || []);
+      const newOrders = (data as any[]) || [];
+      
+      // Track known IDs on initial load
+      if (!initialLoadDone.current) {
+        newOrders.forEach((o) => knownOrderIds.current.add(o.id));
+        initialLoadDone.current = true;
+      }
+      
+      setOrders(newOrders);
     }
     setLoading(false);
   }, [getEffectiveUserId, statusFilter]);
 
   useEffect(() => { loadOrders(); }, [loadOrders]);
 
-  // Realtime
+  // Realtime with sound notification
   useEffect(() => {
+    let channel: any;
     const setupRealtime = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       const effectiveId = getEffectiveUserId() || session.user.id;
-      const channel = supabase
+      channel = supabase
         .channel("delivery-orders-rt")
         .on("postgres_changes", {
-          event: "*",
+          event: "INSERT",
+          schema: "public",
+          table: "delivery_orders",
+          filter: `store_user_id=eq.${effectiveId}`,
+        }, (payload: any) => {
+          const newOrder = payload.new;
+          if (newOrder && !knownOrderIds.current.has(newOrder.id)) {
+            knownOrderIds.current.add(newOrder.id);
+            
+            // Play sound
+            if (soundEnabled) {
+              playNotificationSound();
+            }
+            
+            // Show toast
+            toast({
+              title: `🔔 Novo Pedido #${newOrder.order_number}`,
+              description: `${newOrder.customer_name} — ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(newOrder.total_amount)}`,
+            });
+          }
+          loadOrders();
+        })
+        .on("postgres_changes", {
+          event: "UPDATE",
           schema: "public",
           table: "delivery_orders",
           filter: `store_user_id=eq.${effectiveId}`,
         }, () => { loadOrders(); })
         .subscribe();
-      return () => { supabase.removeChannel(channel); };
     };
     setupRealtime();
-  }, [loadOrders, getEffectiveUserId]);
+    return () => { if (channel) supabase.removeChannel(channel); };
+  }, [loadOrders, getEffectiveUserId, soundEnabled, toast]);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     const { error } = await supabase
@@ -125,19 +187,26 @@ export default function DeliveryOrders() {
               </h1>
               <p className="text-muted-foreground">Gerencie os pedidos do delivery</p>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="received">Recebidos</SelectItem>
-                <SelectItem value="preparing">Em Preparo</SelectItem>
-                <SelectItem value="delivering">Em Entrega</SelectItem>
-                <SelectItem value="delivered">Entregues</SelectItem>
-                <SelectItem value="cancelled">Cancelados</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {soundEnabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />}
+                <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
+                <Label className="text-xs text-muted-foreground">Som</Label>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="received">Recebidos</SelectItem>
+                  <SelectItem value="preparing">Em Preparo</SelectItem>
+                  <SelectItem value="delivering">Em Entrega</SelectItem>
+                  <SelectItem value="delivered">Entregues</SelectItem>
+                  <SelectItem value="cancelled">Cancelados</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {orders.length === 0 ? (
