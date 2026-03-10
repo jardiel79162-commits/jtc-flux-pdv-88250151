@@ -260,7 +260,7 @@ export default function PublicCatalog() {
             </div>
           )}
 
-          <Button onClick={() => { setOrderSent(false); setCheckoutOpen(false); setCheckout({ cpf: "", name: "", phone: "", address: "", payment_method: "", notes: "" }); }} className="w-full" style={{ backgroundColor: accentColor }}>
+          <Button onClick={() => { setOrderSent(false); setCheckoutOpen(false); setCheckout({ name: "", phone: "", address: "", payment_method: "", notes: "" }); }} className="w-full" style={{ backgroundColor: accentColor }}>
             Fazer Novo Pedido
           </Button>
         </div>
