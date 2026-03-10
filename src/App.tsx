@@ -113,6 +113,7 @@ const App = () => {
               <Route path="/auri" element={<Auri />} />
               <Route path="/manuais" element={<Manuals />} />
               <Route path="/pedidos" element={<DeliveryOrders />} />
+              <Route path="/pagamentos-delivery" element={<DeliveryPaymentSettings />} />
               <Route path="/caixa-de-mensagem" element={<Inbox />} />
             </Route>
 

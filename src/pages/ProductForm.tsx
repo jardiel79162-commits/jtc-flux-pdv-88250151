@@ -355,6 +355,11 @@ const ProductForm = () => {
           label="Foto do Produto (opcional)"
         />
 
+        {/* Variants editor for clothing mode */}
+        {isClothing && (
+          <ProductVariantsEditor variants={variants} onChange={setVariants} />
+        )}
+
         <div className="flex items-center space-x-2">
           <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
           <Label>Produto Ativo</Label>
