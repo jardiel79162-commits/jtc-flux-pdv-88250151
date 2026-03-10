@@ -1876,6 +1876,8 @@ const Auth = () => {
                         try {
                           const { data: { session } } = await supabase.auth.getSession();
                           if (session?.user?.email_confirmed_at) {
+                            // Save business_type
+                            await supabase.from("store_settings").upsert({ user_id: session.user.id, business_type: businessType }, { onConflict: "user_id" });
                             toast({ title: "E-mail confirmado!", description: "Redirecionando para o dashboard..." });
                             navigate("/dashboard");
                             return;
@@ -1886,6 +1888,8 @@ const Auth = () => {
                             password: formData.password,
                           });
                           if (!error && data?.user?.email_confirmed_at) {
+                            // Save business_type
+                            await supabase.from("store_settings").upsert({ user_id: data.user.id, business_type: businessType }, { onConflict: "user_id" });
                             toast({ title: "E-mail confirmado!", description: "Redirecionando para o dashboard..." });
                             navigate("/dashboard");
                           } else {
